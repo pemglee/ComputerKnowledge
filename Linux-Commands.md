@@ -41,21 +41,21 @@
   ps -elf
   ```
   
-  +  1 F,
-  +  2 S,
-  +  3 UID,
-  +  4 PID,
-  +  5 PPID,
-  +  6 C,
-  +  7 PRI,
-  +  8 NI,
-  +  9 ADDR,
-  + 10 SZ,
-  + 11 WCHAN,
-  + 12 STIME,
-  + 13 TTY,
-  + 14 TIME,
-  + 15 CMD,
+  + " 1"-"F",
+  + " 2"-"S",
+  + " 3"-"UID",
+  + " 4"-"PID",
+  + " 5"-"PPID",
+  + " 6"-"C",
+  + " 7"-"PRI",
+  + " 8"-"NI",
+  + " 9"-"ADDR",
+  + "10"-"SZ",
+  + "11"-"WCHAN",
+  + "12"-"STIME",
+  + "13"-"TTY",
+  + "14"-"TIME",
+  + "15"-"CMD",
 
 + `-aux` 选项
 
@@ -63,25 +63,25 @@
   ps -aux
   ```
   
-  +  1 USER,
-  +  2 PID,
-  +  3 %CPU,
-  +  4 %MEM,
-  +  5 VSZ, 虚拟内存
-  +  6 RSS, 常驻内存
-  +  7 TTY, 终端
-  +  8 STAT, 运行状态
-    + R
-    + S
+  + " 1"-"USER",
+  + " 2"-"PID",
+  + " 3"-"%CPU",
+  + " 4"-"%MEM",
+  + " 5"-"VSZ", 虚拟内存
+  + " 6"-"RSS", 常驻内存
+  + " 7"-"TTY", 终端
+  + " 8"-"STAT", 运行状态
+    + R, Running
+    + S, Sleep
     + D
     + T
     + Z
     + X
     + I
     + P
-  +  9 START,
-  + 10 TIME,
-  + 11 COMMAND,
+  + " 9"-"START",
+  + "10"-"TIME",
+  + "11"-"COMMAND",
 
 ### `pwd`
 
