@@ -6,6 +6,8 @@
 
 ### Linux 
 
+[Linux学习笔记](./Linux-ops.md)
+
 + [Linux目录](./Linux-Directories_Files.md)
 
 + [Linux命令](./Linux-Commands.md)
@@ -23,6 +25,8 @@
 #### 常见错误
 
 [错误列表](./Oracle_ErrorCode.md)
+
+### Sqlite
 
 ## 其他
 
