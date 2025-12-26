@@ -6,7 +6,7 @@
 
 ### Linux 
 
-+ [Linux目录](./Linux-Directories.md)
++ [Linux目录](./Linux-Directories_files.md)
 
 + [Linux命令](./Linux-Commands.md)
 
