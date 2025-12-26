@@ -42,3 +42,9 @@ NAMESERVER, 输入DNS
 + Dynamic Ports,    ` 1024` ~ `65535`, 动态端口; 
   + Registered Ports, ` 1024` ~ `49151`, 注册端口;  
   + Private Ports, `49152` ~ `65535`, 私有端口; 
+
+### "three-way handshaking" vs "four-way wavehanding"
+
+三次握手: three-way handshaking
+
+四次挥手: four-way wavehanding
