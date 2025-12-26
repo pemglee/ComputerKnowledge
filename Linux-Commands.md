@@ -43,9 +43,9 @@
   
   + " 1"-"F",
   + " 2"-"S",
-  + " 3"-"UID",
-  + " 4"-"PID",
-  + " 5"-"PPID",
+  + " 3"-"UID", 用户
+  + " 4"-"PID", 进程
+  + " 5"-"PPID", 父进程
   + " 6"-"C",
   + " 7"-"PRI",
   + " 8"-"NI",
@@ -72,22 +72,66 @@
   + " 7"-"TTY", 终端
   + " 8"-"STAT", 运行状态
     + R, Running
-    + S, Sleep
-    + D
-    + T
-    + Z
-    + X
-    + I
-    + P
+    + S, Sleeping
+    + D, Uninterruptible Sleep
+    + T, Stopped
+    + Z, Zombied
+    + X, Dead
+    + I, Idle 空闲
+    + P, Paging 分页
+
   + " 9"-"START",
   + "10"-"TIME",
   + "11"-"COMMAND",
+
+  实例 1, 内存排序前20
+  ```sh
+  ps -aux | sort -rnk 4 | head -20
+  ```
+
+  实例 2, CPU占用前20
+  ```sh
+  ps -aux | sort -rnk 3 | head -20
+  ```
+
+  实例 3, 每隔1分钟打印java进程信息
+  ```sh
+  for ((;;)) do ps -aux | grep -v grep | grep -i java; sleep 60; done
+  ```
+  或
+  ```sh
+  for ((;;)) do clear; ps -aux | grep -v grep | grep -i java; date; sleep 60; done
+  ```
+
+#### windows
+
+`tasklist`
+
+```cmd
+for /L %N in () do cls & tasklist | findstr /i java & TIMEOUT /T 30 /NOBREAK
+```
 
 ### `pwd`
 
 **P**rint current **W**orking **D**irectory
 
 ### `shutdown`
+
++ `  ` `--help`
++ `-H` `--halt`, Halt the machine
++ `-P` `--poweroff`
++ `-r` `--reboot`
++ `-h` `        `, Equivalent to `--poweroff`, overridden by `--halt`
++ `-k` `        `, Don't halt/power-off/reboot, just send warnings
++ `  ` `--no-wall`, Don't send wall message before halt/power-off/reboot
++ `-c` `        `, Cancel a pending shutdown
++ `  ` `--show`, Show pending shutdown
+
+```sh
+shutdown -h 20
+```
+
+20分钟后，系统关机。
 
 #### windows
 
