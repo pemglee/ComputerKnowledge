@@ -15,6 +15,10 @@
 
 ### `alias`
 
+### `cd`
+
+**C**hange **D**irectory
+
 ### `chmod`
 
 ### `chown`
@@ -120,17 +124,25 @@
 
 **L**i**S**t directory contents
 
+### `mkdir`
+
+**M**ake **D**irectory.
+
++ `-p`
+
+### `netstat`
+
 #### options
 
 + `-a`, all
 
 + `-l`, long listing name
 
++ `-h`, 以可读性较高的方式展示
+
 + `-t`, 按时间排序
 
 + `-r`, 反向排序
-
-### `netstat`
 
 ### `pkill`
 
@@ -218,6 +230,14 @@ for /L %N in () do cls & tasklist | findstr /i java & TIMEOUT /T 30 /NOBREAK
 
 **P**rint current **W**orking **D**irectory
 
+### `rm`
+
+**R**e**M**ove.
+
++ `-r`
+
++ `-f`, force, 强制删除
+
 ### `shutdown`
 
 + `  ` `--help`
@@ -261,6 +281,10 @@ shutdown /r /f /t 1200
 须在指定时间(秒)内完成。 如 `timeout 900 ping baidu.com`
 
 ### `top`
+
+### `touch`
+
+### `tree`
 
 ### `unalias`
 
