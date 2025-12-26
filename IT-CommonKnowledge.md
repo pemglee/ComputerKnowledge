@@ -43,6 +43,30 @@ NAMESERVER, 输入DNS
   + Registered Ports, ` 1024` ~ `49151`, 注册端口;  
   + Private Ports, `49152` ~ `65535`, 私有端口; 
 
+### 网络状态
+
+#### LISTEN
+
+#### SYN_SENT
+
+#### SYN_RECEIVED
+
+#### ESTABLISHED
+
+#### FIN_WAIT_1
+
+#### FIN_WAIT_2
+
+#### CLOSE_WAIT
+
+#### CLOSING
+
+#### LAST_ACK
+
+#### TIME_WAIT
+
+#### CLOSED
+
 ### "three-way handshaking" vs "four-way wavehanding"
 
 三次握手: three-way handshaking
