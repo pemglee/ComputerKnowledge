@@ -2,6 +2,14 @@
 
 ## 操作系统
 
+### Windows
+
+### Linux 
+
++ [Linux目录](./Linux-Directories.md)
+
++ [Linux命令](./Linux-Commands.md)
+
 ## 网络
 
 ## 编程
