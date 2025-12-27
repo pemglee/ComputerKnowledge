@@ -23,6 +23,10 @@
 
 ### `chown`
 
+### `cp`
+
++ `-r`
+
 ### `date`
 
 + 显示日期
@@ -108,6 +112,8 @@
 
 见 `tail` 命令
 
+### `help`
+
 ### `history`
 
 ### `host`
@@ -124,11 +130,15 @@
 
 **L**i**S**t directory contents
 
+### `man`
+
 ### `mkdir`
 
 **M**ake **D**irectory.
 
 + `-p`
+
+### `mv`
 
 ### `netstat`
 
@@ -230,6 +240,8 @@ for /L %N in () do cls & tasklist | findstr /i java & TIMEOUT /T 30 /NOBREAK
 
 **P**rint current **W**orking **D**irectory
 
+### `reboot` 
+
 ### `rm`
 
 **R**e**M**ove.
@@ -276,6 +288,12 @@ shutdown /r /f /t 1200
 
 ### `tee`
 
+### `time`
+
+计算程序运行时间
+
+如, `time date`
+
 ### `timeout`
 
 须在指定时间(秒)内完成。 如 `timeout 900 ping baidu.com`
@@ -289,6 +307,16 @@ shutdown /r /f /t 1200
 ### `unalias`
 
 ### `vi` & `vim`
+
+[vi/vim学习笔记](./vim-operatings.md)
+
+#### "Normal-mode" {k[Esc] ? k[Esc] * 2}
+
+#### "Insert-mode" {k[i]}
+
+#### "Command-mode" {k[:], k[/]}
+
+#### "Visual-mode" {k[v], k[V], k[Ctrl+v]}
 
 ### `w`
 
