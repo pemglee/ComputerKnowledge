@@ -144,10 +144,34 @@ _Cherno_ 教程中的CMake用法，
 再编程，  
 后利用codelite的内建命令进行修改CMake项目文件和编译
 
-**操作过程**
+**操作过程** (外部构建)
 1. 手动编写"CMakeLists.txt"文件  
-2. 执行`cmake`命令生成"Makefile"  
+2. `makedir build && cd build`
+2. 执行`cmake ..`命令生成"Makefile"  
 3. 执行`make`进行编译  
 
 ### 操作实例 1
+
++ "Project_Path": "/mnt/c/Workspace/workspaces/CppWrkspces/lessons/lin64/ProjFromI8/XiaoBing1016/clsSwapExercise"  
+
++ "CMakeLists.txt"  
+  + "File_Path":   
+    "/mnt/c/Workspace/workspaces/CppWrkspces/lessons/lin64/ProjFromI8/XiaoBing1016/clsSwapExercise/build/CMakeLists.txt"
+  + "code"  
+    ```CMake
+    cmake_minimum_required(VERSION 3.10)
+    
+    project(SWAP)
+    
+    include_directories(include)
+    
+    add_executable(mainCmake main.cpp src/swap.cpp)
+
+    ```
+
++ Operating Steps
+
+  1. `makedir build && cd build`  
+  2. `cmake ..`
+  3. `make`
 
