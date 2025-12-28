@@ -22,7 +22,9 @@
 
   + [计算机编程]  
 
-    + [~~C~~]  
+    + [C]
+
+      + [C 知识点](./C_Point-list.md)  
 
     + [C++](./CPP-Overview.md)  
 
@@ -72,15 +74,25 @@
 
       + [C++ IDE]
 
-        + [Microsoft Visual Studio](./CPP_VS-Settings-2512.md)
+        + [Microsoft Visual Studio](./CPPIDE_VS-Settings-2512.md)
 
-        + [Visual Studio Code](./CPP_VSCode-Settings-2512.md)
+        + [Visual Studio Code](./CPPIDE_VSCode-Settings-2512.md)
+
+        + [CodeLite](./CPPIDE_CodeLite-Settings-2512.md)
 
       + [C++ 程序调试与排错]
       
         + [程序错误](./CPP-common_exceptions.md)
 
         + [程序调试](./CPP_tips-4debuginfo.md)
+
+      + [C++ 知识点和技巧]
+
+        + [C++ 知识点]
+
+        + [C++ 技巧]
+
+          + [添加调试信息](./CPP_tips-4debuginfo.md)
 
     + [C#]
 
@@ -103,6 +115,10 @@
       + [Oracle常见错误及处理](./Oracle_ErrorCode.md)
 
     + [Sqlite]
+
+  + [数据结构]
+
+    + [主题讨论]
 
   + [其他]
 
