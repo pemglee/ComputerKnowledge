@@ -2,39 +2,7 @@
 
 ## Overview  
 
-+ "README.md"
-
-  + "操作系统"
-    + "Windows"
-    + "Linux"
-
-  + "网络"
-
-  + "编程"
-
-    + "C++"
-
-    + "C#"
-
-    + "Java"
-
-    + "Python"
-
-    + "Shell"
-
-    + "Batch" & "PowerShell"
-
-    + "IDE"
-
-  + "数据库"
-
-    + "MySQL"
-
-    + "Oracle"
-
-    + "Sqlite"
-
-  + "其他"
+  [笔记架构](./ComputerKnowledge_virtualTree.md)
 
 ## 操作系统
 
@@ -43,10 +11,6 @@
 ### Linux 
 
 [Linux学习笔记](./Linux-ops.md)
-
-+ [Linux目录](./Linux-Directories_Files.md)
-
-+ [Linux命令](./Linux-Commands.md)
 
 ## 网络
 
@@ -73,10 +37,6 @@
 ### MySQL
 
 ### Oracle
-
-#### 常见错误
-
-[错误列表](./Oracle_ErrorCode.md)
 
 ### Sqlite
 

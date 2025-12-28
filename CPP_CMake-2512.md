@@ -121,7 +121,7 @@ CMake, Cross-platform development, 跨平台安装编译工具。
     + "LIBRARY_OUTPUT_PATH", 库文件的输出/存放路径  
       
 
-+ "build.sh"
++ "build.sh" Cherno示例文件  
   ex.  
   ```sh
   #!/bin/sh
@@ -149,6 +149,24 @@ _Cherno_ 教程中的CMake用法，
 2. `makedir build && cd build`
 2. 执行`cmake ..`命令生成"Makefile"  
 3. 执行`make`进行编译  
+
+### Cherno CMakeLists.txt 学习
+
+原始文件  
+
+```CMake
+cmake_minimum_required (VERSION 3.31)
+
+project (HelloWorld)
+
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -std=c++17")
+set (source_dir "${PROJECT_SOURCE_DIR}/src")
+
+file (GLOB source_files "${source_dir}/*.cpp")
+
+add_executable (HelloWorld ${source_files})
+
+```
 
 ### 操作实例 1
 
