@@ -80,11 +80,19 @@
 
         + [CodeLite](./CPPIDE_CodeLite-Settings-2512.md)
 
+        + [QtCreator](./CPPIDE_QtCreator-Settings-2512.md)
+
       + [C++ 程序调试与排错]
       
         + [程序错误](./CPP-common_exceptions.md)
 
-        + [程序调试](./CPP_tips-4debuginfo.md)
+        + [程序调试](./CPP_tips-4debuginfo.md)  
+
+        + [程序追踪]
+
+          + [GDB]
+
+          + [valgrind]
 
       + [C++ 知识点和技巧]
 
