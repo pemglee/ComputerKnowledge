@@ -62,6 +62,8 @@
 
         + [STL map](./CPPSTL-map.md)
 
+        + [STL array](./CPPSTL-array.md)
+
       + [C++ 标准库]  
 
         + [\<iostream\>](./CPPLIB-iostream.md)

@@ -103,7 +103,7 @@ CMake, Cross-platform development, 跨平台安装编译工具。
     + "CMAKE_BUILD_TYPE" 编译类型  
       + "Debug"  
       + "Release"
-    + "CMAKE_BINARY_DIR" _vs_ "PROJECT_BINARY_DIR" _vs_ "<projectname>_BINARY_DIR"
+    + "CMAKE_BINARY_DIR" _vs_ "PROJECT_BINARY_DIR" _vs_ "<projectname>_BINARY_DIR"  
       此三者指代内容一致。如果  
       "in-source build", 变量为工程顶层目录  
       "out-of-source build", 变量为工程编译发生的目录  
