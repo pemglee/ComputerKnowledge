@@ -58,6 +58,10 @@
 
       + [C++ 标准模板库(STL)]  
 
+        + [STL vector]
+
+        + [STL map](./CPPSTL-map.md)
+
       + [C++ 标准库]  
 
         + [\<iostream\>](./CPPLIB-iostream.md)
