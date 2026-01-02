@@ -30,70 +30,96 @@
 ### `date`
 
 + 显示日期
-  ```bash
-  # date
-  Sat Dec 13 01:06:43 AM CST 2025
-  ```
-  ```bash
-  # cal 02 2028
-     February 2028
-  Su Mo Tu We Th Fr Sa
-         1  2  3  4  5
-   6  7  8  9 10 11 12
-  13 14 15 16 17 18 19
-  20 21 22 23 24 25 26
-  27 28 29
-  ```
-  + 日期格式化
+  + 实例 1
+
     ```bash
-    # date +%y%m%d
-    251213
-    
-    # date +%Y%m%d
-    20251213
-    
-    # date +%Y-%m-%d
-    2025-12-13
+    # date
+    Sat Dec 13 01:06:43 AM CST 2025
     ```
-    ```sh
-    # date +%D
-    12/13/25
-    # date +%m/%d/%y
-    12/13/25
+
+  + 实例 2
+
+    ```bash
+    # cal 02 2028
+       February 2028
+    Su Mo Tu We Th Fr Sa
+           1  2  3  4  5
+     6  7  8  9 10 11 12
+    13 14 15 16 17 18 19
+    20 21 22 23 24 25 26
+    27 28 29
     ```
-    `date +%D` <==> `date +%m/%d/%y`
+
+  + 日期格式化
+
+    + 实例 1
+
+      ```bash
+      # date +%y%m%d
+      251213
+      
+      # date +%Y%m%d
+      20251213
+      
+      # date +%Y-%m-%d
+      2025-12-13
+      ```
+
+    + 实例 2
+
+      ```sh
+      # date +%D
+      12/13/25
+      # date +%m/%d/%y
+      12/13/25
+      ```
+
+      `date +%D` <==> `date +%m/%d/%y`
 
 + 日期计算
-  ```bash
-  # date -d "2 day" +%Y-%m-%d
-  2025-12-15
+
+  + 实例 1
+
+    ```bash
+    # date -d "2 day" +%Y-%m-%d
+    2025-12-15
+    
+    # date -d "-2 day" +%Y-%m-%d
+    2025-12-11
+    ```
+
+  + 实例 2
+
+    ```bash
+    # date -d "20260301 -2 day" +%Y-%m-%d
+    2026-02-27
+    
+    # date -d "20280301 -2 day" +%Y-%m-%d
+    2028-02-28
+    ```
   
-  # date -d "-2 day" +%Y-%m-%d
-  2025-12-11
-  ```
-  ```bash
-  # date -d "20260301 -2 day" +%Y-%m-%d
-  2026-02-27
-  
-  # date -d "20280301 -2 day" +%Y-%m-%d
-  2028-02-28
-  ```
-  ```bash
-  # date -d "20280301 -2 day" +%w
-  1
-  ```
-  1 for Monday
+  + 实例 3
+
+    ```bash
+    # date -d "20280301 -2 day" +%w
+    1
+    ```
+
+    1 for Monday
 
 + 设置日期
+
   ```bash
   # date -s 250325
   ```
+
   设置当前日期为 2025 Mar 25
 
 #### windows下
 
-    `date /T` <==> `echo %date%`
-    `time /T` <==> `echo %time%`
++ `date /T` <==> `echo %date%`
+
++ `time /T` <==> `echo %time%`
 
 ### `dd`
 
