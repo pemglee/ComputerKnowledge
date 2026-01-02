@@ -97,6 +97,7 @@
 
 MOC(元对象编译器, Meta-Object Compiler)是一个预处理器，将Qt特性的C++程序转换为标准C++程序；
 之后再由标准C++编译器进行编译  
+Meta-Object System是C++扩展，更适合组件化GUI编程。  
 
 是对C++的扩展，增加了新的功能  
 
@@ -109,6 +110,9 @@ MOC(元对象编译器, Meta-Object Compiler)是一个预处理器，将Qt特性
 ## Qt Class
 
 ### QObject
+
+QObject**不支持拷贝**，也**不支持赋值**。  
+QObject以对象树的结构组织自己。  
 
 + `QObject.dumpObjectTree()`
 
