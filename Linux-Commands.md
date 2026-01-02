@@ -95,6 +95,11 @@
     `date /T` <==> `echo %date%`
     `time /T` <==> `echo %time%`
 
+### `dd`
+
+读取、转换和输出数据
+
+### `df`
 
 ### `dirname`
 

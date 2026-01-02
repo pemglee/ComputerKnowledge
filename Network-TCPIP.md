@@ -6,11 +6,11 @@
 
 ### 四层模型
 
-| level                     | protocol                       |
-| :-----------------------: | :----------------------------: |
-| Application Level         | "HTTP" "FTP" "SMTP" "POP3" ... |
-| Transport Level           | "TCP" "UDP"                    |
-| Network Level             | "IPv4" "IPv6" "ARP" "ICMP"     |
-| Network Interface Level   | "ETHERNET" "WLAN" "PPP"        |
+| layer 1             | layer 2                  | protocol                       |
+| :------------------ | :----------------------- | :----------------------------- |
+| Applciation Message | Application Level        | "HTTP" "FTP" "SMTP" "POP3" ... |
+| TCP Segment         | Transport Level          | "TCP" "UDP"                    |
+| IP Packet           | Network Level            | "IPv4" "IPv6" "ARP" "ICMP"     |
+| Ethernet Frame      | Network Interface Level  | "ETHERNET" "WLAN" "PPP"        |
 
 ### 三次握手 & 四次挥手
