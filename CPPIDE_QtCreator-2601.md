@@ -114,9 +114,26 @@ Meta-Object System是C++扩展，更适合组件化GUI编程。
 
   信号与槽的连接方式。  
 
+  自动连接
+
 + 属性  
   动态管理  
 + 内存管理  
+
+## Qt宏
+
++ Q_OBJECT
++ Q_PROPERTY()
+  类型 QVariant, 类似 union
+  + READ
+  + WRITE
+  + MEMBER
+  + NOTIFY
+
+  QObject::property  
+  QObject::setProperty  
+
+  为QML及其他语言提供支持；可以动态发现及设置属性
 
 ## Qt Class
 
@@ -129,3 +146,6 @@ QObject以对象树的结构组织自己。
 
 + `OObject.dumpObjectInfo()`
 
+## Qt Programing
+
+### main.moc
