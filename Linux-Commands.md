@@ -7,9 +7,9 @@
 
   + "command": `ls`
 
-  + "options": `-lah`
+  + "options": "-lah"
 
-  + "op-objects": `/home ./`
+  + "op-objects": "/home ./"
 
 ## linux command list
 
@@ -25,7 +25,7 @@
 
 ### `cp`
 
-+ `-r`
++ "-r"
 
 ### `date`
 
@@ -167,7 +167,7 @@
 
 **M**ake **D**irectory.
 
-+ `-p`
++ "-p"
 
 ### `mv`
 
@@ -175,15 +175,15 @@
 
 #### options
 
-+ `-a`, all
++ "-a", all
 
-+ `-l`, long listing name
++ "-l", long listing name
 
-+ `-h`, 以可读性较高的方式展示
++ "-h", 以可读性较高的方式展示
 
-+ `-t`, 按时间排序
++ "-t", 按时间排序
 
-+ `-r`, 反向排序
++ "-r", 反向排序
 
 ### `pkill`
 
@@ -209,10 +209,10 @@
   + " 9"-"ADDR",
   + "10"-"SZ",
   + "11"-"WCHAN",
-  + "12"-"STIME",
-  + "13"-"TTY",
-  + "14"-"TIME",
-  + "15"-"CMD",
+  + "12"-"STIME", start time 进程启动时间
+  + "13"-"TTY", - 终端
+  + "14"-"TIME", - cpu占用时间
+  + "15"-"CMD", command 命令
 
 + `-aux` 选项
 
@@ -243,6 +243,7 @@
   + "11"-"COMMAND",
 
   实例 1, 内存排序前20, "-rnk 4"针对第4列进行排序
+
   ```sh
   ps -aux | sort -rnk 4 | head -20
   ```
@@ -252,12 +253,15 @@
   ```sh
   ps -aux | sort -rnk 3 | head -20
   ```
- 
+
   实例 3, 每隔1分钟打印所有java进程信息
+
   ```sh
   for ((;;)) do ps -aux | grep -v grep | grep -i java; sleep 60; done
   ```
+
   或
+
   ```sh
   for ((;;)) do clear; ps -aux | grep -v grep | grep -i java; date; sleep 60; done
   ```
@@ -280,21 +284,21 @@ for /L %N in () do cls & tasklist | findstr /i java & TIMEOUT /T 30 /NOBREAK
 
 **R**e**M**ove.
 
-+ `-r`
++ "-r"
 
-+ `-f`, force, 强制删除
++ "-f", force, 强制删除
 
 ### `shutdown`
 
-+ `  ` `--help`
-+ `-H` `--halt`, Halt the machine
-+ `-P` `--poweroff`
-+ `-r` `--reboot`
-+ `-h` `        `, Equivalent to `--poweroff`, overridden by `--halt`
-+ `-k` `        `, Don't halt/power-off/reboot, just send warnings
-+ `  ` `--no-wall`, Don't send wall message before halt/power-off/reboot
-+ `-c` `        `, Cancel a pending shutdown
-+ `  ` `--show`, Show pending shutdown
++ "  " "--help"
++ "-H" "--halt", Halt the machine
++ "-P" "--poweroff"
++ "-r" "--reboot"
++ "-h" "        ", Equivalent to `--poweroff`, overridden by `--halt`
++ "-k" "        ", Don't halt/power-off/reboot, just send warnings
++ "  " "--no-wall", Don't send wall message before halt/power-off/reboot
++ "-c" "        ", Cancel a pending shutdown
++ "  " "--show", Show pending shutdown
 
 ```sh
 shutdown -h 20
@@ -308,9 +312,9 @@ shutdown -h 20
 shutdown /r /f /t 1200
 ```
 
-+ `/r` 重启, `/s` 关机, `/h` 休眠/挂起
-+ `/f` 强制
-+ `/t 1200` 等待1200秒之后执行
++ "/r" 重启, "/s" 关机, "/h" 休眠/挂起
++ "/f" 强制
++ "/t 1200" 等待1200秒之后执行
 
 ### `split`
 
@@ -334,6 +338,68 @@ shutdown /r /f /t 1200
 
 ### `top`
 
+#### 汇总信息缺省显示
+
+![top display, header](./images/LinuxCmd-Top-2601a.png)
+
++ "top", 运行的命令  
+
+  "21:20:08", 系统时间  
+  "up 11 min", 系统已启动 11 分钟  
+  "1 user", 1个登录用户  
+  "load average: 0.06, 0.60, 0.54"  
+
++ "Tasks:"  
+  任务汇总信息:  
+  "29 total", 共 29 个任务  
+  "1 running", 1 个运行任务  
+  "28 sleeping", 28 个休眠任务  
+  "0 stopped", 0 个停止任务  
+  "0 zombie", 0 个僵尸进程  
+
++ "%Cpu(s):"
+  CPU信息：  
+
++ "MiB Mem:"
+
++ "MiB Swap:"  
+
+##### TOP Command
+
++ Key"1"
+  
+  ![Top Cmd - key 1](./images/LinuxCmd-Top_k1-2601a.png)
+
++ Key"2"
+
+  ![Top Cmd - key 2](./images/LinuxCmd-Top_k2-2601a.png)
+
+#### 进程信息缺省显示
+
++ PID
+
++ USER
+
++ PR
+
++ NI
+
++ VIRT
+
++ RES
+
++ SHR
+
++ S
+
++ %CPU
+
++ %MEM
+
++ TIME+
+
++ COMMAND
+
 ### `touch`
 
 ### `tree`
@@ -356,12 +422,12 @@ shutdown /r /f /t 1200
 
 ### `wc`
 
-  + 参数`-l`, line counts
++ 参数"-l", line counts
 
-  + 参数`-w`, word counts
++ 参数"-w", word counts
 
-  + 参数`-c`, byte counts
-  
-  + 参数`-m`, character counts
++ 参数"-c", byte counts
+
++ 参数"-m", character counts
 
 ### `who`
