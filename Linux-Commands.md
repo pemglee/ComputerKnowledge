@@ -404,6 +404,14 @@ shutdown /r /f /t 1200
 
 ### `tree`
 
+### `uptime`
+
+```sh
+# uptime
+ 22:57:54 up 0 min,  1 user,  load average: 0.00, 0.00, 0.00
+
+```
+
 ### `unalias`
 
 ### `vi` & `vim`

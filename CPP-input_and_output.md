@@ -4,6 +4,24 @@
 
 ### std::cout & related
 
+iostream库，istream + ostream，i.e. input stream & output stream。 
+
+stream，流，i.e. 字符序列，随着时间的推移，字符是顺序生成或消耗的。  
+
+#### IO对象  
+
+**注意**是对象，**不**是类
+
++ cout
+
++ cerr
+
++ clog
+
++ cin
+
+  `>>`， 运算符，格式化函数
+
 #### headers
 
 `#include <iostream>`

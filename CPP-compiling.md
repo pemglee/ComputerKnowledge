@@ -20,23 +20,46 @@
 
 + Clang/LLVM
 
-+ MSVC
-  + Microsoft Visual Studio Community 2026  
-    [MS-VisualStudio配置笔记](./CPP_VS-Settings-2512.md)
++ MSVC  
+  + Microsoft Visual Studio Community 2026   
+    + MSVC  
+      "x86_x64 Cross Tools Comman"  
+
+      ```cmd
+      **********************************************************************
+      ** Visual Studio 2026 Developer Command Prompt v18.1.1
+      ** Copyright (c) 2025 Microsoft Corporation
+      **********************************************************************
+      [DEBUG:ext\vcvars.bat] Found potential v145 version file: 'Microsoft.VCToolsVersion.VC.14.50.18.0.txt'
+      [DEBUG:ext\vcvars.bat] Testing v145 version file: 'Microsoft.VCToolsVersion.VC.14.50.18.0.txt'
+      [vcvarsall.bat] Environment initialized for: 'x86_x64'
+
+      C:\Program Files\Microsoft Visual Studio\18\Community>cl
+      Microsoft (R) C/C++ Optimizing Compiler Version 19.50.35721 for x64
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+
+      usage: cl [ option... ] filename... [ /link linkoption... ]
+
+      C:\Program Files\Microsoft Visual Studio\18\Community>
+      ```
+
+      `cl /EHsc `
+
+    + [MS-VisualStudio配置笔记](./CPP_VS-Settings-2512.md)
 
 + ICC, Intel C++ Compiler
 
-### 编译过程
+### gcc/g++ 编译过程
 
 1. Pre-Processing, 预处理，加入头文件
    + 生成文件, "*.i"
    + 命令示例, `g++ -E main.cpp -o test.i`
 
-2. Compiling, 编译，生成汇编（指令）文件
-   + 生成文件, "*.s"
-   + 命令示例, `g++ -S test.i -o CTst.s`
+2. Compiling, 编译，生成**汇编（指令）文件**  
+   + 生成文件, "*.s"  
+   + 命令示例, `g++ -S test.i -o CTst.s`  
 
-3. Assembling, 汇编，生成目标文件（二进制）
+3. Assembling, 汇编，生成**目标文件**（二进制）  
    + 生成文件, "*.o"
    + 命令示例, `g++ -c CTst.s -o objTst.o`
 
@@ -44,9 +67,9 @@
    + 生成文件
    + 命令示例, `g++ objTst.o -o exeTest`
 
-## GCC
+## GCC / G++
 
-### gcc参数
+### g++参数
 
 + 调试信息
 
@@ -95,9 +118,9 @@
 
 ### 操作实例 1
 
-"lin_path": "/mnt/c/Workspace/workspaces/CppWrkspces/lessons/src/ProjFromI8/comp_header-2512a"
-"win_path": "C:\Workspace\workspaces\CppWrkspces\lessons\src\ProjFromI8\comp_header"
-
+"lin_path": "/mnt/c/Workspace/workspaces/CppWrkspces/lessons/lin64/ProjFromI8/XiaoBing1016/comp_header-2512a"  
+"win_path": "C:\Workspace\workspaces\CppWrkspces\lessons\lin64\ProjFromI8\XiaoBing1016\comp_header-2512a"
+  
 + 目录结构
 
   ```sh
@@ -165,8 +188,8 @@
 
 ### 操作实例 2
 
-"lin_path": "/mnt/c/Workspace/workspaces/CppWrkspces/lessons/src/ProjFromI8/comp_header-2512a"
-"win_path": "C:\Workspace\workspaces\CppWrkspces\lessons\src\ProjFromI8\comp_header"
+"lin_path": "/mnt/c/Workspace/workspaces/CppWrkspces/lessons/lin64/ProjFromI8/XiaoBing1016/comp_header-2512a"  
+"win_path": "C:\Workspace\workspaces\CppWrkspces\lessons\lin64\ProjFromI8\XiaoBing1016\comp_header-2512a"
 
 + 目录结构
 
@@ -216,8 +239,8 @@
 
 ### 操作实例 3
 
-"lin_path": "/mnt/c/Workspace/workspaces/CppWrkspces/lessons/src/ProjFromI8/comp_header-2512a"
-"win_path": "C:\Workspace\workspaces\CppWrkspces\lessons\src\ProjFromI8\comp_header"
+"lin_path": "/mnt/c/Workspace/workspaces/CppWrkspces/lessons/lin64/ProjFromI8/XiaoBing1016/comp_header-2512a"  
+"win_path": "C:\Workspace\workspaces\CppWrkspces\lessons\lin64\ProjFromI8\XiaoBing1016\comp_header-2512a"
 
 + 目录结构
 
@@ -238,8 +261,8 @@
   
   ```
 
-+ 生成动态库
- 
++ 生成动态库  
+
   ```sh
   # g++ src/Swap.cpp -Iinclude -c -fPIC -o src/Swap2.o
 
@@ -274,6 +297,7 @@
   ```
 
   + 执行命令  
+
     ```sh
     # ./dynamain
     ./dynamain: error while loading shared libraries: libSwap.so: cannot open shared object file: No such file or directory
@@ -289,3 +313,5 @@
 ## cmake
 
 [CMake学习笔记](./CPP_CMake-2512.md)
+
+## qmake
