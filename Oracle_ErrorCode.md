@@ -2,6 +2,10 @@
 
 ## code list
 
+### "ORA-00933: SQL command not propertly ended"
+
+执行SQL语句时，命令没有被正确地结束，从而导致语法错误。
+
 ### "ORA-00936: Missing Expression"
 
 缺乏表达式，如
@@ -31,3 +35,7 @@
 ### "ORA-01465: invalid hex number"
 
 无效的十六进制数字
+
+### "ORA-01756: quoted string no properly terminated"
+
+“引号字符串未正确终止”  

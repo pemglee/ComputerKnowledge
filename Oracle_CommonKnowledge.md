@@ -1,5 +1,18 @@
 # Oracle数据库通识
 
+## 数据库连接
+
+### 直接连接
+
+实例 1： `sqlplus cgb632/cgb632@192.168.3.36:1521/osum1`
+
+### 利用客户端配置连接
+
+实例 1： `sqlplus $SUMMITDBNAME/$SUMMITDBPASSWD@${ORACLE_SID}`
+
+配置信息：[NJCB] 
+
+
 ## 字符/字符串 处理
 
 ### 常用函数
