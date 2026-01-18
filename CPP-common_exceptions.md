@@ -14,7 +14,7 @@
 
 `error: invalid conversion from 'int' to 'const char*' [-fpermissive]`
 
-### ERROR,  'void*' to '数据类型*'
+### ERROR, 'void*' to '数据类型*'
 
 `error: invalid conversion from 'void*' to 'sCOMMDATA*' {aka 'CommodityData*'} [-fpermissive]`
 
@@ -34,7 +34,7 @@
     pCommData = static_cast<sCOMMDATA*>(sGetListItem(pCommDataList,1));
 ```
 
-### WARNING， 'string' to 'char*'
+### WARNING，'string' to 'char*'
 
 `warning: ISO C++ forbids convert a string constant to 'char*' [-Wwrite-strings]`  
 
@@ -81,5 +81,13 @@
     sprintf(tempString, "out CheckCreditLimits, and count is : [%d], output is [%s]", count, output);
     cWriteLog( __FILE__, __LINE__, tempString)；
 ```
+
+## others
+
+### ERROR, expected initializer befor '...'  
+
+initializer：在这里是分号的意思。
+
+出错代码前，检查是否缺少`;`
 
 ## undefined
