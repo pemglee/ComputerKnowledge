@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <fstream>
 
-int _DEBUG_ = 0;
+int _DEBUG_UTL_ = 0;
 ```
 
 ### source
@@ -34,13 +34,28 @@ int _DEBUG_ = 0;
 # include "test.h"
 int main()
 {
-    const char *envDebug = std::getenv("DEBUG");
-    if ( envDebug != nullptr )
-        _DEBUG_ = atoi(envDebug);
-    else
-        _DEBUG_ = 0;
+        const char *pDebugUTL = std::getenv("DEBUG_UTL");
 
-    if ( _DEBUG_ ) std::cout << __DATE__ << " " << __TIME__ << " [test.cc " << __LINE__ << " / main()] Debug-info" << std::endl;
-    return 0; 
+        if ( pDebugUTL != nullptr )
+                _DEBUG_UTL_ = atoi(pDebugUTL);
+        else
+                _DEBUG_UTL_ = 0;
+
+        if (_DEBUG_UTL_) std::cout << __DATE__ << " " << __TIME__ << " [" << __FILE__ << " " << __FUNCTION__ <<" " << __LINE__ << "] DEGUB ON " << std::endl;
+
+        return 0;
 }
+```
+
+output:
+```sh
+┌──(edgar㉿ThinkPadT14P-23)-[/mnt/c/Workspace/workspaces/CppWrkspces/lessons/lin64/test]
+└─$ export DEBUG_UTL=1
+
+┌──(edgar㉿ThinkPadT14P-23)-[/mnt/c/Workspace/workspaces/CppWrkspces/lessons/lin64/test]
+└─$ ./debugtest
+Jan 20 2026 23:59:10 [AddDebugInfo.cc:15 main] DEGUB ON
+
+┌──(edgar㉿ThinkPadT14P-23)-[/mnt/c/Workspace/workspaces/CppWrkspces/lessons/lin64/test]
+└─$
 ```
