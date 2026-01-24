@@ -23,6 +23,41 @@
 
 ### `chown`
 
+### `contab`
+
++ `-l`  
+  罗列现有任务
+
++ `-i`
+  删除任务，提示确认
+
++ `-r`  
+  删除任务
+
+#### 任务格式
+
+| 字段   | 分    | 时     | 日    | 月    | 周    | 命令   |
+| :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| 范围   | 0-59  | 0-23  | 1-31  | 1-12  | 0-7   |       |
+
+0/7 Sun  
+1-5 Mon ~ Fri  
+6   Sat  
+
+#### 示例
+
++ NJCB示例1
+  ```sh  
+  #Xfunds_PMFXSpot
+  05 20 * * 1-5 sh /home/summit/EOD/crontab/crtb_xfdsPMFxspot_GenReport.sh
+  00 05 * * 1-5 sh /home/summit/EOD/crontab/crtb_xfdsPMFxspot_Upload.sh
+  30 08 * * 1-5 sh /home/summit/EOD/crontab/crtb_xfdsPMFxspot_SendSMS.sh
+  ```
+
+  1. 周一至周五，每天 20:05 执行报表生成脚本
+  2. 周一至周五，每天 05:50 执行报表上传脚本
+  3. 周一至周五，每天 08:30 执行消息发送脚本
+
 ### `cp`
 
 + "-r"
