@@ -41,8 +41,13 @@ int main()
         else
                 _DEBUG_UTL_ = 0;
 
+        /*
         if (_DEBUG_UTL_) std::cout << __DATE__ << " " << __TIME__ << " [" << __FILE__ << " " << __FUNCTION__ <<" " << __LINE__ << "] DEGUB ON " << std::endl;
+        */
 
+        std::cout << __DATE__ << " " << __TIME__ << " [" << __FILE__ << ":" __LINE__ << " " << __FUNCTION__ "] "
+                  << "begin"
+                  << std::endl;
         return 0;
 }
 ```
