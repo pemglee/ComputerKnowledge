@@ -12,6 +12,8 @@
 + 函数，`chr(38)` 写成了 `char(38)`
 +
 
+### "ORA-01013: user requested cancel of current operation"
+
 ### "ORA-01034: ORACLE not available"
 
 数据实例未启动
@@ -39,3 +41,5 @@
 ### "ORA-01756: quoted string no properly terminated"
 
 “引号字符串未正确终止”  
+
+### "ORA-24909: call in progress, Current operation canceled"
