@@ -2,9 +2,13 @@
 
 ## 数据库连接
 
+`sqlplus user/password@URI:port/SID as role`
+
 ### 直接连接
 
 实例 1： `sqlplus cgb632/cgb632@192.168.3.36:1521/osum1`
+
+实例 2： `sqlplus / as sysdba` (on OracleDB Server)
 
 ### 利用客户端配置连接
 
@@ -72,3 +76,12 @@
   + BFILE可以存储在数据库外部文件系统中，数据库只存储其路径和文件名。
 
 #### dbms_*
+
+Example 1: (in NJCB IMA Summit)
+
+```sql
+select externalid, dbms_lob.substr(data,200,10)
+from dmLC_FailQueue
+where externalid='62455NJ'
+;
+```
