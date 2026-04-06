@@ -8,7 +8,8 @@ markmap:
 
 + JVM 
 
-  + 内存模型， 运行时数据区
+  + 内存模型， 
+    运行时数据区
 
     + 线程共享区
 
@@ -44,7 +45,8 @@ markmap:
                 + 内存泄漏 Memory Leak
               + 垃圾回收错误，抛出 java.lang.OutOfMemoryError: GC overhead limit exceeded
 
-    + 线程私有区，每个线程独有
+    + 线程私有区，
+      每个线程独有
 
       + 程序计数器 PC Register, Program Counter Register
         唯一不会发生 OutOfMemoryError的区域
@@ -98,3 +100,17 @@ markmap:
         + [说明] 
           堆是共享区域，多个线程可以同时访问(读+写)一个堆上的数据  
           手动使用 synchronized, volatile, lock 等机制来保证并发安全(可见性、原子性、有序性)
+
+  + Java启动参数
+
++ 数据类型
+
+  + 基本数据类型
+
+  + 引用数据类型
+
+  + 类型转换
+
+    + 自动类型提升
+
+    + 强制类型转换
