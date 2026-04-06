@@ -6,9 +6,93 @@ markmap:
 
 ## 概述
 
-+ JVM 
++ 一些概念
 
-  + 内存模型， 
+  + JDK -- Java Development Kit
+    + java.exe, 启动JVM
+    + javac.exe, Java编译器，把 .java文件编译成 .class (java字节码文件)
+    + .jar, 把一组 .class文件打包成 .jar文件，用于发布
+    + javadoc.exe, 从 .java文件中自动提取注释并生成帮助文档
+    + jdb.exe, Java调试器，用于开发阶段的运行调试
+
+  + JRE -- Java Runtime Environment
+  + JVM -- Java Virtual Machine
+  + EE -- Enterprise Edition
+    + Java SE
+    + API+ 扩展库
+  + SE -- Standard Edition
+    + JVM
+    + 标准库
+  + ME -- Micro Edition
+  + OpenJDK
+  + Hotspot
+  + JSR -- Java Specification Request
+  + JCP -- Java Community Process
+
++ 关键字
+
+  + [表格]
+
+    | 类别    | 关键字 | 说明   |
+    | :------ | :--------- | :---- |
+    | 访问控制 | private    | 私有类成员  |
+    |         | protected  | 受保护类成员 |
+    |         | public     | 公共类成员  |
+    |         | default    | 默认类成员  |
+    | 修饰符   | abstract   | 声明抽象    |
+    |         | class      | 类         |
+    |         | extends    | 扩充、继承  |
+    |         | final      | 最终值、不可变 |
+    |         | implements | 实现(接口) |
+    |         | interface  | 接口      |
+    |         | native     | 本地、原生 |
+    |         | new        | 创建      |
+    |         | static     | 静态      |
+    |         | strictfp   | 严格浮点、精确浮点 |
+    |         | synchronized | 线程、同步 |
+    |         | transient  | 短暂的 |
+    |         | volatile   | 易失  |
+    | 程序控制 | break      | 终止循环 |
+    |         | case       | switch选择 |
+    |         | continue   | 继续处理   |
+    |         | do         | 运行      |
+    |         | else       | 否则      |
+    |         | for        | 循环      |
+    |         | if         | 如果      |
+    |         | instanceof | 实例      |
+    |         | return     | 返回      |
+    |         | switch     | 选择      |
+    |         | while      | 循环      |
+    | 错误处理 | assert     | 断言表达式  |
+    |         | catch      | 捕捉异常   |
+    |         | finally    | 强制执行   |
+    |         | throw      | 抛出异常对象 |
+    |         | throws     | 声明可能抛出的异常 |
+    |         | try        | 尝试运行   |
+    | 包相关   | import     | 导入      |
+    |         | package    | 包        |
+    | 基本类型 | boolean    | 布尔类型   |
+    |         | byte       | 字节类型   |
+    |         | char       | 字符类型   |
+    |         | double     | 双精度浮点 |
+    |         | float      | 单精度浮点 |
+    |         | int        | 整型      |
+    |         | long       | 长整型    |
+    |         | short      | 短整型    |
+    | 变量引用 | super      | 父类、超类 |
+    |         | this       | 本类      |
+    |         | void       | 无返回值   |
+    | 保留关键字 | goto      | 跳转，禁用 |
+    |          | const     | 常量，禁用 |
+
+  + [说明]
+
+    + null，字面常量，非关键字
+    + true & false，字面常量，非关键字
+
++ JVM  
+
+  + 内存模型，  
     运行时数据区
 
     + 线程共享区
@@ -104,13 +188,220 @@ markmap:
   + Java启动参数
 
 + 数据类型
+  Java是强类型语言
 
   + 基本数据类型
+    + byte, 8 bits / 1 Byte, -128 ~ 127, integer
+    + short, 16 bits / 2 Bytes, -32768 ~ 32767, integer
+    + int, 32 bits / 4 Bytes, -2147483648 ~ 2147483647, integer
+    + long, 64 bits / 8 Bytes, -9223372036854775808 ~ 9223372036854775807, interger
+    + float, 32 bits / 4 Bytes, 
+    + double, 64 bits / 8 Bytes, 
+    + char, 16 bits / 2 Bytes,
+    + boolean,
 
   + 引用数据类型
+    + class
+    + interface
+    + array
 
   + 类型转换
 
     + 自动类型提升
 
     + 强制类型转换
+
++ Operator
+
+  + 算术运算符
+
+  + 赋值运算符
+
+  + 比较运算符
+
+
+  + 逻辑运算/布尔运算
+    + 位运算符
+    
+    + 与 `&&`(短路与), `&`
+    + 或 `||`(短路或), `|`
+
+  + 三元运算符
+
+  + 运算优先级
+    1. `()`
+    2. 一元运算符: `!`, `~`, `++`, `--`
+    3. 乘除运算符: `*`, `/`, `%`
+    4. 加减运算符: `+`, `-`
+    5. 移位运算符: `<<`, `>>`, `>>>`
+
+    6. 比较运算符: `>`, `>=`, `<`, `<=`, `instanceof`
+    6. 相等运算符: `==`, `!=`
+    6. 位与运算符: `&`
+    6. 位异或运算符: `^`
+    6. 位或运算符: `|`
+    6. 逻辑与运算符: `&`, `&&`
+    7. 逻辑或运算符: `|`, `||`
+    7. 条件运算符: `? : `
+    8. 赋值运算符: `+=`, `-=`, `*=`, `/=`
+
++ Control
+
+  + 顺序结构
+
+  + 分支控制 / 条件控制 / 选择结构
+
+    + `if {}`, `if {} else {}`, `if {} elseif {} else {}`
+
+    + `swith () {case :...}`
+
+  + 循环结构
+
+    + for
+
+    + foreach
+
+    + while
+
+    + do while
+  
+    + 中断终止
+  
+      + break
+  
+      + continue
+
++ OOP -- Object-Oriented Programming
+  + 封装 Encapsulation
+    将数据和可对其操作的方法绑定在一起
+  + 继承 Inheritance
+  + 多态 Polymorphism
+    允许不同类的对象对同一消息做出不同相应
+  + 抽象 Abstraction
+    + 接口
+  + 类 Class
+  + 对象 Object
+  + 方法 Method
+  + 重载 Overload/Override
+
++ Java类库  
+  + 数学、计算
+
+  + 字符、字符串
+
+  + 集合框架
+    + java.util.ArrayList
+    + java.util.LinkedList
+    + java.util.HashMap
+    + java.util.Vector
+    + java.util.HashSet
+    + java.util.Scanner
+    + java.util.regex.Pattern
+    + java.util.regex.Macher
+
+  + IO/NIO
+    + java.io.File
+    + java.io.InputStream
+    + java.io.OutputStream
+    + java.nio.file.Files
+
+  + 多线程
+    + java.lang.Thread
+    + java.util.concurrent.ExecutorService
+
+  + 日期、时间
+    + java.time.LocalDate
+    + java.time.LocalDateTime
+    + java.time.ZonedDateTime
+    + java.util.Date
+    + java.text.SimpleDateFormat
+    + java.util.Calendar
+    + java.util.GregorianCalendar
+    + java.time.Instant
+    + java.time.ChronoUnit
+    + java.time.Period
+    + java.time.Duration
+
+  + 网络编程
+    + java.net.URL
+    + java.net.Socket
+
++ Java第三方库
+
++ 数据库 & 持久化框架
+
++ 异常处理
+
+## 专题
+
++ File， Stream， IO
+
++ 集合 & 泛型
+
+  + 集合
+    + [说明]
+      Java集合框架主要是由 Collection 和 Map 两个接口派生而来
+  
+    + List
+    + Set
+    + Queue
+    + ArrayList
+      动态数组。查询效率高，插入和删除效率低
+    + LinkedList
+      基于双向链表。插入和删除效率高，查询效率低
+    + HashMap
+      基于Hash表实现。透过哈希值快速定位键值，具有较高的查找效率。非线程安全
+    + TreeMap
+      基于红黑树实现。能够对键进行排序
+    + ConcurrentHashMap
+      线程安全的哈希表，采用分段锁机制
+    + HashSet
+    + TreeSet
+
+  + 泛型
+
+    + 泛型类
+
+    + 泛型接口
+
+    + 泛型方法
+
+    + 泛型通配符
+
+      + 无界通配符
+      + 上界通配符
+      + 下届通配符
+
++ 多线程 & 并发
+
+  + 继承 Thread类
+
+  + 实现 Runnable接口
+
+  + 线程池
+
+    + 固定大小线程池
+
+    + 单线程线程池
+
+    + 缓存栈线程池
+
++ AOP 面向切面编程  
+
+  + 业务类
+
+  + 切面类
+
+  + 配置类
+
++ Spring
+
+  + Spring Boot
+
+  + Spring Cloud
+
+
+
+## reference doc
+
++ [知乎 -- 划重点，Java入门指南](https://zhuanlan.zhihu.com/p/24611339952)
