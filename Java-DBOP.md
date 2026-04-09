@@ -16,7 +16,7 @@ markmap:
 
     + 自增主键问题
 
-      + [描述] 为什么不推荐使用数据库自增主键，也不推荐UUID，雪花算法简论
+      + [描述] 为什么**不**推荐使用数据库自增主键，也不推荐UUID，雪花算法简论
 
       + [解释/解决]
         + 自增主键问题
@@ -38,7 +38,7 @@ markmap:
             + 41 bit timestamp
             + 10 bit MachineID
             + 12 bit SequenceID
-          + problem
+          + [Problems]
             + 时间回拨问题
               + [问题]
                 + 不再趋势递增
@@ -61,3 +61,51 @@ markmap:
   + 查询去重
     + `distinct`
     + `group by`
+
+  + count
+
+    + count(*) vs count(1)/count(0)
+
+      + [功能]
+      + [性能]
+        + [MySql] 
+          + 无区别
+          + 从查询计划来看，`count(0)`略胜，因为无需MySql在底层做优化
+
+          + 查询计划
+  
+           ```sql
+           /*select count(0) */ select count(0) as 'count(*)' from '表名‘；
+           ``` 
+
+    + count(field_name)
+      + 会排除值为NULL的记录
+
+  + 循环查询
+    + 为什么**不**能循环查库
+
+      + [描述]
+      + [故障]
+        1+N查询/级联查询(分库分表) 引发雪崩，会抽干连接池，导致网络I/O阻塞和接口大范围超时
+
+
+
+  + 多表查询
+
+    + 为什么**不**能多表join
+
+  + Redis
+    + [Question] Redis为什么快
+      + [Answer] 
+        + 纯内存访问
+        + 单线程避免上下文切换
+        + 渐进式ReHash
+          Redis采用全局hash表，使用key-value结构  
+          ReHash采用两张表  
+
+        + 缓存时间戳
+          采用读时间方法会耗费资源，所以每毫秒更新时间戳供程序使用。
+          
+    + [Question] Redis如何实现IO多路复用
+
+
