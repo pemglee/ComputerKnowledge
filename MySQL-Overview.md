@@ -1,3 +1,9 @@
+---
+title: MySQL学习
+markmap:
+  colorFreezeLevel: 24
+---
+
 # 数据库概念
 
 + 数据库, Database, 关联表(database tables)的集合
@@ -16,21 +22,4 @@
 
 
   + 冗余, , 存储多倍数据， 冗余降低了_性能_，但提高了_安全性_
-
-## MySQL安装
-
-### software
-
-+ MySQL, MySQL Server Configuration
-  ex, "MySQL APT Repository"/"mysql-apt-config_0.8.36-1_all.deb"
-
-+ MySQL, MySQL Server
-  ex, 
-+ MySQL-client, MySQL Client, 连接并操作
-
-+ MySQL-devel, 库和头文件
-
-+ MySQL-shared,
-
-+ MySQL-bench, 基准和性能测试工具
 

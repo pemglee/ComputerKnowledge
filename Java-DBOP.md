@@ -94,6 +94,17 @@ markmap:
 
     + 为什么**不**能多表join
 
+
+  + SQL优化
+
+    + 避免 `select *`
+
+      + [原因]
+
+        + 增加查询解析器的成本
+
+    +
+
   + Redis
     + [Question] Redis为什么快
       + [Answer] 

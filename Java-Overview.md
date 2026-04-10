@@ -336,6 +336,10 @@ markmap:
 
 + Java应用框架
 
+  + SSM
+
+  + SpringBoot
+
 + 分布式、微服务
 
   + C(Consistency强一致性) A(Availability可用性) P(Parition tolerance分区容错性)
@@ -347,6 +351,10 @@ markmap:
 
   + ACID
     追求强一致性、强隔离、事务边界清晰
+
+  + SpringCloud
+
+  + 微服务
 
 + 数据库 & 持久化框架
 
