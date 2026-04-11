@@ -17,11 +17,21 @@ markmap:
 
 + Exception，运行时错误，可以捕获并被处理
 
+  + RuntimeException
+    + NullPointerException (NPE,空指针异常。实为 Null Reference， 对象为空)
+    + IndexOutOfBoundsException
+    + SecurityException
+    + IllegalArgumentException
+  + IOException 
+    + UnsupportedCharsetException
+    + FileNotFoundException
+    + SocketException
+  + ParseExcepton
+  + GeneralSecurityException
+  + SQLException
+  + TimeoutException
+
   + NumberFormatException
-
-  + FileNotFoundException
-
-  + SocketException
 
 ## Java Error/Exceptions explain
 
