@@ -227,10 +227,50 @@ markmap:
     + char, 16 bits / 2 Bytes,
     + boolean,
 
+
   + 引用数据类型
     + class
+      + 基本类型 vs 封装类
+        
+        + 对应关系
+          + [Table]
+
+            |  | basic type | class |
+            | :---- | :---- | :---- |
+            |       | int   | Integer |
+
+        + 区别
+
+          + 存储位置
+            + 基本类型，栈
+            + 封装类，堆
+
+          + 默认值
+            + 基本类型
+              + `int a; // a = 0`
+            + 封装类，默认 null
+              + `Integer a; // a = null`
+          + 赋值  
+            + 基本类型 直接赋值   
+            + 封装类 使用 new 关键字
+
+          + 混用
+            自动使用**拆箱**或**装箱**"**操作
+
+          + 操作
+            + 基本类型
+            + 封装类，增加了方法和属性
+
+
+        + 说明
+          + Integer
+            + Integer是int的封装类
+            + `Integer.valueOf()`在 -128~127 间会复用缓存对象
+
+
     + interface
     + array
+
 
   + 类型转换
 
@@ -244,7 +284,28 @@ markmap:
 
   + 赋值运算符
 
-  + 比较运算符
+  + 比较运算符 
+
+  + 相等运算符
+
+    + `==`
+      + 说明， 
+        java中的对象相等比较的是对象的引用，而非值
+        如果比较数值，应使用 equals
+        + 示例
+          + [code]
+
+            ```java
+            Integer a1 = 100; // it is Integer, not int
+            // <==> Integer a1 = Integer.valueOf(100); // i.e. 装箱 boxing
+            Integer a2 = 100;
+            System.out.println( a1 == a2 ); // return true， since there is a integerCache
+
+            Integer a3 = 200;
+            Integer a4 = 200;
+            System.out.println( a3 == a4 ); // return false
+            System.out.println( a3.equals(a4) ); // return true
+            ```
 
   + 逻辑运算/布尔运算
     + 位运算符

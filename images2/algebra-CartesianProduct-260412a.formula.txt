@@ -1,0 +1,2 @@
+{\textstyle \sigma_{instructor.ID = teaches.ID}{(instructor \times teaches)}
+}

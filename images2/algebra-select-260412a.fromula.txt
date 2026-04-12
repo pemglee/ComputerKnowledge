@@ -1,0 +1,2 @@
+{\textstyle \sigma_{dept\_name = "Physics" \wedge  salary > 9000}{(instructor)}
+}

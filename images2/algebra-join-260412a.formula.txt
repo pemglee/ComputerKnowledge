@@ -1,0 +1,2 @@
+{\textstyle r \Join_{\theta} s = \sigma_{\theta}(r \times s)
+}
