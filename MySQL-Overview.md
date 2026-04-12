@@ -122,18 +122,48 @@ markmap:
 
             + 代数表示
               + [Diagram]
-                ![]()
+                ![algebra join](./images2/algebra-join-260412a.svg)
 
             + SQL
               + [code]
+                ```sql
+                select *
+                from instructor join teaches
+                on instructor.ID = teaches.ID;
+                ```
+                
 
           + 集合
 
-            + 合
+            + 合 union
+              + 代数表示
+                + [Diagram]
+                  + ![algebra set union](./images2/algebra-SetUnion-260412.svg)
+              + SQL
+                + [code]
+                  ```sql
+                  select * from section where semester='Fall' and year=2017
+                  union all
+                  select * from section where semester='Spring' and year=2018;
+                  ```
 
-            + 交
+            + 交 intersection
+              + 代数表示
+                + [Diagram]
+                  + ![algebra set union](./images2/algebra-SetIntersection-260412.svg)
+              + SQL
+                + [code]
+                  ```sql
+                  ```
 
-            + 差
+            + 差 set-difference
+              + 代数表示
+                + [Diagram]
+                  + ![algebra set union](./images2/algebra-SetDiff-260412.svg)
+              + SQL
+                + [code]
+                  ```sql
+                  ```
 
           + 赋值
 
@@ -264,9 +294,126 @@ markmap:
 
     + 外键, FK (Foreign Key),  
     + 复合建, ,
-    + 索引, Index,  
-      + 
+    + 索引, Index, MySQL
+      排好顺序的数据结构。
 
+      + 分类 1， 索引性质
+
+        + 主键索引
+          + 说明
+            + 唯一且非空，一个表只能有一个
+        + 唯一索引
+          + 说明
+            + 值不能重复
+            + 可以为空
+        + 普通索引
+        + 联合索引
+          + 说明
+            + 多列组合的索引
+            + 注意列的顺序
+        + 全文索引
+          + 说明
+            + 针对长文本字段
+        + 空间索引
+          + 说明
+            + 专门为空间数据做区域距离查询准备
+
+      + 分类 2， 数据结构角度
+
+        + B+树索引
+          + 说明
+            + 默认
+            + 适用: 范围查询、排序、聚合；
+        + 哈希索引
+          + 说明
+            + 适用: 等值查询; **不**支持范围查询；
+        + 倒排索引
+          + 说明
+            + 适用: 全文搜索，先分词再查找；
+        + R树索引
+          + 说明
+            + 适用: 多维空间数据专用；
+
+      + 分类 3， 从InnoDB的B+树实现
+
+        + 聚簇索引
+          + 说明
+            + 主键索引，叶子节点直接存完整数据行
+        + 非聚簇索引
+          + 说明
+            + 叶子节点只保存索引列和主键值，要查全行，得先回表到聚簇索引再取一次
+
+      + ~~B树索引~~
+
+        + B树
+
+        + B树索引
+          + 说明
+            所有的值是按顺序存储的，并且每个叶子到根的距离相同；  
+            B树索引，存储引擎不再需要进行全表扫描来获取数据
+
+          + 示例
+            + 图例
+              + [Diagram]
+                ![B-Tree Index](./images2/DB-BTreeIndex.jpeg)
+
+            + 过程 查找E
+              1. 和 根节点M 比较， E < M, 搜索左侧分支
+              2. 和 一级节点 D|G 比较， D < E < M, 搜索中间节点
+              3. 和 二级节点 E|F 比较， E = E， 返回 E 的关键字和指针信息
+              4. 通过指针信息找出记录的全行信息
+
+      + B+树索引
+
+        + B树 vs. B+树
+          + 图例
+            + [Diagram]
+              ![BTree compare B+Tree](./images2/DB-BTreeCmpB+Tree.jpeg)
+          + 区别
+            + B树中无重复元素，B+树有
+            + B树中间节点会存储数据指针信息，B+树只在叶子节点中才存储
+            + B+树的每个叶子节点都有一个指针指向下一片叶子，把所有叶子链在一起
+          + B+树优点
+            + 中间节点不存储指针，同样的页可以保存更多的节点，树的总高度小，（数据量相同的情况下，B+树比B树更加矮胖，）效率更高。
+            + B+树只在叶子才能获取数据，而B树可以在中间节点获取，所以B+树查询时间更稳定
+            + B+树每个叶子都有指向下一叶子的指针，方便范围查询和全表查询；而B树须做中序遍历。
+
+        + B+树
+          + 结构
+
+            + 示例
+              + 图例
+                + [Diagram]
+                  ![B+-Tree Index](./images2/DB-B+TreeIndex.jpeg)
+
+              + 表结构
+                + [code]
+
+                  ```sql
+                  create table Student(
+                    last_name varchar(50) not null,
+                    first_name varchar(50) not null,
+                    birth_date date not null,
+                    gender int(2) not null,
+                    key (last_name, first_name, birth_date)
+                  );
+                  ```
+
+                  `Index{last_name, first_name, birth_date}`
+
+              + 过程 查找{"name":"Cuba Allen", "BirthDate":"1960-Jan-01"}
+
+          + 特点 (i.e. B+树优点)
+            + 所有的值都存储在叶子节点
+            + 多路平衡树
+            + 叶子节点间使用指针相连，可高效遍历
+            + 全值匹配 和索引中所有的列进行匹配
+            + 
+
+          + 限制
+            + 
+
+      + Hash索引
 
   + 冗余, , 存储多倍数据， 冗余降低了_性能_，但提高了_安全性_
 
@@ -355,13 +502,57 @@ markmap:
         + 错误
         + 纠正
 
-+ 数据库操作
-  + 数据库结构 / 数据表结构
-  + Select -- Query 查询
-  + Update -- 更新
-  + Insert -- 插入
-  + Delete -- 删除
-  + Truncate -- 截断/删节
-  + Drop -- 抛弃
++ 数据库操作 & SQL
+  + SQL
+    + DDL
+    + DML
+    + integrity
+    + view definition
+    + transaction control
+    + embedded SQL & dynamic SQL
+    + authorization
+
+  + 数据类型
+
+    + [Table]
+
+      | Common Data Type | MySQL Data Type | Oracle Data Type | MS SQLServer Data Type | PostgreSQL Data Type | length | Range | precision | Notes 1 | Notes 2 |
+      | :--------------- | :-------------- | :--------------- | :--------------------- | :------------------- | :----- | :---- | :-------- | :------ | :------ |
+
+  + 数据库 + 数据表
+    + Create -- 创建
+    + Alter -- 修改
+    + Drop -- 抛弃
+    + Grant -- 授权
+  + 数据 
+    + Select -- Query 查询
+    + Update -- 更新
+    + Insert -- 插入
+    + Delete -- 删除
+    + Truncate -- 截断/删节
 
 + Trouble Shoot
+
+
+# 参考
+
++ [568数据](http://www.568sj.cn/)
+
+  + [...]
+
+    + [MySQL / DataType]()
+
+      + [MySQL数据库数据类型详解与性能对比](http://www.568sj.cn/news/01121254636527947776.html)
+
++ [bilibili](https://www.bilibili.com/)
+
+  + [77sindu](https://space.bilibili.com/3546955412146263?spm_id_from=333.788.upinfo.detail.click)
+
++ [腾讯](https://cloud.tencent.com)
+
+  + [码农架构](https://cloud.tencent.com/developer/user/5395074)
+
+    + [MySQL / index]()
+
+      + [MySQL索引的原理，B+树、聚集索引和二级索引的结构分析](https://cloud.tencent.com/developer/article/1735294)
+

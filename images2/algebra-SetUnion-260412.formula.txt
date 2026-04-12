@@ -1,0 +1,3 @@
+{\textstyle \prod_{course\_id}(\sigma_{semester="Fall" \wedge year=2017}{(section)}) \bigcup 
+            \prod_{course\_id}(\sigma_{semester="Spring" \wedge year=2018}{(section)})
+}

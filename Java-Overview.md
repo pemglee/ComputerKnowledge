@@ -595,6 +595,8 @@ markmap:
 
   + SpringBoot
 
+    + SpringBoot启动流程
+
 + 分布式、微服务
 
   + C(Consistency强一致性) A(Availability可用性) P(Parition tolerance分区容错性)
@@ -755,4 +757,13 @@ markmap:
 
 ## reference doc
 
-+ [知乎 -- 划重点，Java入门指南](https://zhuanlan.zhihu.com/p/24611339952)
++ [bilibili](https://www.bilibili.com/)
+
+  + [77sindu](https://space.bilibili.com/3546955412146263?spm_id_from=333.788.upinfo.detail.click)
+    + [Java / Spring]()
+      + [3年Java面试，问他：Spring Boot启动流程。背诵：main方法启动→刷新上下文… 结果直接现场抬走](https://www.bilibili.com/video/BV1r1wcztEkU?spm_id_from=333.788.player.player_end_recommend_autoplay&vd_source=38fc599412349dcfe60484e3ff320c66&trackid=web_related_0.router-related-2479604-grjpt.1775995421238.393)
+
++ [知乎]()
+  + [TigerOnHill](https://www.zhihu.com/people/denpenr) 
+    + [Java / 基础]()
+      + [划重点，Java入门指南](https://zhuanlan.zhihu.com/p/24611339952)
