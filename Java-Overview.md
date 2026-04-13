@@ -15,6 +15,111 @@ markmap:
     + javadoc.exe, 从 .java文件中自动提取注释并生成帮助文档
     + jdb.exe, Java调试器，用于开发阶段的运行调试
 
+    + jdk8 升级至 jdk17
+
+      + 框架要求
+        + Spring Framework
+        + Spring Boot
+        + Kafka  
+        + Jenkins
+      + 增强
+        + switch
+          + 取消 break，且精简
+
+            + before jdk17
+
+              + [code]
+
+                ```java
+                String name = "徐庶";
+                String alias;
+                Switch (name) {
+                  case "周瑜":
+                    alias = "公瑾";
+                    break;
+                  case "徐庶":
+                    alias = "元直";
+                    break;
+                  default:
+                    alias = "未知";
+                    break;
+                }
+                ```
+
+              + [code]
+
+                ```java
+                String name = "徐庶";
+                String country;
+                Switch (name) {
+                  case "周瑜":
+                  case "徐庶":
+                    country = "三国";
+                    break;
+                  case "铁木真":
+                  case "忽必烈":
+                    country = "元朝";
+                    break;
+                  default:
+                    country = "未知";
+                    break;
+                }
+                ```
+
+            + jdk17
+
+              + [code]
+
+                ```java
+                var name = "徐庶";
+                String alias = switch (name) {
+                  case "周瑜" -> "公瑾"
+                  case "徐庶" -> "元直";
+                  default -> "未知";
+                }
+                ```
+
+              + [code]
+
+                ```java
+                var name = "徐庶";
+                String alias = switch (name) {
+                  case "周瑜", "徐庶" -> "三国";
+                  case "铁木真", "忽必烈" -> "元朝";
+                  default -> "未知";
+                }
+                ```
+
+              + [code]
+
+                ```java
+                var name = "徐庶";
+                String alias = switch (name) {
+                  case "周瑜", "徐庶" -> {
+                    System.out.println("三国");
+                    yield "三国"；
+                  }
+                  case "铁木真", "忽必烈" -> {
+                    System.out.println("元朝");
+                    yield "元朝";
+                  }
+                  default -> {
+                    System.out.println("未知");
+                    yield "未知";
+                  }
+                }
+                ```
+          + 对象类型支持
+        + 字符串增强
+          + 引入 `'''... '''`
+          + 引入 `\` 和 `\s`
+        + instanceof增强
+        + 子类继承问题
+        + Lombok
+          通过注解自动生成常见样本代码
+        + 空指针问题
+        + ZGC
+
   + JRE -- Java Runtime Environment
   + JVM -- Java Virtual Machine
   + EE -- Enterprise Edition
@@ -432,8 +537,36 @@ markmap:
           + `getParameterType()` 获取构造函数的参数类型
           + `getModifiers()` 获取构造函数的修饰符，如 'public', 'private'
 
+    + 注释
 
-        
+      + `@Bean`
+        + 说明
+          方法级别注解
+          通常写在`@Configuration`配置类方法中
+      + `@Component`
+        + 说明
+          类级别注解  
+          标记一个Java类为Spring组件
+
+      + `@Bean` vs. `@Component`
+
+        + 表格 
+          + [Table]
+
+            |       | @Compenont | @Bean |
+            | :---- | :--------- | :---- |
+            | 作用目标 | 类        | 方法   |
+            | 注册方式 | 自动扫描，需`@ComponentScan`扫描类路径 | 显示声明，在配置类中 |
+            | 实例化控制 | Spring自动创建，无构造 | 开发者配置，可 `new()`、配置参数 |
+            | 适用对象 | 自定义业务类 | 第三方类 / 负载初始化逻辑 |
+            | 配置灵活性 | 较低，依赖 `@PostConstruct` | 高，支持 条件、依赖注入，多配置 |
+            | 命名规则 | 默认类名首字母小写 | 默认方法名 |
+            | 需要配置类 | 否 | 是，配合 `@Configuration` |
+
+        + 说明
+          + 同一个类上同时使用 `@Component` 和 `@Bean`
+            + `@Component`标记类为Bean；`@Bean`返回另一个Bean
+          + 
 
 + Java类库  
   + 数学、计算
@@ -595,8 +728,6 @@ markmap:
 
   + SpringBoot
 
-    + SpringBoot启动流程
-
 + 分布式、微服务
 
   + C(Consistency强一致性) A(Availability可用性) P(Parition tolerance分区容错性)
@@ -739,6 +870,15 @@ markmap:
 
     + 缓存栈线程池
 
++ IoC -- Inversion of control 控制反转 / DI -- Dependency injection 依赖注入
+  + IoC, 将组件间的依赖关系从程序内部提取到外部来管理
+  + DI，将组件间的依赖关系在外部通过参数或其他方式注入到内部
+
+  + 图示
+
+    + [Diagram]
+      ![Ioc and DI](./images2/Java-Spring-IoC_DI.jpg)
+
 + AOP 面向切面编程  
 
   + 业务类
@@ -749,9 +889,78 @@ markmap:
 
 + Spring
 
+  + Spring
+
+  + Spring Framework
+
   + Spring Boot
 
+    + 问题
+
+      + Spring boot 启动流程
+        + 三件事
+          + 准备环境
+          + 创建上下文
+          + 启动业务
+
+
+        + 启动`main()`方法，即五个步骤
+
+          + [code]
+  
+            ```java
+            SpringApplication.run(Application.class, args);
+            ```
+
+          + 动作
+
+            + `new SpringApplication()`
+
+              + 说明
+                + 推断应用类型
+                  + 判断类路径里有没有"javax.servlet"
+                    + 有， Web应用
+                + 设置初始化器、监听器、主类
+
+            + `run(Application.class, args)`
+
+              + 说明
+                + 真正的启动
+
+              + 过程
+                + 准备环境
+                  + 加载配置文件、系统变量、命令行参数
+                  + 封装成 "ConfigurableEnvironment"
+                + 创建上下文，"Application Context"，即"上下文容器"
+                  + 装配Bean，加载配置类。即 `@ComponentScan`
+                + 刷新上下文，
+                  + 所有 Bean 初始化完成
+                  + 事件监听器 注册完成
+                  + Web 项目 ？启动内嵌Tomcat : NoAction;
+                + 调用接口 "CommandLineRunner" 和 "ApplicationRunner"
+                  + 启动后须完成的逻辑
+                + 发布 "ApplicationReadyEvent"，即 启动业务
+
   + Spring Cloud
+
+    + 问题
+
+      + 从用户请求到服务返回，全程用来哪些组件？
+        + 过程
+          + 网关与流量控制
+            用户请求进来，先到 Spring Cloud Gateway (网关层)，配合 Sentinel 做 限流 + 熔断， 避免突发流量引发后端阻塞
+          + 服务发现与调用
+            网关到Nacos上搜索 可用实例列表 找服务地址
+          + 负载均衡
+            服务间使用 OpenFeign 互相调用，同时通过 LoadBalancer 在多个实例间做负载均衡
+          + 配置中心
+            服务配置统一放在 Nacos config 里维护，改配置不用重启，动态刷新
+          + 容错降级
+            下游服务故障，Sentinel 介入，降级，保障核心链路/服务
+          + 消息驱动
+            异步逻辑 进入 Spring Cloud Stream，配合 RocketMQ / RabbitMQ 进行解耦、削峰
+          + 全链路观测
+            Spring Boot 2.x 用 Sleuth + Zipkin 做链路追踪，配合 Spring Boot Admin 监控
 
 
 
@@ -762,6 +971,16 @@ markmap:
   + [77sindu](https://space.bilibili.com/3546955412146263?spm_id_from=333.788.upinfo.detail.click)
     + [Java / Spring]()
       + [3年Java面试，问他：Spring Boot启动流程。背诵：main方法启动→刷新上下文… 结果直接现场抬走](https://www.bilibili.com/video/BV1r1wcztEkU?spm_id_from=333.788.player.player_end_recommend_autoplay&vd_source=38fc599412349dcfe60484e3ff320c66&trackid=web_related_0.router-related-2479604-grjpt.1775995421238.393)
+
+      + [你背的八股过时啦！刚面了个5年Java，问他：Spring Cloud的核心组件有哪些？他顺口溜：Eureka、Feign...](https://www.bilibili.com/video/BV16jXfBcEaK/?spm_id_from=333.1387.homepage.video_card.click&vd_source=38fc599412349dcfe60484e3ff320c66)
+
++ [CSDN](https://csdn.net)
+
+  + [普通网友]()
+
+    + [Java / Spring]
+
+      + [Spring中的IOC详解](https://blog.csdn.net/dc_0012/article/details/157912749)
 
 + [知乎]()
   + [TigerOnHill](https://www.zhihu.com/people/denpenr) 
