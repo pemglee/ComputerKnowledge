@@ -315,6 +315,9 @@ markmap:
           `-ea:com.itranswarp.sample.Main` 类名  
           `-ea:com.itranswarp.sample1` 包名  
 
+    + `-Xms` 
+    + `-Xmx`
+
   + javac编译参数
 
     + `-cp jar名` ClassPath
@@ -536,37 +539,6 @@ markmap:
           + `newInstance(Object... initargs)` 使用指定的构造函数参数创建一个新实例
           + `getParameterType()` 获取构造函数的参数类型
           + `getModifiers()` 获取构造函数的修饰符，如 'public', 'private'
-
-    + 注释
-
-      + `@Bean`
-        + 说明
-          方法级别注解
-          通常写在`@Configuration`配置类方法中
-      + `@Component`
-        + 说明
-          类级别注解  
-          标记一个Java类为Spring组件
-
-      + `@Bean` vs. `@Component`
-
-        + 表格 
-          + [Table]
-
-            |       | @Compenont | @Bean |
-            | :---- | :--------- | :---- |
-            | 作用目标 | 类        | 方法   |
-            | 注册方式 | 自动扫描，需`@ComponentScan`扫描类路径 | 显示声明，在配置类中 |
-            | 实例化控制 | Spring自动创建，无构造 | 开发者配置，可 `new()`、配置参数 |
-            | 适用对象 | 自定义业务类 | 第三方类 / 负载初始化逻辑 |
-            | 配置灵活性 | 较低，依赖 `@PostConstruct` | 高，支持 条件、依赖注入，多配置 |
-            | 命名规则 | 默认类名首字母小写 | 默认方法名 |
-            | 需要配置类 | 否 | 是，配合 `@Configuration` |
-
-        + 说明
-          + 同一个类上同时使用 `@Component` 和 `@Bean`
-            + `@Component`标记类为Bean；`@Bean`返回另一个Bean
-          + 
 
 + Java类库  
   + 数学、计算
@@ -940,6 +912,38 @@ markmap:
                 + 调用接口 "CommandLineRunner" 和 "ApplicationRunner"
                   + 启动后须完成的逻辑
                 + 发布 "ApplicationReadyEvent"，即 启动业务
+
+  + 注释
+
+    + `@Bean`
+      + 说明
+        方法级别注解
+        通常写在`@Configuration`配置类方法中
+    + `@Component`
+      + 说明
+        类级别注解  
+        标记一个Java类为Spring组件
+
+    + `@Bean` vs. `@Component`
+
+      + 表格 
+        + [Table]
+
+          |       | @Compenont | @Bean |
+          | :---- | :--------- | :---- |
+          | 作用目标 | 类        | 方法   |
+          | 注册方式 | 自动扫描，需`@ComponentScan`扫描类路径 | 显示声明，在配置类中 |
+          | 实例化控制 | Spring自动创建，无构造 | 开发者配置，可 `new()`、配置参数 |
+          | 适用对象 | 自定义业务类 | 第三方类 / 负载初始化逻辑 |
+          | 配置灵活性 | 较低，依赖 `@PostConstruct` | 高，支持 条件、依赖注入，多配置 |
+          | 命名规则 | 默认类名首字母小写 | 默认方法名 |
+          | 需要配置类 | 否 | 是，配合 `@Configuration` |
+
+      + 说明
+        + 同一个类上同时使用 `@Component` 和 `@Bean`
+          + `@Component`标记类为Bean；`@Bean`返回另一个Bean
+        + 
+
 
   + Spring Cloud
 
