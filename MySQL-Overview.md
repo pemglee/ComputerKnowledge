@@ -366,7 +366,7 @@ markmap:
           + 示例
             + 图例
               + [Diagram]
-                ![B-Tree Index](./images2/DB-BTreeIndex.jpeg)
+                ![B-Tree Index](./images/DB-BTreeIndex.jpeg)
 
             + 过程 查找E
               1. 和 根节点M 比较， E < M, 搜索左侧分支
@@ -379,7 +379,7 @@ markmap:
         + B树 vs. B+树
           + 图例
             + [Diagram]
-              ![BTree compare B+Tree](./images2/DB-BTreeCmpB+Tree.jpeg)
+              ![BTree compare B+Tree](./images/DB-BTreeCmpB+Tree.jpeg)
           + 区别
             + B树中无重复元素，B+树有
             + B树中间节点会存储数据指针信息，B+树只在叶子节点中才存储
@@ -395,7 +395,7 @@ markmap:
             + 示例
               + 图例
                 + [Diagram]
-                  ![B+-Tree Index](./images2/DB-B+TreeIndex.jpeg)
+                  ![B+-Tree Index](./images/DB-B+TreeIndex.jpeg)
 
               + 表结构
                 + [code]
@@ -460,7 +460,7 @@ markmap:
           + 图例
 
             + [Diagram]
-              ![Primary Index](./images2/DB-PrimaryKeyIndex.jpeg)
+              ![Primary Index](./images/DB-PrimaryKeyIndex.jpeg)
 
           + 表结构
 
@@ -487,7 +487,7 @@ markmap:
 
             + 图例
               + [Diagram]
-                ![表数据](./images2/DB-tbl-layout_test.jpeg)
+                ![表数据](./images/DB-tbl-layout_test.jpeg)
 
             + 表结构
               + [code]
@@ -511,14 +511,14 @@ markmap:
                 + 图示
   
                   + [Diagram]
-                    ![InnoDB Primary key](./images2/DB-tbl-layout_test-InnoDB-PrimaryKey.jpeg)
+                    ![InnoDB Primary key](./images/DB-tbl-layout_test-InnoDB-PrimaryKey.jpeg)
   
               + 二级索引
   
                 + 图示
   
                   + [Diagram]
-                    ![InnoDB Primary key](./images2/DB-tbl-layout_test-InnoDB-L2Key.jpeg)
+                    ![InnoDB Primary key](./images/DB-tbl-layout_test-InnoDB-L2Key.jpeg)
   
                 + 说明
                   + 二级索引叶子节点保存了主键，类似指针而非通常保存的下一叶子的地址 
@@ -532,14 +532,14 @@ markmap:
                 + 图示
   
                   + [Diagram]
-                    ![InnoDB Primary key](./images2/DB-tbl-layout_test-MyISAM-PrimaryKey.jpeg)
+                    ![InnoDB Primary key](./images/DB-tbl-layout_test-MyISAM-PrimaryKey.jpeg)
   
               + 二级索引
   
                 + 图示
   
                   + [Diagram]
-                    ![InnoDB Primary key](./images2/DB-tbl-layout_test-MyISAM-L2Key.jpeg)
+                    ![InnoDB Primary key](./images/DB-tbl-layout_test-MyISAM-L2Key.jpeg)
   
                 + 说明
                   + 二级索引和主键索引无区别
@@ -549,7 +549,7 @@ markmap:
               + 图示
     
                 + [Diagram]
-                  ![InnoDB vs. MyISAM](./images2/DB-tbl-layout_test-PrimaryKey_NoPrimary.jpeg)
+                  ![InnoDB vs. MyISAM](./images/DB-tbl-layout_test-PrimaryKey_NoPrimary.jpeg)
     
               + 聚集索引的优点：
     
@@ -579,7 +579,7 @@ markmap:
   + Normal form - 范式
     + 示意图
       + [Diagram]
-        ![DBNF](./images2/DBNormalForm.webp)
+        ![DBNF](./images/DBNormalForm.webp)
 
     + 码，足以区分实体(记录)的属性或属性集/组。
       一个元组(行)的所有属性必须能唯一标识元组。即，不能出现两个元组的属性完全相同。

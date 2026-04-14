@@ -1,0 +1,49 @@
+注解名称 	所属框架 	核心功能 	作用域 	关键属性 	典型应用场景
+@Component 	Spring Framework 	标注通用组件，自动注册为Bean 	类 	value（Bean名称） 	不确定层级的通用组件
+@Controller 	Spring Framework 	标注Web层控制器，处理HTTP请求返回视图 	类 	value（Bean名称） 	传统Spring MVC控制器
+@Service 	Spring Framework 	标注业务逻辑层组件 	类 	value（Bean名称） 	Service层业务处理类
+@Repository 	Spring Framework 	标注数据访问层组件，转换数据库异常 	类 	value（Bean名称） 	DAO层数据库操作类
+@Autowired 	Spring Framework 	按类型自动装配Bean 	构造器/方法/字段/参数 	required（是否必须） 	依赖注入，配合@Qualifier
+@Qualifier 	Spring Framework 	配合@Autowired按名称指定Bean 	字段/方法/参数/类 	value（Bean名称） 	解决同类型多Bean冲突
+@Resource 	JSR-250 	默认按名称装配，找不到按类型 	字段/方法 	name（Bean名称）、type（Bean类型） 	Java标准依赖注入
+@Primary 	Spring Framework 	指定同类型Bean的默认优先注入 	类/方法 	无 	设置默认Bean
+@RestController 	Spring Framework 	标注RESTful控制器，所有方法返回JSON/XML 	类 	value（Bean名称） 	前后端分离REST API开发
+@ResponseBody 	Spring Framework 	将返回值写入HTTP响应体 	方法/类 	无 	@Controller中返回数据
+@RequestBody 	Spring Framework 	将HTTP请求体绑定到方法参数 	方法参数 	required（是否必须） 	接收POST/PUT的JSON数据
+@RequestParam 	Spring Framework 	绑定请求参数到方法参数 	方法参数 	name/value、required、defaultValue 	获取查询参数、表单参数
+@PathVariable 	Spring Framework 	绑定URL路径变量到方法参数 	方法参数 	name/value、required 	RESTful URL动态参数
+@RequestMapping 	Spring Framework 	灵活映射HTTP请求到处理方法 	类/方法 	value/path、method、consumes、produces 	定义请求映射
+@GetMapping 	Spring Framework 	专门处理HTTP GET请求 	方法 	同@RequestMapping 	查询资源
+@PostMapping 	Spring Framework 	专门处理HTTP POST请求 	方法 	同@RequestMapping 	创建资源
+@PutMapping 	Spring Framework 	专门处理HTTP PUT请求 	方法 	同@RequestMapping 	更新资源
+@DeleteMapping 	Spring Framework 	专门处理HTTP DELETE请求 	方法 	同@RequestMapping 	删除资源
+@RestControllerAdvice 	Spring Framework 	全局异常处理、数据绑定，专门用于REST 	类 	basePackages、annotations 	统一处理REST API异常
+@ExceptionHandler 	Spring Framework 	标注异常处理方法 	方法 	value（异常类型） 	定义异常处理逻辑
+@Configuration 	Spring Framework 	标注配置类，替代XML配置 	类 	value（Bean名称） 	Java配置类，定义Bean
+@ComponentScan 	Spring Framework 	指定扫描包路径，自动注册组件 	类 	basePackages、includeFilters、excludeFilters 	自定义扫描包
+@SpringBootApplication 	Spring Boot 	启动类核心注解，组合配置、自动配置、组件扫描 	类 	scanBasePackages、exclude 	Spring Boot入口类
+@SpringBootConfiguration 	Spring Boot 	标注Spring Boot配置类 	类 	无 	Spring Boot配置类
+@EnableAutoConfiguration 	Spring Boot 	启用自动配置，根据依赖自动配置Bean 	类 	exclude、excludeName 	启用Spring Boot自动配置
+@Import 	Spring Framework 	导入配置类、Bean类等 	类 	value（导入的类数组） 	模块化配置
+@Conditional 	Spring Framework 	按条件装配Bean 	类/方法 	value（Condition实现类） 	动态装配Bean
+@SpringBootTest 	Spring Boot Test 	标注Spring Boot集成测试类，启动应用上下文 	类 	classes、webEnvironment 	Spring Boot集成测试
+@Mapper 	MyBatis 	标注Mapper接口，生成代理实现类 	接口 	无 	MyBatis Mapper接口定义
+@Select 	MyBatis 	标注查询方法，定义SQL 	方法 	value（SQL语句） 	简单查询
+@Insert 	MyBatis 	标注插入方法，定义SQL 	方法 	value（SQL语句） 	简单插入
+@Update 	MyBatis 	标注更新方法，定义SQL 	方法 	value（SQL语句） 	简单更新
+@Delete 	MyBatis 	标注删除方法，定义SQL 	方法 	value（SQL语句） 	简单删除
+@TableName 	MyBatis-Plus 	标注实体类，指定数据库表名 	类 	value（表名） 	实体类与表名映射
+@TableId 	MyBatis-Plus 	标注主键字段，指定主键策略 	字段 	value（字段名）、type（主键策略） 	实体类主键映射
+@TableField 	MyBatis-Plus 	标注非主键字段，指定字段映射、填充策略等 	字段 	value（字段名）、exist、fill 	实体类字段映射、自动填充
+@Transactional 	Spring Framework 	开启声明式事务管理 	类/方法 	propagation、isolation、timeout、readOnly、rollbackFor 	业务方法事务保证
+@Aspect 	Spring AOP 	标注切面类 	类 	无 	AOP切面定义
+@Pointcut 	Spring AOP 	定义切入点 	方法 	value（切入点表达式） 	复用切入点表达式
+@Before 	Spring AOP 	前置通知，目标方法执行前执行 	方法 	value（切入点） 	方法前逻辑（日志、权限）
+@Around 	Spring AOP 	环绕通知，目标方法执行前后执行，可控制执行 	方法 	value（切入点） 	性能监控、事务控制
+@After 	Spring AOP 	后置通知，目标方法执行后（无论异常）执行 	方法 	value（切入点） 	资源释放
+@AfterReturning 	Spring AOP 	返回通知，目标方法正常返回后执行 	方法 	value（切入点）、returning（返回值参数名） 	获取返回值
+@AfterThrowing 	Spring AOP 	异常通知，目标方法抛出异常后执行 	方法 	value（切入点）、throwing（异常参数名） 	异常监控
+@Value 	Spring Framework 	注入单个配置属性或SpEL表达式结果 	字段/方法/构造参数 	value（属性表达式） 	单个属性注入
+@ConfigurationProperties 	Spring Boot 	批量注入配置属性，绑定到类字段 	类 	prefix、ignoreUnknownFields 	批量配置注入，类型安全
+@WebFilter 	Servlet API 	标注Servlet过滤器 	类 	urlPatterns、filterName 	Web请求过滤（编码、权限）
+@ServletComponentScan 	Spring Boot 	扫描Servlet注解（@WebFilter等） 	类 	basePackages 	Spring Boot中使用Servlet原生注解

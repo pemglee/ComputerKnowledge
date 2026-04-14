@@ -3,6 +3,7 @@ title: Java学习
 markmap:
   colorFreezeLevel: 24
 ---
+# Java
 
 ## 概述
 
@@ -380,7 +381,7 @@ markmap:
   + 类型转换
 
     + 自动类型提升
-
+SSh
     + 强制类型转换
 
 + Operator
@@ -490,7 +491,7 @@ markmap:
       为Spring等框架、类库提供了依赖注入。
 
     + 示意图  
-      + ![java.lang.reflect](./images2/javalang-reflect.png)
+      + ![java.lang.reflect](./images/Java-javalang-reflect.png)
 
     + 主要类和接口
 
@@ -537,36 +538,10 @@ markmap:
           + `getParameterType()` 获取构造函数的参数类型
           + `getModifiers()` 获取构造函数的修饰符，如 'public', 'private'
 
-    + 注释
-
-      + `@Bean`
-        + 说明
-          方法级别注解
-          通常写在`@Configuration`配置类方法中
-      + `@Component`
-        + 说明
-          类级别注解  
-          标记一个Java类为Spring组件
-
-      + `@Bean` vs. `@Component`
-
-        + 表格 
-          + [Table]
-
-            |       | @Compenont | @Bean |
-            | :---- | :--------- | :---- |
-            | 作用目标 | 类        | 方法   |
-            | 注册方式 | 自动扫描，需`@ComponentScan`扫描类路径 | 显示声明，在配置类中 |
-            | 实例化控制 | Spring自动创建，无构造 | 开发者配置，可 `new()`、配置参数 |
-            | 适用对象 | 自定义业务类 | 第三方类 / 负载初始化逻辑 |
-            | 配置灵活性 | 较低，依赖 `@PostConstruct` | 高，支持 条件、依赖注入，多配置 |
-            | 命名规则 | 默认类名首字母小写 | 默认方法名 |
-            | 需要配置类 | 否 | 是，配合 `@Configuration` |
-
-        + 说明
-          + 同一个类上同时使用 `@Component` 和 `@Bean`
-            + `@Component`标记类为Bean；`@Bean`返回另一个Bean
-          + 
+  + 注解 Annotation
+    + 内置注解
+    + 元注解
+    + 自定义注解
 
 + Java类库  
   + 数学、计算
@@ -877,7 +852,7 @@ markmap:
   + 图示
 
     + [Diagram]
-      ![Ioc and DI](./images2/Java-Spring-IoC_DI.jpg)
+      ![Ioc and DI](./images/Java-Spring-IoC_DI.jpg)
 
 + AOP 面向切面编程  
 
@@ -889,13 +864,112 @@ markmap:
 
 + Spring
 
-  + Spring
+  + Spring Framework / Spring
+    框架的框架，可以整合多种框架
+    框架， 预先设计/实现好的软件架构，提供了通用解决方案和功能模块。包括一系列预定义的类、接口、函数和工具
 
-  + Spring Framework
+    + 框架组合
+
+      + SSH， Struts + Spring+ Hibernate
+      + SSM， Spring + SpringMVC + Mybatis
+      + ...
+
+
+
+    + 说明
+      + 开源、轻量级J2EE
+      + IoC & AOP
+
+    + 特点
+      + 模块化设计
+      + 代码可移植、可维护
+      + 声明式事务管理
+      + 简化测试
+      + 可快速与第三方框架集成
+        + Hibernate (持久层)
+        + MyBatis (持久层)
+        + Struts (表现层)
+        + SpringMVC (表现层)
+        + SpringBoot
+        + SpringCloud
+        + ...
+
+    + 优点 = 特点
+      + 非侵入式
+      + 降低耦合
+      + AOP
+      + 支持声明式事务
+      + 方便程序测试
+      + 方便集成第三方框架
+      + 降低J2EE API使用难度
+
+    + 概念
+
+      + 图示
+
+        + [Diagram]
+          ![Spring Framework](./images/Java-SpringFramework.webp)
+        + [Diagram]
+          ![Spring Framework](./images/Java-SpringFramework2.png)
+
+      + Spring容器
+        管理组件的生命周期（创建、配置、组装、管理）
+
+        + Core 核心模块
+          提供基础功能，包含IoC+DI的底层实现机制
+        + Beans，对象实例，由Spring容器管理。
+          提供 BeanFactory，是IoC+DI的直接实现。管理
+          + Scope 作用域
+          + Lifecycle 生命周期
+        + Context 上下文模块
+          集成了 资源绑定、国际化支持、事件传播
+
+        + SpEL -- Spring Expressing Language，
+          支持在运行时 动态查询和操作 对象，增强配置灵活性
+
+        + Data Access/Integration
+          + JDBC
+          + ORM (Object Relational Mapping)
+            + Hibernate, 在Java**类**和数据**表**间建立映射关系，以及提供缓存、事务管理、延迟加载等功能
+            + MyBatis, 持久层框架，在XML配置文件和注解中定义SQL映射，将Java**对象**和数据库**记录**之间进行映射 
+            + ...
+          + OXM
+            XML相关操作（双向转换、XML映射、etc）
+          + JMS
+          + Transaction
+
+        + Web
+          + Basic Web
+          + Servlet / MVC
+          + WebSocket
+          + Portlet
+
+        + AOP & Test
+
+          + AOP
+          + Text
+            + Junit
+            + Mockito
+
+      + IoC / DI，将程序的控制权从应用程序转移到框架/容器（好莱坞原则，Do not call us, we will call you）
+        + DI的方式
+          + 构造器注入
+          + Setter方法
+          + 字段注入
+
+      + AOP
+
+  + Spring MVC
 
   + Spring Boot
+    Spring Boot 是 Spring Framework 的扩展，而非替代  
+    + 设计思想
+      + 约定大于配置(Convention Over Configuration)  
+      + 开箱即用
+      + 外代码生成、无需XML配置。纯 注解驱动开发，兼容 XML配置
+      + 内嵌容器。 无需单独部署Web容器，直接打包成Jar运行
 
-    + 问题
+    + 启动
 
       + Spring boot 启动流程
         + 三件事
@@ -941,9 +1015,17 @@ markmap:
                   + 启动后须完成的逻辑
                 + 发布 "ApplicationReadyEvent"，即 启动业务
 
-  + Spring Cloud
+  + Spring Cloud  
+    + [说明】
+      + 基于Spring Boot构建，是Spring Boot在分布式场景的生态延申
+      + 用于构建分布式系统的微服务架构的**工具集合**
+      + 提供了多个子项目
+        + 服务发现
+        + 负载均衡
+        + 断路器
+        + 分布式配置
 
-    + 问题
+    + 运行
 
       + 从用户请求到服务返回，全程用来哪些组件？
         + 过程
@@ -962,9 +1044,747 @@ markmap:
           + 全链路观测
             Spring Boot 2.x 用 Sleuth + Zipkin 做链路追踪，配合 Spring Boot Admin 监控
 
+  + 注解 Annotation
+    + 概览
+      **注解是Spring Boot驱动开发的核心**。
 
+      + 类型
+        + 启动注解
+          + 核心启动注解 `@SpringBootApplication`
+            + 配置 `@SpringBootConfiguration`, 替代Spring的XML配置文件
+            + 自动配置 `@EnableAutoConfiguration`, Spring Boot自动配置的核心入口
+            + 组件扫描 `@ComponentScan`, 默认扫描启动类所在包及其子包下的Bean
+
+        + 配置绑定注解
+
+          + `@Configuration`                  标记类为配置类，替代 XML 配置，注册 Bean 到容器 
+          + `@Bean`                           标注在方法上，将方法返回值注册为 Spring 容器中的 Bean 
+          + `@ConfigurationProperties`        类型安全的配置绑定，将配置文件中的属性批量绑定到 Java Bean 
+          + `@EnableConfigurationProperties`  开启 @ConfigurationProperties 注解的生效，将绑定的 Bean 注册到容器 
+          + `@Value`                          单个配置属性注入，支持 SpEL 表达式 
+          + `@PropertySource`                 加载指定的外部配置文件 
+
+        + 条件注解
+          Spring Boot 自动配置的核心判断逻辑，用于控制 Bean/配置类的生效条件
+
+          + 类条件：
+            + `@ConditionalOnClass`（类路径存在指定类时生效）
+            + `@ConditionalOnMissingClass`
+          + Bean 条件：
+            + `@ConditionalOnBean`（容器存在指定 Bean 时生效）
+            + `@ConditionalOnMissingBean`
+            + `@ConditionalOnSingleCandidate`
+          + 配置条件：
+            + `@ConditionalOnProperty`（配置文件中指定属性匹配时生效）
+          + 资源条件：
+            + `@ConditionalOnResource`（类路径存在指定资源时生效）
+          + Web 条件：
+            + `@ConditionalOnWebApplication`
+            + `@ConditionalOnNotWebApplication`
+          + 表达式条件：
+            + `@ConditionalOnExpression`（SpEL 表达式成立时生效）
+
+        + 场景化功能注解
+          + Web 相关：
+            + `@RestController`
+            + `@RequestMapping`
+            + `@GetMapping、@PostMapping`
+            + `@RequestBody`
+            + `@RequestParam`
+            + ...
+          + 事务相关：
+            + `@Transactional`
+          + 异步相关：
+            + `@EnableAsync`
+            + `@Async`
+          + 定时任务：
+            + `@EnableScheduling`
+            + `@Scheduled`
+          + 缓存相关：
+            + `@EnableCaching`
+            + `@Cacheable`
+            + `@CachePut`
+            + `@CacheEvict`
+          + 校验相关：
+            + 通用
+              + `@Valid`
+              + `@Validated`
+              + ...
+            + JSR-380 规范注解
+              + `@NotNull`
+              + `@NotBlank`
+              + ...
+        + Bean管理注解
+          + ...
+          
+      + 图示
+
+        + [Diagram]
+          ![Java Spring Annotation](./images/Java-SpringAnnotation.webp)
+
+    + `@After`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 事务与AOP注解
+      + 所属框架: Spring AOP 
+      + 作用域: 方法 
+      + 核心功能: 定义通知类型（前置、环绕、后置、返回、异常） 
+      + 常用属性: 
+        + `value`（切入点）
+        + `returning`（返回值参数名）
+        + `throwing`（异常参数名） 
+      + 使用场景: 方法执行前后的逻辑（如日志、性能监控、异常处理）
+
+    + `@AfterReturning`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 事务与AOP注解
+      + 所属框架: Spring AOP 
+      + 作用域: 方法 
+      + 核心功能: 定义通知类型（前置、环绕、后置、返回、异常） 
+      + 常用属性: 
+        + `value`（切入点）
+        + `returning`（返回值参数名）
+        + `throwing`（异常参数名） 
+      + 使用场景: 方法执行前后的逻辑（如日志、性能监控、异常处理）
+
+    + `@AfterThrowing`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 事务与AOP注解
+      + 所属框架: Spring AOP 
+      + 作用域: 方法 
+      + 核心功能: 定义通知类型（前置、环绕、后置、返回、异常） 
+      + 常用属性: 
+        + `value`（切入点）
+        + `returning`（返回值参数名）
+        + `throwing`（异常参数名） 
+      + 使用场景: 方法执行前后的逻辑（如日志、性能监控、异常处理）
+
+    + `@Around`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 事务与AOP注解
+      + 所属框架: Spring AOP 
+      + 作用域: 方法 
+      + 核心功能: 定义通知类型（前置、环绕、后置、返回、异常） 
+      + 常用属性: 
+        + `value`（切入点）
+        + `returning`（返回值参数名）
+        + `throwing`（异常参数名） 
+      + 使用场景: 方法执行前后的逻辑（如日志、性能监控、异常处理）
+
+    + `@Aspect`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 事务与AOP注解
+      + 所属框架: Spring AOP 
+      + 作用域: 类 
+      + 核心功能: 标注切面类，定义横切关注点（如日志、事务）
+      + 常用属性:
+      + 使用场景: AOP切面定义
+
+    + `@Autowired`
+      + 说明:
+      + 类别: 依赖注入注解
+      + 所属框架: Spring Framework 
+      + 作用域: 构造器、方法、字段、参数 
+      + 核心功能: 按类型（byType）自动装配Bean，默认要求依赖必须存在 
+      + 常用属性: 
+        + `required`（是否必须注入，默认'true'）
+      + 使用场景: 自动注入依赖Bean, 配合`@Qualifier`  
+
+    + `@Bean`
+      + 说明:
+        方法级别注解
+        通常写在`@Configuration`配置类方法中  
+        告诉 Spring容器 ，该方法的返回值应被注册为一个可被依赖注入管理的Bean
+      + 类别:
+      + 所属框架:
+      + 作用域:
+      + 核心功能:
+      + 常用属性:
+      + 使用场景:
+
+    + `@Before`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 事务与AOP注解
+      + 所属框架: Spring AOP 
+      + 作用域: 方法 
+      + 核心功能: 定义通知类型（前置、环绕、后置、返回、异常） 
+      + 常用属性: 
+        + `value`（切入点）
+        + `returning`（返回值参数名）
+        + `throwing`（异常参数名） 
+      + 使用场景: 方法执行前后的逻辑（如日志、性能监控、异常处理）
+
+    + `@Component`
+      + 说明:
+        类级别注解, **核心组件注解**  
+        标记一个Java类为Spring组件
+      + 类别: Spring核心组件注解
+      + 所属框架: Spring Framework
+      + 作用域: 类
+      + 核心功能: 标注通用组件，自动注册为Spring Bean
+      + 常用属性: 
+        + `value`(指定Bean名称，默认类名首字母小写)
+      + 使用场景: 不确认层级的通用工具类、基础组件
+
+    + Diff: `@Bean`, `@Component`
+
+      + 表格 
+        + [Table]
+
+          |          | @Component                         | @Bean                        |
+          | :------- | :--------------------------------- | :--------------------------- |
+          | 作用目标   | 类                                 | 方法                          |
+          | 注册方式   | 自动扫描，需`@ComponentScan`扫描类路径 | 显示声明，在配置类中            |
+          | 实例化控制 | Spring自动创建，无构造                | 开发者配置，可 `new()`、配置参数 |
+          | 适用对象   | 自定义业务类                         | 第三方类 / 负载初始化逻辑        |
+          | 配置灵活性 | 较低，依赖 `@PostConstruct`          | 高，支持 条件、依赖注入，多配置   |
+          | 命名规则   | 默认类名首字母小写                    | 默认方法名                     |
+          | 需要配置类 | 否                                 | 是，配合 `@Configuration`      |
+
+      + 说明:
+        + 同一个类上同时使用 `@Component` 和 `@Bean`
+          + `@Component`标记类为Bean；`@Bean`返回另一个Bean
+        + 
+
+    + `@ComponentScan`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 配置与启动注解
+      + 所属框架: Spring Framework
+      + 作用域: 类（通常配合`@Configuration`） 
+      + 核心功能: 指定扫描包路径，自动注册@Component等注解的类为Bean 
+      + 常用属性:
+        + `basePackages`（扫描包路径）
+        + `includeFilters`（包含过滤器）
+        + `excludeFilters`（排除过滤器）
+      + 使用场景: 自定义扫描包路径 
+
+    + `@Conditional`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 配置与启动注解
+      + 所属框架: Spring Framework  
+      + 作用域: 类、方法
+      + 核心功能: 按条件装配Bean，满足指定Condition才注册
+      + 常用属性:
+        + `value`（Condition实现类数组）
+      + 使用场景: 动态装配（如根据环境变量决定是否注册Bean）
+
+    + `@Configuration`
+      + 说明:
+        
+        + 元注解:
+          + `@Component` 
+      + 类别: 配置与启动注解
+      + 所属框架: Spring Framework 
+      + 作用域: 类 
+      + 核心功能: 标注配置类，替代XML配置，类中通过`@Bean`方法定义Bean
+      + 常用属性:
+      + 使用场景: Java配置类，定义Bean、配置第三方组件 
+
+    + `@ConfigurationProperties`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 其他注解
+      + 所属框架: Spring Boot 
+      + 作用域: 类
+      + 核心功能: 批量注入配置属性，绑定到类字段（类型安全）
+      + 常用属性:
+        + `prefix`（配置前缀）
+        + `ignoreUnknownFields`（忽略未知字段）
+      + 使用场景: 批量配置注入（如连接池配置、自定义应用配置） 
+
+    + `@Controller`
+      + 说明:
+        + 元注解: `@Component`
+      + 类别: Spring核心组件注解
+      + 所属框架: Spring Framework
+      + 作用域: 类
+      + 核心功能: 标注Web层控制器，处理HTTP请求并返回视图 
+      + 常用属性: 
+        + `value`(指定Bean名称，默认类名首字母小写)
+      + 使用场景: 传统Spring MVC开发，返回JSP/Thymeleaf等视图 
+
+    + `@Delete`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: MyBatis/MyBatis-Plus注解
+      + 所属框架: MyBatis 
+      + 作用域: 方法 
+      + 核心功能: 标注CRUD方法，直接定义SQL语句（替代XML） 
+      + 常用属性:
+        + `value`（SQL语句） 
+      + 使用场景: 简单CRUD操作，无需复杂XML配置 
+
+    + `@DeleteMapping`
+      + 说明:
+        
+        + 元注解: 
+          + `@RequestMapping`(method = 对应HTTP方法)
+      + 类别: Web层注解
+      + 所属框架: Spring Framework
+      + 作用域: 方法
+      + 核心功能: 简化`@RequestMapping`，专门处理对应HTTP方法的请求
+      + 常用属性:
+      + 使用场景: RESTful资源操作（GET查询、POST创建、PUT更新、DELETE删除）
+
+    + `@EnableAutoConfiguration`
+      + 说明:
+        
+        + 元注解: 
+           
+      + 类别: 配置与启动注解
+      + 所属框架: Spring Boot
+      + 作用域: 类  
+      + 核心功能: 启用Spring Boot自动配置，根据依赖自动配置Bean  
+      + 常用属性:
+        + `exclude`（排除自动配置类）
+        + `excludeName`（排除自动配置类名）
+      + 使用场景: 自定义自动配置（通常被@SpringBootApplication间接使用）
+
+    + `@ExceptionHandler`
+      + 说明:
+        
+        + 元注解: 
+        
+      + 类别: Web层注解
+      + 所属框架: Spring Framework
+      + 作用域: 方法 
+      + 核心功能: 标注异常处理方法，处理指定类型的异常 
+      + 常用属性:
+        + `value`（要处理的异常类型数组）
+      + 使用场景: 在`@RestControllerAdvice`类中定义异常处理逻辑 
+
+    + `@GetMapping`
+      + 说明:
+        
+        + 元注解: 
+          + `@RequestMapping`(method = 对应HTTP方法)
+      + 类别: Web层注解
+      + 所属框架: Spring Framework
+      + 作用域: 方法
+      + 核心功能: 简化`@RequestMapping`，专门处理对应HTTP方法的请求
+      + 常用属性:
+      + 使用场景: RESTful资源操作（GET查询、POST创建、PUT更新、DELETE删除）
+
+    + `@Import`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 配置与启动注解
+      + 所属框架: Spring Framework  
+      + 作用域: 类
+      + 核心功能: 导入其他配置类、Bean类或ImportSelector实现类 
+      + 常用属性:
+        + `value`（要导入的类数组） 
+      + 使用场景: 模块化配置，组合多个配置类 
+
+    + `@Insert`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: MyBatis/MyBatis-Plus注解
+      + 所属框架: MyBatis 
+      + 作用域: 方法 
+      + 核心功能: 标注CRUD方法，直接定义SQL语句（替代XML）  
+      + 常用属性:
+        + `value`（SQL语句） 
+      + 使用场景: 简单CRUD操作，无需复杂XML配置 
+
+    + `@Mapper`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: MyBatis/MyBatis-Plus注解
+      + 所属框架: MyBatis 
+      + 作用域: 接口 
+      + 核心功能: 标注Mapper接口，自动生成代理实现类并注册为Bean 
+      + 常用属性:
+      + 使用场景: MyBatis Mapper接口定义 
+
+    + `@PathVariabl`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: Web层注解
+      + 所属框架: Spring Framework
+      + 作用域: 方法参数 
+      + 核心功能: 绑定URL路径变量（如/users/{id}中的id）到方法参数 
+      + 常用属性:
+        + `name`/`value`（路径变量名）
+        + `required`（是否必须）
+      + 使用场景: RESTful URL中的动态参数 
+
+    + `@Pointcut`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 事务与AOP注解
+      + 所属框架: Spring AOP 
+      + 作用域: 方法 
+      + 核心功能: 定义切入点（要拦截的方法集合）
+      + 常用属性:
+        + `value`（切入点表达式，如execution(* com.example.service.*.*(..))）
+      + 使用场景: 复用切入点表达式 
+
+    + `@PostMapping`
+      + 说明:
+        
+        + 元注解: 
+          + `@RequestMapping`(method = 对应HTTP方法)
+      + 类别: Web层注解
+      + 所属框架: Spring Framework
+      + 作用域: 方法
+      + 核心功能: 简化`@RequestMapping`，专门处理对应HTTP方法的请求
+      + 常用属性:
+      + 使用场景: RESTful资源操作（GET查询、POST创建、PUT更新、DELETE删除）
+
+    + `@Primary`
+      + 说明:
+        + 元注解: 
+          + `@Component`
+      + 类别: 依赖注入注解
+      + 所属框架: Spring Framework 
+      + 作用域: 类、方法 
+      + 核心功能: 当存在多个同类型Bean时，标注@Primary的Bean为默认优先注入的Bean 
+      + 常用属性:
+      + 使用场景: 设置默认Bean，避免注入冲突
+
+    + `@PutMapping`
+      + 说明:
+        
+        + 元注解: 
+          + `@RequestMapping`(method = 对应HTTP方法)
+      + 类别: Web层注解
+      + 所属框架: Spring Framework
+      + 作用域: 方法
+      + 核心功能: 简化`@RequestMapping`，专门处理对应HTTP方法的请求
+      + 常用属性:
+      + 使用场景: RESTful资源操作（GET查询、POST创建、PUT更新、DELETE删除）
+
+    + `@Qualifier`
+      + 说明:
+        
+      + 类别: 依赖注入注解
+      + 所属框架: Spring Framework
+      + 作用域: 字段、方法、参数、类
+      + 核心功能: 配合@Autowired，按名称（byName）指定要注入的Bean
+      + 常用属性: `value`(指定Bean名称，默认类名首字母小写)
+      + 使用场景: 传解决同类型多Bean冲突 
+
+    + `@Repository`
+      + 说明:
+        创建 DAO 对象，访问数据库
+        + 元注解: `@Component`
+      + 类别: Spring核心组件注解
+      + 所属框架: Spring Framework
+      + 作用域: 类
+      + 核心功能: 标注数据访问层（DAO层）组件，转换数据库异常为Spring统一异常体系
+      + 常用属性:
+        + `value`
+      + 使用场景: (DAO)数据库操作类，如MyBatis Mapper、JPA Repository 
+
+    + `@RequestBody`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: Web层注解
+      + 所属框架: Spring Framework 
+      + 作用域: 方法参数 
+      + 核心功能: 将HTTP请求体（JSON/XML）绑定到方法参数  
+      + 常用属性:
+        + `required`（是否必须有请求体，默认true）
+      + 使用场景: 接收POST/PUT请求的JSON数据 
+
+    + `@RequestMapping`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: Web层注解
+      + 所属框架: Spring Framework
+      + 作用域: 类、方法 
+      + 核心功能: 灵活映射HTTP请求到处理方法，可指定URL、HTTP方法、请求头等 
+      + 常用属性:
+        + `value`/`path`（URL路径）
+        + `method`（HTTP方法）
+        + `consumes`（请求Content-Type）
+        + `produces`（响应Content-Type） 
+      + 使用场景: 定义请求映射（类上定义基础路径，方法上定义具体路径）  
+
+    + `@RequestParam`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: Web层注解
+      + 所属框架: Spring Framework 
+      + 作用域: 方法参数 
+      + 核心功能: 绑定HTTP请求参数（查询参数或表单参数）到方法参数 
+      + 常用属性:
+        + `name`/`value`（参数名）
+        + `required`（是否必须）
+        + `defaultValue`（默认值）
+      + 使用场景: 获取URL查询参数（如?page=1）、表单提交参数 
+
+    + `@Resource`
+      + 说明:  
+      + 类别: 依赖注入注解
+      + 所属框架: JSR-250（Java标准）
+      + 作用域: 字段、方法 
+      + 核心功能: 默认按名称（byName）装配，找不到名称再按类型（byType） 
+      + 常用属性: 
+        + `name`（Bean名称）
+        + `type`（Bean类型）
+      + 使用场景:
+
+    + `@ResponseBody`
+      + 说明:
+        
+      + 类别: Web层注解
+      + 所属框架: Spring Framework
+      + 作用域: 方法、类
+      + 核心功能: 将方法返回值直接写入HTTP响应体（而非解析为视图）
+      + 常用属性:  
+      + 使用场景: 在@Controller类中单独标注方法返回数据   
+
+    + `@RestController`
+
+      + 说明:  
+        + 元注解
+          + `@Controller`  
+          + `@ResponseBody`  
+      + 类别: Web层注解
+      + 所属框架: Spring Framework  
+      + 作用域: 类  
+      + 核心功能: 标注RESTful控制器，所有方法默认返回JSON/XML数据  
+      + 常用属性:  
+      + 使用场景: 前后端分离的REST API开发
+
+    + `@RestControllerAdvice`
+      + 说明:
+        
+        + 元注解: 
+          + `@ControllerAdvice`
+          + `@ResponseBody`
+      + 类别: Web层注解
+      + 所属框架: Spring Framework
+      + 作用域: 类 
+      + 核心功能: 全局异常处理、全局数据绑定，专门用于RESTful服务 
+      + 常用属性:
+        + `basePackages`（扫描包路径）
+        + `annotations`（指定注解）
+      + 使用场景: 统一处理REST API的异常，返回JSON格式错误信息 
+
+    + Diff: `@Autowired`，`@Resource`
+
+    + `@Select`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: MyBatis/MyBatis-Plus注解
+      + 所属框架: MyBatis 
+      + 作用域: 方法 
+      + 核心功能: 标注CRUD方法，直接定义SQL语句（替代XML） 
+      + 常用属性:
+        + `value`（SQL语句） 
+      + 使用场景: 简单CRUD操作，无需复杂XML配置 
+
+    + `@ServletComponentScan`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 其他注解
+      + 所属框架: Spring Boot
+      + 作用域: 类 
+      + 核心功能: 扫描@WebFilter、@WebServlet等Servlet注解 
+      + 常用属性:
+        + `basePackages`（扫描包路径）
+
+      + 使用场景: Spring Boot中使用Servlet原生注解
+
+    + `@Service`
+      + 说明:
+        创建service类对象，业务层对象
+        + 元注解: `@Component`
+      + 类别: Spring核心组件注解
+      + 所属框架: Spring Framework
+      + 作用域: 类
+      + 核心功能: 标注业务逻辑层（Service层）组件 
+      + 常用属性: 
+        + `value`(指定Bean名称，默认类名首字母小写)
+      + 使用场景: 业务逻辑处理类，如用户服务、订单服务 
+
+    + `@SpringBootApplication`
+      + 说明:
+        
+        + 元注解:  
+          + `@SpringBootConfiguration` 
+          + `@EnableAutoConfiguration` 
+          + `@ComponentScan`
+
+      + 类别: 配置与启动注解
+      + 所属框架: Spring Boot  
+      + 作用域: 类（启动类） 
+      + 核心功能: Spring Boot启动类核心注解，组合配置、自动配置、组件扫描三大功能 
+
+      + 常用属性:
+        + `scanBasePackages`（扫描包路径）
+        + `exclude`（排除自动配置类）
+      + 使用场景: 标注Spring Boot应用入口类  
+
+    + `@SpringBootConfiguration`
+      + 说明:
+        
+        + 元注解: 
+          + `@Configuration`
+      + 类别: 配置与启动注解  
+      + 所属框架: Spring Boot
+      + 作用域: 类
+      + 核心功能: 标注Spring Boot配置类，语义上更明确 
+      + 常用属性:
+      + 使用场景: Spring Boot配置类（通常被`@SpringBootApplication`间接使用）
+
+    + `@SpringBootTest`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 测试注解
+      + 所属框架: Spring Boot Test
+      + 作用域: 类
+      + 核心功能: 标注Spring Boot集成测试类，启动完整应用上下文
+      + 常用属性:
+        + `classes`（指定启动类）
+        + `webEnvironment`（Web环境模式）
+      + 使用场景: Spring Boot集成测试（测试Service、Controller等） 
+
+
+    + `@TableField`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: MyBatis/MyBatis-Plus注解
+      + 所属框架: MyBatis-Plu
+      + 作用域: 字段 
+      + 核心功能: 标注非主键字段，指定字段映射、是否插入/更新、填充策略等 
+      + 常用属性:
+        + `value`（字段名）
+        + `exist`（是否为表字段）
+        + `fill`（填充策略） 
+      + 使用场景: 字段名与列名不一致、排除非表字段、自动填充（如创建时间） 
+
+    + `@TableId`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: MyBatis/MyBatis-Plus注解
+      + 所属框架: MyBatis-Plus
+      + 作用域: 字段
+      + 核心功能: 标注主键字段，指定主键生成策略 
+      + 常用属性:
+        + `value`（字段名）
+        + `type`（主键策略，如IdType.AUTO自增）
+      + 使用场景: 实体类主键映射 
+
+    + `@TableName`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: MyBatis/MyBatis-Plus注解
+      + 所属框架: MyBatis-Plus 
+      + 作用域: 类 
+      + 核心功能: 标注实体类，指定对应的数据库表名
+      + 常用属性:
+        + `value`（表名）
+      + 使用场景: 实体类名与表名不一致时指定表名 
+
+    + `@Transactional`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 事务与AOP注解
+      + 所属框架: Spring Framework 
+      + 作用域: 类、方法 
+      + 核心功能: 开启声明式事务管理，保证方法内操作要么全部成功要么全部回滚
+      + 常用属性:
+        + `propagation`（传播行为）
+        + `isolation`（隔离级别）
+        + `rollbackFor`（回滚异常类型）
+      + 使用场景: 业务方法需要事务保证数据一致性（如转账、订单创建） 
+
+    + `@Update`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: MyBatis/MyBatis-Plus注解
+      + 所属框架: MyBatis 
+      + 作用域: 方法 
+      + 核心功能: 标注CRUD方法，直接定义SQL语句（替代XML） 
+      + 常用属性:
+        + `value`（SQL语句） 
+      + 使用场景: 简单CRUD操作，无需复杂XML配置 
+
+    + `@Value`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 其他注解
+      + 所属框架: Spring Framework
+      + 作用域: 字段、方法、构造参数 
+      + 核心功能: 注入单个配置属性或SpEL表达式结果 
+      + 常用属性: 
+        + `value`（属性表达式，如${app.name}）
+      + 使用场景: 单个属性注入 
+
+    + `@WebFilter`
+      + 说明:
+        
+        + 元注解: 
+      + 类别: 其他注解
+      + 所属框架: Servlet API 
+      + 作用域: 类 
+      + 核心功能: 标注Servlet过滤器，定义URL匹配规则 
+      + 常用属性:
+        + `urlPatterns`（过滤URL）
+        + `filterName`（过滤器名称） 
+      + 使用场景: Web请求过滤（如字符编码、权限验证） 
+
++ Maven
 
 ## reference doc
+
++ [阿里云开发者社区](https://developer.aliyun.com)
+
+  + [来一杯热Java]()
+
+    + [Java / Spring]()
+
+      + [【数据载体POJO】POJO / DO / PO / DTO / VO / BO / Query / Entity / TO 全方位对比分析](https://developer.aliyun.com/article/1720695?spm=a2c6h.13262185.profile.12.4aa2341aPGAaK5)
+
+      + [【注解】常见 Java 注解系统性知识体系总结（附《全方位对比表》+ 思维导图）](https://developer.aliyun.com/article/1722048)
+
+    + [Data / Database]()
+      
+      + [【MyBatis】MyBatis框架知识（全体系总结）](https://developer.aliyun.com/article/1716699?spm=a2c6h.13262185.profile.30.4aa2341aPGAaK5)
+
+      + [【MyBatis-Plus】Spring Boot + MyBatis-Plus 进行各种数据库操作（附完整 CRUD 项目代码示例）](https://developer.aliyun.com/article/1718067?spm=a2c6h.13262185.profile.26.4aa2341aPGAaK5)
+
+    + [Data / Redis]()
+
+      + [【Redis】Redis常用命令速查表（完整版）](https://developer.aliyun.com/article/1718597?spm=a2c6h.13262185.profile.22.4aa2341aPGAaK5)
 
 + [bilibili](https://www.bilibili.com/)
 
@@ -974,13 +1794,35 @@ markmap:
 
       + [你背的八股过时啦！刚面了个5年Java，问他：Spring Cloud的核心组件有哪些？他顺口溜：Eureka、Feign...](https://www.bilibili.com/video/BV16jXfBcEaK/?spm_id_from=333.1387.homepage.video_card.click&vd_source=38fc599412349dcfe60484e3ff320c66)
 
+
+  + [黑马程序员教材研究院](https://space.bilibili.com/3706950638373177?spm_id_from=333.788.upinfo.detail.click)
+
+    + [Java / Spring]()
+      + [Java EE企业级应用开发教程（Spring+Spring MVC+MyBatis）（第3版）](https://www.bilibili.com/video/BV1BzwSzoEfq/?spm_id_from=333.788.recommend_more_video.0&trackid=web_related_0.router-related-2479604-6dnm7.1776137399665.556&vd_source=38fc599412349dcfe60484e3ff320c66)
+
++ [菜鸟教程](https://www.runoob.com/)
+
+  + [Java教程](https://www.runoob.com/java/java-tutorial.html)
+
+    + [Java / 基础]()
+
+      + [Java 注解（Annotation）](https://www.runoob.com/w3cnote/java-annotation.html)
+
 + [CSDN](https://csdn.net)
 
   + [普通网友]()
 
-    + [Java / Spring]
+    + [Java / Spring]()
 
       + [Spring中的IOC详解](https://blog.csdn.net/dc_0012/article/details/157912749)
+
++ [腾讯云开发者社区](https://cloud.tencent.com/developer/)
+
+  + [tcilay](https://cloud.tencent.com/developer/user/1414645)
+    
+    + [Java / 基础]()
+
+      + [Java自定义注解完全指南：从基础到实战落地](https://cloud.tencent.com/developer/article/2626789)
 
 + [知乎]()
   + [TigerOnHill](https://www.zhihu.com/people/denpenr) 
