@@ -541,93 +541,240 @@ SSh
           + `getParameterType()` 获取构造函数的参数类型
           + `getModifiers()` 获取构造函数的修饰符，如 'public', 'private'
 
-<<<<<<< HEAD
   + 注解 Annotation
     + 内置注解
     + 元注解
     + 自定义注解
 
-=======
->>>>>>> 56aa7545d95f5441d1aa54987e3f4c45a1cfb5cc
 + Java类库  
   + 数学、计算
+
+    + 说明
+      + Java不允许运算符重载
+
+    + java
+      + math
+        + [class] BigInteger
+          + [method] `BigInteger add(BigInteger other)`  
+          + [method] `BigInteger subtract(BigInteger other)`  
+          + [method] `BigInteger multiply(BigInteger other)`
+          + [method] `BigInteger divide(BigInteger other)`
+          + [method] `BigInteger mod(BigInteger other)`
+          + [method] `BigInteger sqrt()`
+          + [method] `BigInteger compareTo(BigInteger other)`
+          + [method] `static BigInteger valueOf(long x)`
+
+          + 示例
+
+            + [code]
+
+              ```java
+              import java.math.*;
+              import java.util.*;
+
+              public class BigNumerical {
+                  public static void main(String[] args) {
+                      Scanner in = new Scanner(System.in);
+
+                      System.out.print("How many numbers do you need to draw? ");
+                      int k = in.nextInt();
+
+                      System.out.print("What is the highest number you can draw? ");
+                      BigInteger n = in.nextBigInteger();
+
+                      /*
+                       * compute binomial coefficient n*(n-1)*(n-2)*...*(n-k+1)/(1*2*...*k)
+                       */
+
+                      BigInteger lotteryOdds = BigInteger.ONE;
+
+                      for (int i = 1; i <= k; i++) {
+                          lotteryOdds = lotteryOdds.multiply(n.subtract(BigInteger.valueOf(i - 1))).divide              (BigInteger.valueOf(i));
+                      }
+
+                      System.out.printf("Your odds are 1 in %s. Good luck !%n", lotteryOdds);
+                  }
+              }
+              ```
+
+        + [class] BigDecimal
+          + [constructor] `BigDecimal(String digits)`
+          + [method] `BigDecimal(BigDecimal other)`
+          + [method] `BigDecimal add(BigDecimal other)`
+          + [method] `BigDecimal subtract(BigDecimal other)`
+          + [method] `BigDecimal multiply(BigDecimal other)`
+          + [method] `BigDecimal divide(BigDecimal other)`
+          + [method] `BigDecimal divide(BigDecimal other, RoundingMode mode)`
+
+            + 说明
+              + RoundingMode
+                + [enum] `RoundingMode.HALF_UP` 四舍五入
+
+          + [method] `BigDecimal compareTo(BigDecimal other)`
+
 
   + 字符、字符串
 
   + 集合
-    + java.util.ArrayList
-    + java.util.LinkedList
-    + java.util.HashMap
-    + java.util.Vector
-    + java.util.HashSet
-    + java.util.Scanner
-    + java.util.regex.Pattern
-    + java.util.regex.Macher
+    + java
+      + util
+        + ArrayList
+        + HashMap
+        + HashSet
+        + LinkedList
+        + regex
+          + [class] Macher
+            + [method] `matches()`
+            + [method] `lookingAt()`
+            + [method] `find()`
+            + [method] `group()`
+              + 说明
+                + 须成功调用 `matches()`、`lookingAt()` 或 `find()`，否则抛出 "IllegalStateException"
+            + [method] `group(int group)`
+              + 说明
+                + 须成功调用 `matches()`、`lookingAt()` 或 `find()`，否则抛出 "IllegalStateException"
+            + [method] `groupCount()`
+              + 说明
+                + 须成功调用 `matches()`、`lookingAt()` 或 `find()`，否则抛出 "IllegalStateException"
+            + [method] `start()`
+              + 说明
+                + 须成功调用 `matches()`、`lookingAt()` 或 `find()`，否则抛出 "IllegalStateException"
+            + [method] `end()`
+              + 说明
+                + 须成功调用 `matches()`、`lookingAt()` 或 `find()`，否则抛出 "IllegalStateException"
+
+            + 说明
+              + 不能 `new()`，必须通过 `Pattern.matcher(CharSequence input)` 创建
+              + 根据Pattern编译的正则表达式，对输入的字符序列进行操作
+              + Matcher 实例**不**是线程安全的，多个线程应各自创建实例
+              + 状态依赖，所有匹配信息的方法都依赖于最近一次成功匹配的状态
+              + 使用`()`定义捕获组，组0 始终代表整个匹配
+          + [class] Pattern
+
+          + 示例
+            + [code]
+
+              ```java
+              import java.util.regex.*
+
+              public class MatcherExample {
+                public static void main(String[] args) {
+                  String text = "The quick brown fox jumps over the lazy dog";
+                  Pattern pattern = Pattern.compile("\\b\\2{4}\\b");  // 匹配4字母单词
+                  Matcher matcher = pattern.matcher(text);
+
+                  System.out.println("Original Text:" + text);
+                  System.out.println("To match the word has 4 letters");
+
+                  while ( matcher.find() ) {
+                    System.out.println("Finded:" + matcher.group() + " at position of " + matcher.start() + "-" + (matcher.end() - 1));
+                  }
+
+                  // replace all of words with "&zwjn;****&zwnj;"
+                  String replaced = matcher.replaceAll("&zwjn;****&zwnj;");
+                  System.out.println("\nReplaced Text:" + replaced);
+                }
+              }
+              ```
+
+        + Scanner
+        + Vector
 
   + IO/NIO
-    + java.io.File
-    + java.io.InputStream
-    + java.io.OutputStream
-    + java.nio.file.Files
+
+    + java
+      + io
+        + [class] File
+        + [class] InputStream
+        + [class] OutputStream
+      + nio
+        + file
+          + [class] Files
 
   + 多线程
-    + java.lang.Thread
-    + java.util.concurrent.ExecutorService
+    + java
+      + lang
+        + [class] Thread
+    + java
+      + util
+        + concurrent
+          + [class] ExecutorService
 
   + 日期、时间
-    + java.time.LocalDate
-    + java.time.LocalDateTime
-    + java.time.ZonedDateTime
-    + java.util.Date
-    + java.text.SimpleDateFormat
-    + java.util.Calendar
-    + java.util.GregorianCalendar
-    + java.time.Instant
-    + java.time.ChronoUnit
-    + java.time.Period
-    + java.time.Duration
+    + java
+      + text
+        + [class] SimpleDateFormat
 
+      + time
+        + [class] ChronoUnit
+        + [class] Duration
+        + [class] Instant
+        + [class] LocalDate
+        + [class] LocalDateTime
+        + [class] Period
+        + [class] ZonedDateTime
+
+      + util
+        + [class] Calendar
+          
+        + [class] Date
+        + [class] GregorianCalendar
   + 网络编程
-    + java.net.URL
-    + java.net.Socket
+    + java
+      + net
+        + [class] URL
+        + [class] Socket
 
   + 日志
-    + java.util.logging
 
-      + 说明
+    + java
+      + util
+        + logging
+          + [class] Level
 
-      + 日志级别
-
-        + [Table]
-
-          | level   | notes 1 | notes 2 |
-          | :------ | :------ | :------ |
-          | SEVERE  |         | 最严重   |
-          | WARNING |         |         |
-          | INFO    |         |         |
-          | CONFIG  |         |         |
-          | FINE    |         |         |
-          | FINER   |         |         |
-          | FINEST  |         |         |
-
-      + 示例
-
-        + [code]
-
-          ```java
-          import java.util.logging.Level;
-          import java.util.logging.Logger;
+            + 日志级别
   
-          public class Hello {
-            public static void main(string[] args) {
-              Logger logger = Logger.getGlobal();
-              logger.info("start process ...");
-              logger.warning("memory is running out ... ");
-              logger.fine("ignored.");
-              logger.severe("process will be terminated ...");
-            }
-          }
-          ```
+              + [Table]
+  
+                | level   | notes 1 | notes 2 |
+                | :------ | :------ | :------ |
+                | SEVERE  |         | 最严重   |
+                | WARNING |         |         |
+                | INFO    |         |         |
+                | CONFIG  |         |         |
+                | FINE    |         |         |
+                | FINER   |         |         |
+                | FINEST  |         |         |
+
+          + [class] Logger
+
+            + [method] `Logger getGlobal()`
+            + [method] `info()`
+            + [method] `warning()`
+            + [method] `fine()`
+            + [method] `severe()`
+
+            + 说明
+  
+  
+            + 示例
+  
+              + [code]
+  
+                ```java
+                import java.util.logging.Level;
+                import java.util.logging.Logger;
+        
+                public class Hello {
+                  public static void main(string[] args) {
+                    Logger logger = Logger.getGlobal();
+                    logger.info("start process ...");
+                    logger.warning("memory is running out ... ");
+                    logger.fine("ignored.");
+                    logger.severe("process will be terminated ...");
+                  }
+                }
+                ```
 
 + Java第三方库
 
@@ -636,14 +783,35 @@ SSh
       可以作为 日志接口 使用。  
       优先使用 Log4j, 后使用 JDK Logging。
 
-    + 文件
+    + 文件 "commons-logging-x.y.jar"
 
-      + 包 "org.apache.commons.logging"
-      
-      + 文件 "commons-logging-x.y.jar"
+    + org
+      + apache
+        + commons
+          + logging
+            + [class] Log
+            + [class] LogFactory
+
+            + 示例
+
+              + [Code]
+
+                ```sql
+                import org.apache.commons.logging.Log;
+                import org.apache.commons.logging.LogFactory;
+          
+                public class Main {
+                  public static void main(String[] args) {
+                    Log log = LogFactory.getLog(Main.class)
+                    log.info("start...");
+                    log.warn("end.");
+                  }
+                }
+                ```
 
     + 日志级别
       + [Table]
+
         | level   | notes 1 | notes 2 |
         | :------ | :------ | :------ |
         | FATAL   |         | 最严重   |
@@ -653,22 +821,6 @@ SSh
         | DEBUG   |         |         |
         | TRACE   |         |         |
 
-    + 示例
-    
-      + [Code]
-
-        ```sql
-        import org.apache.commons.logging.Log;
-        import org.apache.commons.logging.LogFactory;
-  
-        public class Main {
-          public static void main(String[] args) {
-            Log log = LogFactory.getLog(Main.class)
-            log.info("start...");
-            log.warn("end.");
-          }
-        }
-        ```
 
   + Log4j
 
@@ -837,19 +989,85 @@ SSh
       + 上界通配符
       + 下届通配符
 
-+ 多线程 & 并发
++ 多线程 & 并发 
 
-  + 继承 Thread类
+  + 说明
+    + 多任务 multitasking，在同一时间，可以运行多个程序。
+      + 并发 Concurrency & 并行 Parallelism
+        + *并发**，多个任务交替执行
+        + **并行**，多个任务同时执行
+      + 进程 Process &　线程 Thread 
+        + **进程**，程序的一次执行过程，是系统资源分配的基本单位，有**独立**的内存空间
+        + **线程**，进程内的执行单元，进程间**共享**内存
+          + 状态
+            + New
+            + Runnable
+            + Blocked
+            + Waiting
+            + Timed waiting
+            + Terminated
+      + 关系
+        一个进程可以包含多个线程  
+        线程切换成本远低于进程切换成本
+      + 核心问题
+        + 分工
+          如何高效地拆解任务并分配给线程
 
-  + 实现 Runnable接口
+          + Executor & 线程池
+          + Fork & Join
+          + Future
+          + Guarded Suspension模式
+          + Balking模式
+          + Thread-Per-Message模式
+          + 生产者-消费者模式
+          + Worker Thread模式
+          + 两阶段终止模式
 
-  + 线程池
+        + 同步/协作
+          线程间如何协作
 
-    + 固定大小线程池
+          + 信号量(Semaphore)
+          + 管理(Monitor)
+            + Lock & Condition
+            + synchronized
+          + CountDownLatch
+          + CyclicBarrier
+          + Phaser
+          + Exchanger
+        + 互斥
+          保证同一时刻只允许一个线程访问共享资源
 
-    + 单线程线程池
+          + 无锁
+            + 不变模式
+            + 线程本地存储
+            + CAS
+            + Copy-on-Write
+            + 原子类
+          + 互斥锁
+            + synchronized
+            + Lock
+            + 读写锁
 
-    + 缓存栈线程池
+    + 并发理论基础
+      + 可见性
+        缓存
+      + 原子性
+        线程切换
+      + 有序性
+
+  + 说明2
+
+    + 继承 Thread类
+  
+    + 实现 Runnable接口
+  
+    + 线程池
+  
+      + 固定大小线程池
+  
+      + 单线程线程池
+  
+      + 缓存栈线程池
 
 + IoC -- Inversion of control 控制反转 / DI -- Dependency injection 依赖注入
   + IoC, 将组件间的依赖关系从程序内部提取到外部来管理
@@ -859,6 +1077,18 @@ SSh
 
     + [Diagram]
       ![Ioc and DI](./images/Java-Spring-IoC_DI.jpg)
+
+  + 思想 （好莱坞原则，Do not call us, we will call you）
+    + IoC 
+      + 将对象的创建和管理交给容器  
+      + 容器负责实例化对象，管理对象的声明周期以及注入依赖关系  
+      + 对象的控制器由应用程序转移到了容器，即 控制反转
+    + DI (IoC的一种实现方式)
+      通过IoC，在对象创建时自动将其所依赖的**其他**对象注入到该对象中，而不是让该对象内部自行创建和管理这些依赖
+    + Bean，用IoC容器管理的对象实例
+      + 开发者可以通过在配置文件中或配置类中定义Bean的属性和依赖关系，
+      + IoC容器根据配置信息实例化Bean，并将其置入容器进行管理
+
 
 + AOP 面向切面编程  
 
@@ -923,47 +1153,135 @@ SSh
 
         + Core 核心模块
           提供基础功能，包含IoC+DI的底层实现机制
-        + Beans，对象实例，由Spring容器管理。
-          提供 BeanFactory，是IoC+DI的直接实现。管理
-          + Scope 作用域
-          + Lifecycle 生命周期
+        + Bean**s**，由Spring容器管理。
+          + 说明
+            提供对 BeanFactory 等工厂模式的实现，是IoC+DI的直接实现。管理Bean
+            + Scope 作用域
+            + Lifecycle 生命周期
+          + 说明2
+            + Bean 
+              + 安全性 (线程安全性)
+                + Spring本身没有提供Bean的安全策略
+                  默认不是线程安全的。默认是**Singleton**，整个应用的声明周期只有一个实例。  
+                  如果有多个线程同时访问，并修改了成员数据，则出现安全问题。  
+                + 安全性取决于作用域和状态
+                  + 无状态Bean (ex. Controller, Service, DAO, etc)
+                    + 只包含方法的逻辑
+                    + 只依赖于其他 无状态Bean
+                    + 不保存 用户数据 或 会话状态
+
+                  + 有状态Bean
+                    + 有成员数据(即 状态)可被修改
+                    + 解决办法
+                      + 改为 "Prototype" 作用域
+                        `@Scope("prototype")`, 每次请求都创建新的实例，即数据不共享
+                      + 使用 "ThreadLocal"
+                        把变量放在 ThreadLocal 中，实现线程隔离
+                      + 同步机制
+                        使用 synchronized, Lock, AtomicInteger, etc 机制
+
+                + 注意事项
+                  + 不要在 Controller, Service 等中定义成员变量来存储请求参数
+                  + 使用"方法参数"传递请求数据
+                  + 使用"ThreadLocal"存储线程私有数据
+                  + 避免在 单例Bean 中使用成员变量保存状态 
+ 
         + Context 上下文模块
           集成了 资源绑定、国际化支持、事件传播
+          产生IoC容器/上下文容器？
 
         + SpEL -- Spring Expressing Language，
           支持在运行时 动态查询和操作 对象，增强配置灵活性
 
         + Data Access/Integration
           + JDBC
+            + JDBC模块简化了JDBC编码过程
+            + 处理DB Provider特有的错误代码
           + ORM (Object Relational Mapping)
             + Hibernate, 在Java**类**和数据**表**间建立映射关系，以及提供缓存、事务管理、延迟加载等功能
             + MyBatis, 持久层框架，在XML配置文件和注解中定义SQL映射，将Java**对象**和数据库**记录**之间进行映射 
             + ...
           + OXM
-            XML相关操作（双向转换、XML映射、etc）
+            + XML相关操作（双向转换、XML映射、etc）
+            + 绑定XML框架
+              + JAXB
+              + Castor
+              + XML Beans
           + JMS
+            消息处理
           + Transaction
+            通过注解和配置文件实现声明式事务管理
 
         + Web
-          + Basic Web
-          + Servlet / MVC
+          + Spring Web
+            + 基本Web
+            + 文件上传
+            + HTTP Client Side
+            + Spring远程处理支持 (RPC?)
+          + Servlet 
+            构建Web应用的RESTful服务
           + WebSocket
+            + WebSocket
+            + SockJS
+            + STOMP etc
           + Portlet
 
         + AOP & Test
 
           + AOP
-          + Text
+          + Aspects
+          + Instrumentation
+            提供了类工具的支持，实现了类加载器
+          + Messaging
+          + Test
             + Junit
             + Mockito
 
-      + IoC / DI，将程序的控制权从应用程序转移到框架/容器（好莱坞原则，Do not call us, we will call you）
+      + IoC / DI，将程序的控制权从应用程序转移到框架/容器
+        + IoC容器 (对象实例化、装配、配置、管理)
+          + BeanFactory
+          + ApplicationContext
         + DI的方式
           + 构造器注入
           + Setter方法
           + 字段注入
 
       + AOP
+
+      + Spring构建方式
+
+        + Spring Initializr
+          须连接Internet
+
+          + IDEA / Spring Initializr
+            + Options
+              + Server URL: Spring Initializr工具URL
+              + Name: 项目名称
+              + Location: 项目存储的本地目录
+              + Language: 项目开发语言
+              + Type: 项目构建工具
+              + Group: 项目组名称
+              + Artifact: 项目发布名称
+              + Package name: 项目发布包名
+              + JDK: 项目使用的JDK
+              + Packaging: 项目打包形式
+                + jar
+                + war
+              
+            + Dependencies
+              + 
+
+        + Maven
+
+      + 目录解释
+        + ${ProjectName}.java
+          + ${ProjectName}Application.java 项目启动类
+          + static
+          + templates
+          + application.properties 全局配置文件
+          + pom.xml Maven工程配置文件
+
+
 
   + Spring MVC
 
@@ -978,6 +1296,8 @@ SSh
     + 启动
 
       + Spring boot 启动流程
+        提供 "starter"(起步)依赖 ，简化构建配置。 可根据需要，选择"starter"。  
+
         + 三件事
           + 准备环境
           + 创建上下文
@@ -1020,6 +1340,38 @@ SSh
                 + 调用接口 "CommandLineRunner" 和 "ApplicationRunner"
                   + 启动后须完成的逻辑
                 + 发布 "ApplicationReadyEvent"，即 启动业务
+
+        + Spring可以快速加载Bean
+          原因是使用 `@Conditional` 注解
+
+          + `@Conditional`说明
+            只有满足其条件，才能创建Bean实例
+
+            + 定义
+              + [code]
+                ```java
+                Class<? extends Condition>[] value();
+                ```
+
+            + 接口
+
+              + [code]
+                ```java
+                boolean matches(ConditionContext context,
+                                AnnotatedTypeMetadata metadata);
+                ```
+
+            + 机制
+              返回 true --> 注册Bean
+              返回 false --> 跳过
+
+          + 工作机制
+            Spring容器在加载BeanDefinition阶段通过`@Conditional`筛选Bean。
+
+          + 派生注解
+            + `@ConditionalOnClass`
+            + `@ConditionalOnProperty`
+            + `@ConditionalOnMissingBean`
 
   + Spring Cloud  
     + 说明
@@ -1316,7 +1668,8 @@ SSh
 
     + `@Controller`
       + 说明:
-        + 元注解: `@Component`
+        + 元注解: 
+          + `@Component`
       + 类别: Spring核心组件注解
       + 所属框架: Spring Framework
       + 作用域: 类
@@ -1496,7 +1849,8 @@ SSh
     + `@Repository`
       + 说明:
         创建 DAO 对象，访问数据库
-        + 元注解: `@Component`
+        + 元注解: 
+          + `@Component`
       + 类别: Spring核心组件注解
       + 所属框架: Spring Framework
       + 作用域: 类
@@ -1625,7 +1979,8 @@ SSh
     + `@Service`
       + 说明:
         创建service类对象，业务层对象
-        + 元注解: `@Component`
+        + 元注解: 
+          + `@Component`
       + 类别: Spring核心组件注解
       + 所属框架: Spring Framework
       + 作用域: 类
@@ -1768,9 +2123,17 @@ SSh
         + `filterName`（过滤器名称） 
       + 使用场景: Web请求过滤（如字符编码、权限验证） 
 
-+ Maven
++ 项目构建工具
+  + Maven
+  + Gradle
 
 ## reference doc
+
++ 《Java核心编程 12Ed / 机械工业出版社 / ISBN:978-7-111-70641-0》
+
++ ~~《Java EE企业级应用开发教程（Spring+Spring MVC+MyBatis）（第3版）/ 人民邮电出版社 / ISBN:978-7-115-66565-2》~~
+
+## reference Web
 
 + [阿里云开发者社区](https://developer.aliyun.com)
 
@@ -1800,12 +2163,20 @@ SSh
 
       + [你背的八股过时啦！刚面了个5年Java，问他：Spring Cloud的核心组件有哪些？他顺口溜：Eureka、Feign...](https://www.bilibili.com/video/BV16jXfBcEaK/?spm_id_from=333.1387.homepage.video_card.click&vd_source=38fc599412349dcfe60484e3ff320c66)
 
+  + [动力节点]()
+    + [Java / Spring]()
 
+      + [SpringBoot3视频教程从入门到项目实战,springboot3视频教程一套吃透,springboot最新版](https://www.bilibili.com/video/BV1Km4y1k7bn/?spm_id_from=333.788.recommend_more_video.4&trackid=web_related_0.router-related-2479604-grjpt.1776311648534.598&vd_source=38fc599412349dcfe60484e3ff320c66)
+ 
   + [黑马程序员教材研究院](https://space.bilibili.com/3706950638373177?spm_id_from=333.788.upinfo.detail.click)
 
     + [Java / Spring]()
       + [Java EE企业级应用开发教程（Spring+Spring MVC+MyBatis）（第3版）](https://www.bilibili.com/video/BV1BzwSzoEfq/?spm_id_from=333.788.recommend_more_video.0&trackid=web_related_0.router-related-2479604-6dnm7.1776137399665.556&vd_source=38fc599412349dcfe60484e3ff320c66)
+      + [Spring Boot企业级开发教程（第2版）](https://www.bilibili.com/video/BV1XQw7ztEYe/?spm_id_from=333.788.recommend_more_video.6&trackid=web_related_0.router-related-2479604-tn27s.1776311514157.524&vd_source=38fc599412349dcfe60484e3ff320c66)
 
+  + [尚硅谷]()
+    + [Java / Spring]()
+      + [springboot教程，SpringBoot3干活拉满，从零开始轻松拿下面试&加薪](https://www.bilibili.com/video/BV1Es4y1q7Bf/?spm_id_from=333.788.recommend_more_video.3&trackid=web_related_0.router-related-2479604-grjpt.1776311648534.598&vd_source=38fc599412349dcfe60484e3ff320c66)
 + [菜鸟教程](https://www.runoob.com/)
 
   + [Java教程](https://www.runoob.com/java/java-tutorial.html)
@@ -1822,6 +2193,15 @@ SSh
 
       + [Spring中的IOC详解](https://blog.csdn.net/dc_0012/article/details/157912749)
 
++ [gitee](https://gitee.com/)
+
+  + [牛奶不加糖 / JavaStudyNotes]()
+
+    + [Java / 并发、线程]()
+
+      + [Java并发编程实战](https://gitee.com/zhouwb81/java-study-notes/blob/master/Java并发编程实战.md)
+
+
 + [腾讯云开发者社区](https://cloud.tencent.com/developer/)
 
   + [tcilay](https://cloud.tencent.com/developer/user/1414645)
@@ -1831,6 +2211,9 @@ SSh
       + [Java自定义注解完全指南：从基础到实战落地](https://cloud.tencent.com/developer/article/2626789)
 
 + [知乎]()
+
   + [TigerOnHill](https://www.zhihu.com/people/denpenr) 
+
     + [Java / 基础]()
+
       + [划重点，Java入门指南](https://zhuanlan.zhihu.com/p/24611339952)
