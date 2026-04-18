@@ -6,6 +6,47 @@ markmap:
 
 ## Develop Environment
 
++ JDK
+  + URL
+    + Eclipse 
+      + [Download URL](https://adoptium.net/installation/)
+    + Oracle JDK 
+
+  + Environment Variables
+    + $JAVA_HOME / %JAVA_HOME%
+      + windows
+
+        ```batch
+        set JAVA_HOME=C:\Workspace\ProgramFiles\openjdk-17
+        set JRE_HOME=%JAVA_HOME%\jre
+        set CLASSPATH=.;%JAVA_HOME%\lib;%JRE_HOME%\lib;%JAVA_HOME%\lib\tools.jar;%JAVA_HOME%\src.zip    
+        ```
+
+    + $PATH / %PATH%
+      + linux 
+        `export PATH=$JAVA_HOME/bin:$PATH`  
+      + windows
+        `set PATH=%JAVA_HOME%\bin;%PATH%`  
+
+  + check version
+    `java -version`
+
++ Maven
+  + URL
+    + [Apache]
+  + Environment Variables
+    + $MAVEN_HOME / %MAVEN_HOME%
+      + windows
+        `set MAVEN_HOME=C:\Workspace\JavaProjects\apache-maven-3.9.14`
+    + $PATH
+      + windows
+        `set PATH=%MAVEN_HOME%\bin;%PATH%`
+  + check version
+    set java environment
+    `mvn -v`
+
++ ~~Spring~~
+
 + IDE: 
 
   + About
@@ -40,168 +81,164 @@ markmap:
     Kotlin: 261.22158.277-IJ
     ```
 
+  + 设置
+    + edit "idea64.exe.vmoptions"
+      + content
+        + [code]
+          ```text
+          -Xms1024m
+          -Xmx4096m
+          -XX:JbrShrinkingGcMaxHeapFreeRatio=40
+          -XX:ReservedCodeCacheSize=512m
+          -XX:+HeapDumpOnOutOfMemoryError
+          -XX:-OmitStackTraceInFastThrow
+          -XX:CICompilerCount=2
+          -XX:+IgnoreUnrecognizedVMOptions
+          -XX:+UnlockDiagnosticVMOptions
+          -XX:TieredOldPercentage=100000
+          -ea
+          -Dsun.io.useCanonCaches=false
+          -Dsun.java2d.metal=true
+          -Djbr.catch.SIGABRT=true
+          -Djdk.http.auth.tunneling.disabledSchemes=""
+          -Djdk.attach.allowAttachSelf=true
+          -Djdk.module.illegalAccess.silent=true
+          -Djdk.nio.maxCachedBufferSize=2097152
+          -Djava.util.zip.use.nio.for.zip.file.access=true
+          -Dkotlinx.coroutines.debug=off
+          -Dskiko.rendering.useScreenMenuBar=false
+          -Djava.nio.file.spi.DefaultFileSystemProvider=com.intellij.platform.core.nio.fs.MultiRoutingFileSystemProvider
+          ```
+
   + plugins
 
 ## 《Java核心编程 12Ed / 机械工业出版社 / ISBN:978-7-111-70641-0》
 
-## 《Java EE企业级应用开发教程（Spring+Spring MVC+MyBatis）（第3版）/ 人民邮电出版社 / ISBN:978-7-115-66565-2》
-
-[bilibili视频教程](https://www.bilibili.com/video/BV1BzwSzoEfq?spm_id_from=333.788.videopod.episodes&vd_source=38fc599412349dcfe60484e3ff320c66)
+## 《Spring Boot 3核心技术与最佳实践 / 电子工业出版社 / ISBN:978-7-121-45290-1》
 
 ### 章节1.3 项目
 
 #### Spring Boot
 
 + 步骤
-  + 创建项目，并引入依赖
-    
-    + Project
-      + Generators: "Spring Boot"
-      + Project Details
-        + Server URL: "start.spring.io"
-        + Name: "chapter01Boot"
-        + Location: "C:\Workspace\workspaces\JavaWrkspces\SpringExercise\Book-JavaEE_Ed3"
-        + Language: "Java"
-        + Type: "Maven"
-        + Group: "org.edgarworld.book.JavaEE"
-        + Artifact: "chapter01Boot"
-        + Package name: "org.edgarworld.book.javaee.chapter01"
-        + JDK: "Oracle Open JDK 17"("C:/Workspace/ProgramFiles/openjdk-17")
-        + Java: 17
-        + Packaging: "Jar"
-        + Configuration: "Properties"
-      + Dependencies:
-        + Developer Tools
-          + Spring Boot DevTools
-          + Lombok
-          + Spring Configuration Processor
 
-      + 图示
-        + [Diagram]
-          ![New Project](./images/IDEA-Book-JavaEE_ED3-NewProj.png)
+  + 创建项目
 
-    + 配置构建文件
+    + Server URL: "start.spring.io"
+    + Name: "boot3chapter1_3"
+    + Location: "C:\Workspace\workspaces\JavaWrkspces\SpringExercise\Book-SpringBoot3"
+    + Language: "Java"
+    + Type: "Maven"
+    + Group: "net.edgarworld.book.springboot3"
+    + Aritfact: "boot3chapter1_3"
+    + Package name: "net.edgarworld.book.springboot3.boot3chapter1_3"
+    + JDK: "17 _Oracle OpenJDK 17_"
+    + Java: "17 - Sealed types, always-strict floating-point semantics"
+    + Packaging: "Jar"
 
-      + 修改"pom.xml"
+    + Dependencies
+      + Developer Tools
+        + Spring Boot DevTools
+        + Lombok
+        + Spring Configuration Processor
+      + Web
+        + Spring Web
 
-        + ~~添加"\<dependency>\</dependency>"~~
-  
-          + [code]
-  
-            ```xml
-            <dependency>
-              <groupId>org.springframework</groupId>
-              <artifactId>spring-context</artifactId>
-              <version>6.1.4</version>
-            </dependency>
-            ```
+    + 项目目录
+      + 结构
+        + [DirTree]
 
-        + 自动生成
+          ```text
+          C:\Workspace\workspaces\JavaWrkspces\SpringExercise>tree Book-SpringBoot3
+          Folder PATH listing
+          Volume serial number is A60C-E80B
+          C:\WORKSPACE\WORKSPACES\JAVAWRKSPCES\SPRINGEXERCISE\BOOK-SPRINGBOOT3
+          └───boot3chapter1_3
+              ├───.idea
+              ├───.mvn
+              │   └───wrapper
+              └───src
+                  ├───main
+                  │   ├───java
+                  │   │   └───net
+                  │   │       └───edgarworld
+                  │   │           └───book
+                  │   │               └───springboot3
+                  │   │                   └───boot3chapter1_3
+                  │   └───resources
+                  │       ├───static
+                  │       └───templates
+                  └───test
+                      └───java
+                          └───net
+                              └───edgarworld
+                                  └───book
+                                      └───springboot3
+                                          └───boot3chapter1_3
           
-          + [code]
-            ```xml
-            <dependencies>
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter</artifactId>
-                </dependency>
-        
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-devtools</artifactId>
-                    <scope>runtime</scope>
-                    <optional>true</optional>
-                </dependency>
-                <dependency>
-                    <groupId>org.projectlombok</groupId>
-                    <artifactId>lombok</artifactId>
-                    <optional>true</optional>
-                </dependency>
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-test</artifactId>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
-            ```
+          ```
 
-  + 自定义 接口 和 实现类
-    + 创建 
-      + [package] "org.edgarworld.book.javaee.dao"
-        + [interface] UserDao.java
-          + 说明
-          + 代码
-            + [code]
-              ```java
-              package java.edgarworld.book.javaee.dao;
+        + 说明
+          + [R] /
+            + [D] .idea
+            + [D] .mvn
+            + [D] src
+              + [D] main
+                + [D] java
+                  + [D] net
+                    + [D] edgarworld
+                      + [D] book
+                        + [D] springboot3
+                          + [D] boot3chapter1_3
+                            + [f] Boot3chapter13Application.java
+              + [D] test
+                + [D] java
+                  + [D] net
+                    + [D] edgarworld
+                      + [D] book
+                        + [D] springboot3
+                          + [D] boot3chapter1_3
+                            + [f] Boot3chapter13ApplicationTest.java
+            + [f] .gitattributes
+            + [f] .gitignore
+            + [f] HELP.md
+            + [f] mvnw
+            + [f] mvnw.cmd
+            + [f] pom.xml
 
-              public interface UserDao {
-                  public void save();
-              }
-              ```
-        + [Impl-class] UserDaoImpl.java
-          + 说明
-          + 代码
-            + [code]
+## 《bilibili，动力节点，SpringBoot4从入门到精通，适合小白的SpringBoot4视频教程》
 
-              ```java
-              package java.edgarworld.book.javaee.dao;
-              
-              public class UserDaoImpl implements UserDao {
-                  @Override
-                  public void save() {
-                      System.out.println("UserDao save method running! ");
-                  }
-              }
-              ```          
++ [视频教程](https://www.bilibili.com/video/BV1iykjB1Ewc?spm_id_from=333.788.videopod.episodes&vd_source=38fc599412349dcfe60484e3ff320c66&p=4)
 
-  + 创建配置文件并配置Bean
-    [Empty]
-  + 定义测试类
-    [Empty]
-
-## [黑马程序员教材研究院 / Spring Boot企业开发教程](https://www.bilibili.com/video/BV1XQw7ztEYe/?spm_id_from=333.788.recommend_more_video.6&trackid=web_related_0.router-related-2479604-tn27s.1776311514157.524&vd_source=38fc599412349dcfe60484e3ff320c66)
-
-### 章节1.2.2 项目
-
-#### Spring Boot
+### 章节 
 
 + 步骤
 
   + 创建项目
-    + Generators: "Spring Initializr"
 
+    + Generators
+      + "Spring Boot"
+    + --
     + Project
-      + Name: "chapter01BootB"
-      + Location: "C:\Workspace\workspaces\JavaWrkspces\SpringExercise\Book-JavaEE_Ed3"
+      + Server URL: "start.spring.io"
+      + Name: "demo01"
+      + Location: "C:\Workspace\workspaces\JavaWrkspces\SpringExercise\Bili-SpringBoot4"
       + Language: "Java"
       + Type: "Maven"
-      + Group: "org.edgarworld.book.JavaEE"
-      + Artifact: "chapter01BootB"
-      + Package name: "org.edgarworld.book.javaee.chapter01bootb"
-      + JDK: "17 _Oracle OpenJDK 17_"
-      + Java: "17 - Sealed types, always-strict floating-pint semantics"
+      + Group: "net.edgarworld.book.springboot4"
+      + Artifact: "demo01"
+      + Package name: "net.edgarworld.book.springboot4.demo01"
+      + JDK: "Oracle OpenJDK 17 _c:/workspace/ProgramFiles/openjdk-17_"
+      + Java: "17 - Sealed types, always-strict floating-point semantics"
       + Packaging: "Jar"
-
-    + Version: "4.0.5" 
+    + --
     + Dependencies
       + Developer Tools
-        + [X] Spring Boot DevTools
-        + [X] Lombok
-        + [X] Spring Configuration Processor
+        + Spring Boot DevTools
+        + Lombok
+        + Spring Configuration Processor
       + Web
-        + [X] Spring Web
-
-  + Settings
-    + Maven
-      + [X] Execute goals recursively
-      + Output level: Info
-      + Checksum policy: No Global Policy
-      + Multiproject build fail policy: Default
-      + Thread count: '  ' -T option
-      + Maven home path: "Use Maven wrapper"
-      + User settings file: "C:\Workspace\Data\Maven\settings.xml"
-      + Local repository: "C:\Workspace\Data\Maven\repository"
+        + Spring Web
 
 ## 参考
 

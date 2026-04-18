@@ -599,7 +599,26 @@ SSh
 
         + [class] BigDecimal
           + [constructor] `BigDecimal(String digits)`
+
           + [method] `BigDecimal(BigDecimal other)`
+            该方法相当于还是使用了double/float，依然为保留精度
+          + [method] `BigDecimal.valueOf(double other)`
+            + 源码
+              + [code]
+
+                ```java
+                public static BigDecimal valueOf(double val) {
+                  //
+                  //
+                  //
+                  //
+                  return new BigDecimal(Double.toString(val));
+                }
+                ```
+
+                实际使用了构造函数 "BigDecimal(String digits)"  
+                应使用valueOf保留精度  
+
           + [method] `BigDecimal add(BigDecimal other)`
           + [method] `BigDecimal subtract(BigDecimal other)`
           + [method] `BigDecimal multiply(BigDecimal other)`
@@ -608,9 +627,18 @@ SSh
 
             + 说明
               + RoundingMode
+                + [enum] `RoundingMode.CEILING` 向上取整，大于原数
+                + [enum] `RoundingMode.DOWN` 截断取整
+                + [enum] `RoundingMode.FLOOR` 向下取整，小于原数
+                + [enum] `RoundingMode.HALF_DOWN` 五舍六入
                 + [enum] `RoundingMode.HALF_UP` 四舍五入
+                + [enum] `RoundingMode.HALF_EVEN` 
+                  + 整数位为奇数，则四舍五入
+                  + 整数位为偶数，则五舍六入
 
           + [method] `BigDecimal compareTo(BigDecimal other)`
+
+
 
 
   + 字符、字符串
@@ -1104,6 +1132,26 @@ SSh
     框架的框架，可以整合多种框架
     框架， 预先设计/实现好的软件架构，提供了通用解决方案和功能模块。包括一系列预定义的类、接口、函数和工具
 
+    + Spring家族
+
+      + 图示
+        + [Diagram]
+          ![Spring Family](./images/springfamily.jpeg)
+      + Spring Framework -- 基础框架
+        + 全方位的企业级应用开发框架
+        + 核心思想是 IoC 和 AOP
+      + Spring MVC -- Web层解决方案
+        + 图示
+          + [Diagram]
+            ![Spring MVC](./images/springmvc-mvc.jpeg)
+        + 专注Web开发前后端交互
+        + 基于 **M**odel-**V**iew-**C**ontrol
+          + Controller, 接受前端请求，调用Service处理业务逻辑
+          + Model, 封装数据(ex. 从数据库查询数据，etc)，传递给前端（非客户端）
+          + View, 展示数据(如JSP, Thymeleaf, etc)
+      + Spring Boot -- 开发增强工具
+      + Spring Cloud -- 微服务延申
+
     + 框架组合
 
       + SSH， Struts + Spring+ Hibernate
@@ -1160,6 +1208,16 @@ SSh
             + Lifecycle 生命周期
           + 说明2
             + Bean 
+              + Bean注册方式
+                + **通过 `@Component` 实现零配置组件扫描**
+                + **利用 `@Bean` 显式控制第三方库集成**
+                + **借助 `@Import` 或 `@ImportSelector` 实现模块化动态配置**
+                + 采用自动配置机制简化 "Starter"开发
+                + 采用 "FactoryBean" 定制复杂对象创建流程
+                + 通过编写 "ApplicationContext"注册 满足运行时动态需求
+                + **"Spring Boot 4" 的 "BeanRegistrar"接口 动态注册 Bean**
+                  可以替代 "FactoryBean" 和 "ApplicationContext"
+
               + 安全性 (线程安全性)
                 + Spring本身没有提供Bean的安全策略
                   默认不是线程安全的。默认是**Singleton**，整个应用的声明周期只有一个实例。  
@@ -1250,8 +1308,9 @@ SSh
 
       + Spring构建方式
 
-        + Spring Initializr
+        + Spring Initializr (脚手架)
           须连接Internet
+          ?本地搭建
 
           + IDEA / Spring Initializr
             + Options
@@ -1287,16 +1346,113 @@ SSh
 
   + Spring Boot
     Spring Boot 是 Spring Framework 的扩展，而非替代  
+    Spring生态衔接  
+
     + 设计思想
       + 约定大于配置(Convention Over Configuration)  
-      + 开箱即用
+        + 约定并提供一些推荐的默认配置参数
+        + 开发者只需要定义约定以外的配置参数
+      + 开箱即用 （简化配置 + 自动配置）
+        + 约定
       + 外代码生成、无需XML配置。纯 注解驱动开发，兼容 XML配置
       + 内嵌容器。 无需单独部署Web容器，直接打包成Jar运行
+        + 内嵌多种 servlet容器 ，包括 Tomcat, Jetty, Undertow
+      + 包含生产级特性  
+        监控与报警  
+
+    + Spring Boot核心模块
+      + "spring-boot" 框架主模块
+        + 提供了启动Spring应用的主类
+        + 提供了内嵌、可自由搭配的Servlet容器
+        + 配置外部化支持
+        + 提供了Spring容器上下文初始器
+
+      + "spring-boot-autoconfigure" -- java主流技术的自动配置组件
+
+        + 操作
+          + 导入配置
+
+            + 添加扫描路径
+              + 说明
+                使用`@ComponentScan`指定扫描路径，然后自动导入
+
+            + 导入配置类
+              + 说明
+                使用 `@Import` 导入
+                + 配置类 类型
+                  + "MainConfiguration" -- 项目主要配置
+                  + "DataSourceConfiguration" -- 数据源配置
+                  + "RedisConfiguration" -- Redis配置
+                  + "MongoDBConfiguration" -- MongoDB配置
+                  + ...
+                + 场景
+                  某些配置类在其他自爆中，或者依赖的jar中的配置无法被Spring Boot默认扫描注册到
+
+            + 导入XML配置
+              + 说明
+                使用`@ImportResource`导入XML文件内容
+                + 场景
+                  + 老的技术组件的配置文件时XML形式的
+                  + 其他无法找到对应Spring替代注解的
+                  + 无法使用 "@Configuration" 方式注解的
+  
+      + **"spring-boot-starters"** 所有启动器的基础依赖
+        + 一组预先定义的依赖集合，
+        + 自动管理版本兼容
+      + "spring-boot-cli" command line interface, 命令行工具
+      + "spring-boot-actuator"  监控模块
+        
+      + "spring-boot-actuator-autoconfigure"
+      + "spring-boot-test"
+      + "spring-boot-test-autoconfigure"
+      + "spring-boot-loader"
+      + "spring-boot-devtools"
+
+    + Spring Boot的集成方式
+      + Maven/Gradle
+      + Spring Boot CLI
 
     + 启动
 
-      + Spring boot 启动流程
+      + Spring boot 启动流程  
         提供 "starter"(起步)依赖 ，简化构建配置。 可根据需要，选择"starter"。  
+
+        + "starter"  
+          + 说明
+            + 核心功能：
+              + 简化依赖管理
+                "starter"是一种预定义的依赖描述符，本质上是一个Maven/Gradle模块，在其依赖文件(pom.xml / build.gradle)中，预先声明了实现其某功能所需的依赖
+              + 默认配置赋能
+                包含一个或多个自动配置类
+          + 类型
+            + "spring-boot-starter" -- 核心启动器
+            + Spring Web -- 构建Web应用  
+              + 说明
+                + 使用Tomcat作为内嵌容器 
+                + 整合了Spring MVC
+                + 整合了Jackson(JSON处理) 
+  
+              + V3.x
+                "spring-boot-starter-web"  
+              + V4.x
+                "spring-boot-starter-webmvc"
+
+            + "spring-boot-starter-amqp" 
+              通过spring-rabbit来支持AMQP协议（Advanced Message Queuing Protocol
+            + "spring-boot-starter-aop"
+              面向方面的编程即AOP，包括spring-aop和AspectJ
+            + "spring-boot-starter-groovy-templates"
+              支持Groovy模板引擎
+            + "spring-boot-starter-data-redis"
+              使用Redis 和 Spring Data Redis，以及Jedis 客户端
+            + "spring-boot-starter-data-elasticsearch"
+              支持ElasticSearch搜索和分析引擎
+            + "spring-boot-starter-data-jpa"
+              支持 Java Persistence API
+            + "spring-boot-starter-data-mongodb"
+              支持MongoDB数据
+            + "spring-boot-starter-logging"
+              Spring Boot默认的日志框架Logback
 
         + 三件事
           + 准备环境
@@ -1311,6 +1467,29 @@ SSh
             ```java
             SpringApplication.run(Application.class, args);
             ```
+
+            + 示例
+              + 文件名: "Demo01Application.java"
+              + [code]
+
+                ```java
+                import org.springframework.boot.SpringApplication;
+                import org.springframework.boot.autoconfigure.SpringBootApplication;
+                
+                @SpringBootApplication
+                public class Demo01Application {
+                
+                    public static void main(String[] args) {
+                        SpringApplication.run(Demo01Application.class, args);
+                    }
+                
+                }
+                ```
+
+              + Dependence Tree
+                + 图示
+                  + [Diagram]
+                    ![Demo01Application Maven](./images/IDEA-bili-SpringBoot4-Demo1-Maven.png)
 
           + 动作
 
@@ -1331,8 +1510,136 @@ SSh
                 + 准备环境
                   + 加载配置文件、系统变量、命令行参数
                   + 封装成 "ConfigurableEnvironment"
-                + 创建上下文，"Application Context"，即"上下文容器"
-                  + 装配Bean，加载配置类。即 `@ComponentScan`
+                + 创建上下文，"ApplicationContext"对象，即"上下文容器"
+                  + 装配Bean，加载配置类。
+                    + `@ComponentScan`
+                    + `@Import`
+                    + `@ImportSource`
+                    + ...
+
+                  + 示例 1
+                    + 文件 1: "CreateBeanApplication.java" 主文件
+                      + [code]
+
+                        ```java
+                        package net.edgarworld.book.springboot4.createbean;
+                        
+                        import org.springframework.boot.SpringApplication;
+                        import org.springframework.boot.autoconfigure.SpringBootApplication;
+                        
+                        @SpringBootApplication
+                        public class CreateBeanApplication {
+                        
+                            public static void main(String[] args) {
+                                SpringApplication.run(CreateBeanApplication.class, args);
+                            }
+                        
+                        }
+                        ```
+
+                    + 文件 2: "RedisManager.java" Bean文件
+                      + [code]
+
+                        ```java 
+                        package net.edgarworld.book.springboot4.createbean.manager;
+                        
+                        import org.springframework.stereotype.Component;
+                        
+                        
+                        // In Sprint, the objectid of RedisManager is "redisManager"
+                        @Component(value = "myRedisClient")
+                        public class RedisManager {
+                        
+                            public void doRedis() {
+                                System.out.println("Operate Redis (Lesson P18)");
+                            }
+                        }
+                        ```
+
+                    + 文件 3: "UserServiceImpl.java"  服务层/业务层Bean文件
+                      + [code]
+
+                        ```java
+                        package net.edgarworld.book.springboot4.createbean.service;
+                        
+                        import org.springframework.stereotype.Service;
+                        
+                        @Service
+                        public class UserServiceImpl {
+                        }
+                        ```
+
+                    + 文件 4: "UserController.java" 控制层Bean文件
+                      + [code]
+
+                        ```java
+                        package net.edgarworld.book.springboot4.createbean.controller;
+                        
+                        import org.springframework.web.bind.annotation.RestController;
+                        
+                        @RestController
+                        public class UserController {
+                        }
+                        ```
+
+                    + 文件 5: "UserDao.java" 持久层Bean文件
+                      + [code]
+
+                        ```java
+                        package net.edgarworld.book.springboot4.createbean.dao;
+                        
+                        import org.springframework.stereotype.Repository;
+                        
+                        @Repository
+                        public class UserDao {
+                        }
+                        ```
+
+                    + 文件 6: "CreateBeanApplicationTests.java" 测试文件
+                      + [code]
+
+                        ```java
+                        01: package net.edgarworld.book.springboot4.createbean;
+                        02: 
+                        03: import jakarta.annotation.Resource;
+                        04: import net.edgarworld.book.springboot4.createbean.controller.UserController;
+                        05: import net.edgarworld.book.springboot4.createbean.dao.UserDao;
+                        06: import net.edgarworld.book.springboot4.createbean.manager.RedisManager;
+                        07: import net.edgarworld.book.springboot4.createbean.service.UserServiceImpl;
+                        08: import org.junit.jupiter.api.Test;
+                        09: import org.springframework.beans.factory.annotation.Autowired;
+                        10: import org.springframework.boot.test.context.SpringBootTest;
+                        11: import org.springframework.context.ApplicationContext;
+                        12: 
+                        13: @SpringBootTest
+                        14: class CreateBeanApplicationTests {
+                        15: 
+                        16:     @Resource
+                        17:     private ApplicationContext ctx;
+                        18: 
+                        19:     @Test
+                        20:     public void testCtx() {
+                        21:         System.out.println(ctx);
+                        22: 
+                        23:         Object myRedisClient = ctx.getBean("myRedisClient");
+                        24:         System.out.println("myRedisClient = " + myRedisClient);
+                        25: 
+                        26:         UserServiceImpl  userService = ctx.getBean(UserServiceImpl.class);
+                        27:         System.out.println("userService = " + userService);
+                        28: 
+                        29:         UserController userController = ctx.getBean(UserController.class);
+                        30:         System.out.println("userController = " + userController);
+                        31: 
+                        32:         UserDao userDao = ctx.getBean(UserDao.class);
+                        33:         System.out.println("userDao = " + userDao);
+                        34:     }
+                        35: }
+                        ```
+
+                      + 说明
+                        + line_17: 创建 上下文容器
+                        + line_20: testCtx() 处 run
+
                 + 刷新上下文，
                   + 所有 Bean 初始化完成
                   + 事件监听器 注册完成
@@ -1404,7 +1711,7 @@ SSh
 
   + 注解 Annotation
     + 概览
-      **注解是Spring Boot驱动开发的核心**。
+      **"注解"是Spring Boot驱动开发的核心**。
 
       + 类型
         + 启动注解
@@ -1445,6 +1752,7 @@ SSh
         + 场景化功能注解
           + Web 相关：
             + `@RestController`
+              
             + `@RequestMapping`
             + `@GetMapping、@PostMapping`
             + `@RequestBody`
@@ -1562,12 +1870,20 @@ SSh
         方法级别注解
         通常写在`@Configuration`配置类方法中  
         告诉 Spring容器 ，该方法的返回值应被注册为一个可被依赖注入管理的Bean
+        通常用于创建对象的步骤较多、较复杂的情况  
+
+        + 元注解
+        + 源码
+
       + 类别:
       + 所属框架:
       + 作用域:
       + 核心功能:
       + 常用属性:
       + 使用场景:
+        + 配置第三方组件 
+        + 自定义初始化逻辑的Bean
+        
 
     + `@Before`
       + 说明:
@@ -1586,7 +1902,24 @@ SSh
     + `@Component`
       + 说明:
         类级别注解, **核心组件注解**  
-        标记一个Java类为Spring组件
+        标记一个Java类为Spring组件，是所有Bean注册的父类
+        通用组件，还可以使用策略注解(ex. `@Service`, `@Controller`, `@Repository`, etc)派生
+
+        + 元注解
+        + 源码
+        + 示例
+          + [code]
+
+            ```java
+            @Component
+            public class RedisManager {
+              
+              public void set(String key, String value){
+                ...
+              }
+            }
+            ````
+
       + 类别: Spring核心组件注解
       + 所属框架: Spring Framework
       + 作用域: 类
@@ -1619,6 +1952,9 @@ SSh
       + 说明:
         
         + 元注解: 
+        + 源码
+        + 示例
+          
       + 类别: 配置与启动注解
       + 所属框架: Spring Framework
       + 作用域: 类（通常配合`@Configuration`） 
@@ -1646,12 +1982,38 @@ SSh
         
         + 元注解:
           + `@Component` 
+        + 源码
+          + 文件: "spring-context-7.0.6-sources.jar!\org\springframework\context\annotation\Configuration.java"
+        + 示例
+          + [code]
+            ```java
+            @Configuration(proxyBeanMethods = false)
+            public class DataSourceConfig {
+               @Bean
+               public Connection dataSource() {
+                DataSource ds = new PooledDataSource();
+                try {
+                  Connection connection = ds.getConnection("zhangsan","suier23");
+                  return connection;
+                } catch (SQLException e) {
+                  e.printStackTrace();
+                }
+                return null  
+              }
+            }
+            ```
       + 类别: 配置与启动注解
       + 所属框架: Spring Framework 
       + 作用域: 类 
       + 核心功能: 标注配置类，替代XML配置，类中通过`@Bean`方法定义Bean
       + 常用属性:
-      + 使用场景: Java配置类，定义Bean、配置第三方组件 
+        + `name` bean id
+        + `proxyBeanMethods`
+          + "= false" Spring **不生成配置类的CGLIB代理**，配置类会以 普通java类 的形式存在
+          + "= true" 
+            默认  
+            方法中相关对象间相互依赖，应使用 true 选项
+      + 使用场景: Java配置类，定义Bean
 
     + `@ConfigurationProperties`
       + 说明:
@@ -1670,6 +2032,11 @@ SSh
       + 说明:
         + 元注解: 
           + `@Component`
+        + 源码
+          + [code]
+            ```java
+            ```
+        + 示例
       + 类别: Spring核心组件注解
       + 所属框架: Spring Framework
       + 作用域: 类
@@ -1744,7 +2111,46 @@ SSh
     + `@Import`
       + 说明:
         
-        + 元注解: 
+        + 元注解:
+        + 源码
+
+          + [code]
+
+            ```java
+            @Target(ElementType.TYPE)
+            @Retention(RetentionPolicy.RUNTIME)
+            @Documented
+            public @interface Import {
+              /**
+               * {@link Configuration @Configuration}, {@link ImportSelector},
+               * {@link ImportBeanDefinitionRegistrar}, or regular component classes to import
+               */
+              Class<?>[] value();
+            }
+            ```
+
+            + 说明
+              "value" 是一个 "Class"数组，用于导入多个配置
+              + 类型
+                + `@Configuration`
+                + "ImportSelector"
+                + "ImportBeanDefinitionRegistrar
+                + "Component"组件
+
+        + 示例
+          + [code]
+
+            ```java
+            @SprintBootConfiguration
+            @import({Configuration1.class, Configuration2.class})
+            public class MainConfig {
+              @Bean
+              public RestTemplate restTemplate() {
+                return new RestTemplate();
+              }
+            }
+            ```
+
       + 类别: 配置与启动注解
       + 所属框架: Spring Framework  
       + 作用域: 类
@@ -1752,7 +2158,28 @@ SSh
       + 常用属性:
         + `value`（要导入的类数组） 
       + 使用场景: 模块化配置，组合多个配置类 
+    + `@ImportResource`
+      + 说明
 
+        + 元注解
+        + 源码
+          + [code]
+
+            ```java
+            @Retention(RetentionPolicy.RUNTIME)
+            @Target(ElementType.TYPE)
+            @Documented
+            public @interface ImportResource {
+              @AliasFor("locations")
+              String[] value() default {};
+
+              @AliasFor("value")
+              String[] locations() default {};
+
+              Class<? extends BeanDefinitionReader> reader() default BeanDefinitionReade.class;
+            }
+            ```
+        
     + `@Insert`
       + 说明:
         
@@ -1937,7 +2364,7 @@ SSh
     + `@RestControllerAdvice`
       + 说明:
         
-        + 元注解: 
+        + 元注解:  
           + `@ControllerAdvice`
           + `@ResponseBody`
       + 类别: Web层注解
@@ -1954,7 +2381,7 @@ SSh
     + `@Select`
       + 说明:
         
-        + 元注解: 
+        + 元注解:  
       + 类别: MyBatis/MyBatis-Plus注解
       + 所属框架: MyBatis 
       + 作用域: 方法 
@@ -1966,7 +2393,7 @@ SSh
     + `@ServletComponentScan`
       + 说明:
         
-        + 元注解: 
+        + 元注解:  
       + 类别: 其他注解
       + 所属框架: Spring Boot
       + 作用域: 类 
@@ -1979,27 +2406,48 @@ SSh
     + `@Service`
       + 说明:
         创建service类对象，业务层对象
-        + 元注解: 
+        + 元注解:  
           + `@Component`
       + 类别: Spring核心组件注解
       + 所属框架: Spring Framework
       + 作用域: 类
       + 核心功能: 标注业务逻辑层（Service层）组件 
-      + 常用属性: 
+      + 常用属性:  
         + `value`(指定Bean名称，默认类名首字母小写)
       + 使用场景: 业务逻辑处理类，如用户服务、订单服务 
 
     + `@SpringBootApplication`
       + 说明:
-        
+        **Spring Boot应用的入口类**
         + 元注解:  
           + `@SpringBootConfiguration` 
           + `@EnableAutoConfiguration` 
           + `@ComponentScan`
+        + 源码
+        + 示例
+          + [code]
+
+            ```java
+            import org.springframework.boot.SpringApplication;
+            import org.springframework.boot.autoconfigure.SpringBootApplication;
+            
+            @SpringBootApplication
+            public class Bootchapter01Application {
+            
+            	  public static void main(String[] args) {
+            		  SpringApplication.run(Bootchapter01Application.class, args);
+            	  }
+            
+            }
+            ```
+
+          + 解释
+            + "Bootchapter01Application"为项目名称，主类名称
+
 
       + 类别: 配置与启动注解
       + 所属框架: Spring Boot  
-      + 作用域: 类（启动类） 
+      + 作用域: 类（启动类）  
       + 核心功能: Spring Boot启动类核心注解，组合配置、自动配置、组件扫描三大功能 
 
       + 常用属性:
@@ -2009,9 +2457,24 @@ SSh
 
     + `@SpringBootConfiguration`
       + 说明:
-        
-        + 元注解: 
+        + 元注解:  
           + `@Configuration`
+        + 源码
+
+          + [code]
+
+            ```java
+            @Target({ElementType.TYPE})
+            @Retention(RetentionPolicy.RUNTIME)
+            @Documented
+            @Configuration
+            @Indexed
+            public @interface SpringBootConfiguration {
+              @AliasFor(annotation = Configuration.class)
+              boolean proxyBeanMethods() default true;
+            }
+            ```
+        + 示例
       + 类别: 配置与启动注解  
       + 所属框架: Spring Boot
       + 作用域: 类
@@ -2123,13 +2586,123 @@ SSh
         + `filterName`（过滤器名称） 
       + 使用场景: Web请求过滤（如字符编码、权限验证） 
 
-+ 项目构建工具
-  + Maven
-  + Gradle
+    + `@WebMvcAutoConfiguration`
+      + 说明:
+        + 元注解
+        + 源码
+          + path: "WebMvcAutoConfiguration.java"
+          + [code]
+
+            ```java
+            public final class WebMvcAutoConfiguration {
+              public static final String DEFAULT_PREFIX = "";
+              public static final String DEFAULT_SUFFIX = "";
+              private static final String SERVLET_LOCATION = "/";
+
+              public WebMvcAutoConfiguration() {
+
+              }
+
+              @Bean
+              @ConditionalOnMissingBean({HiddenHttpMethodFilter.class})
+              @ConditionalOnBooleanProperty({"spring.mvc.hiddenmethod.filter.enabled"})
+              OrderedHiddenHttpMethodFilter hiddenHttpMethodFilter() {
+                return new OrderHiddenHttpMethodFilter();
+              }
+            }
+            ```
+
+        + 示例 
+
+  + Spring Boot项目构建工具
+    + Spring Boot CLI
+    + Maven
+      + 继承"spring-boot-starter-parent"
+        + 代码
+          + [code]
+  
+            ```xml
+            <!-- 继承Spring Boot父项目 -->
+            <parent>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-parent</artifactId>
+              <version>${spring-boot.version}</version>
+            </parent>
+            ```
+  
+        + 特点 / 优点
+          + 插件只需要定义，无需进行额外配置
+            + 代码
+              + [code]
+  
+                ```xml
+                <build>
+                  <plugins>
+                    <plugin>
+                      <groupId>org.springframework.boot</groupId>
+                      <artifactId>spring-boot-maven-plugin</artifactId>
+                    </plugin>
+                  </plugins>
+                </build>
+                ```
+  
+          + 可以直接定义"properties"参数覆盖依赖的内容
+  
+          + 不利于扩展。 Java是单继承
+  
+      + 导入"spring-boot-dependencies"
+  
+        + 代码
+          + [code]
+  
+            ```xml
+            <dependencyManagement>
+              <dependencies>
+                <dependency>
+                  <!-- Import dependency management from Spring Boot -->
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-dependencies</artifactId>
+                  <version>${spring-boot.version}</version>
+                  <type>pom</type>
+                  <scope>import<scope>
+                </dependency>
+              </dependencies>
+            </dependencyManagement>
+            ```
+  
+        + 特点 / 优点
+          + 需要显示导入依赖并指定版本号  
+      + Maven项目目录结构
+        + 目录
+          + [File Tree]
+            + /
+              + [D] .idea
+              + [D] .mvn
+              + [D] src
+                + [D] main
+                  + [D] java
+                    + [D] ...
+                  + [D] resources
+                    + [D] static
+                    + [D] templates
+                    + [f] application.properties
+                + [D] test
+              + [f] .gitattributes
+              + [f] .gitignore
+              + [f] HELP.md
+              + [f] mvnw
+              + [f] mvnw.cmd
+              + [f] pom.xml
+  
+      + "pom.xml"
+  
+    + Gradle
 
 ## reference doc
 
 + 《Java核心编程 12Ed / 机械工业出版社 / ISBN:978-7-111-70641-0》
+
++ **《Spring Boot 3核心技术与最佳实践 / 电子工业出版社 / ISBN:978-7-121-45290-1》**
 
 + ~~《Java EE企业级应用开发教程（Spring+Spring MVC+MyBatis）（第3版）/ 人民邮电出版社 / ISBN:978-7-115-66565-2》~~
 
@@ -2167,16 +2740,21 @@ SSh
     + [Java / Spring]()
 
       + [SpringBoot3视频教程从入门到项目实战,springboot3视频教程一套吃透,springboot最新版](https://www.bilibili.com/video/BV1Km4y1k7bn/?spm_id_from=333.788.recommend_more_video.4&trackid=web_related_0.router-related-2479604-grjpt.1776311648534.598&vd_source=38fc599412349dcfe60484e3ff320c66)
+
+      + [**SpringBoot4从入门到精通，适合小白的SpringBoot4视频教程**](https://www.bilibili.com/video/BV1iykjB1Ewc/?spm_id_from=333.1387.homepage.video_card.click&vd_source=38fc599412349dcfe60484e3ff320c66)
  
   + [黑马程序员教材研究院](https://space.bilibili.com/3706950638373177?spm_id_from=333.788.upinfo.detail.click)
 
     + [Java / Spring]()
+
       + [Java EE企业级应用开发教程（Spring+Spring MVC+MyBatis）（第3版）](https://www.bilibili.com/video/BV1BzwSzoEfq/?spm_id_from=333.788.recommend_more_video.0&trackid=web_related_0.router-related-2479604-6dnm7.1776137399665.556&vd_source=38fc599412349dcfe60484e3ff320c66)
+
       + [Spring Boot企业级开发教程（第2版）](https://www.bilibili.com/video/BV1XQw7ztEYe/?spm_id_from=333.788.recommend_more_video.6&trackid=web_related_0.router-related-2479604-tn27s.1776311514157.524&vd_source=38fc599412349dcfe60484e3ff320c66)
 
   + [尚硅谷]()
     + [Java / Spring]()
       + [springboot教程，SpringBoot3干活拉满，从零开始轻松拿下面试&加薪](https://www.bilibili.com/video/BV1Es4y1q7Bf/?spm_id_from=333.788.recommend_more_video.3&trackid=web_related_0.router-related-2479604-grjpt.1776311648534.598&vd_source=38fc599412349dcfe60484e3ff320c66)
+
 + [菜鸟教程](https://www.runoob.com/)
 
   + [Java教程](https://www.runoob.com/java/java-tutorial.html)
@@ -2201,6 +2779,11 @@ SSh
 
       + [Java并发编程实战](https://gitee.com/zhouwb81/java-study-notes/blob/master/Java并发编程实战.md)
 
+
++ [腾讯QQ/微信]()
+  + []()
+    + [java / Spring]()
+      + [一文读懂Spring Boot各模块组件依赖关系](https://mp.weixin.qq.com/s?__biz=Mzg2NzYyNjQzNg==&mid=2247484807&idx=1&sn=be8b846246023e35255dd51a9d0c3e1f&scene=21&poc_token=HIzs4WmjlyLZkCeRyvNeEjR0r474QANJ3hpfP16J)
 
 + [腾讯云开发者社区](https://cloud.tencent.com/developer/)
 
