@@ -31,7 +31,7 @@ s -- scale
 
 #### 整数类型
 
-| Data Type | Range                                      | Size 1   | Size 2                   | 
+| Data Type | Range (signed)                             | Size 1   | Range (unsigned)         | 
 | :-------- | :----------------------------------------: | :------- | -----------------------: | 
 | tinyint   |                 -128 ~ 127                 | 1 Byte   | 0 ~                  255 | 
 | smallint  |               -32768 ~ 32767               | 2 Bytes  | 0 ~                65535 | 
@@ -47,15 +47,37 @@ s -- scale
 | double       | double precision float                  |          8 Bytes |                           |
 | decimal(m,d) | Fixed  precision float                  | max(m,d)+2 Bytes |                           |
 
+m, 表示总位数
+d, 表示小数位数
+
+decimal 总共65位
+
 ### 日期和时间类型
 
-| Data Type    | Format                | Size 1   | Size 2                                            |
-| :----------- | :-------------------- | :------- | :-----------------------------------------------: | 
-| year         | YYYYY                 | 1 Byte   |                    1901 ~ 2155                    |
-| time         | HH:MM:SS              | 3 Bytes  |              -838:59:59 ~ 838:59:59               |
-| date         | YYYY-MM-DD            | 3 Bytes  |              1000-01-01 ~ 9999-12-31              |
-| datetime     | YYYY-MM-DD HH:MM:SS   | 8 Bytes  |     1000-01-01 00:00:00 ~ 9999-12-31 23:59:59     |
-| timestamp    | YYYY-MM-DD HH:MM:SS   | 4 Bytes  | 1980-01-01 00:00:00 UTC ~ 2040-01-19 03:14:07 UTC |
++ 表格
+  + [table]
+
+    | Data Type    | Format                | Size 1   | Size 2                                            |
+    | :----------- | :-------------------- | :------- |     :-----------------------------------------------: | 
+    | year         | YYYYY                 | 1 Byte   |                    1901 ~ 2155                    |
+    | time         | HH:MM:SS              | 3 Bytes  |              -838:59:59 ~ 838:59:59               |
+    | date         | YYYY-MM-DD            | 3 Bytes  |              1000-01-01 ~ 9999-12-31              |
+    | datetime     | YYYY-MM-DD HH:MM:SS   | 8 Bytes  |     1000-01-01 00:00:00 ~ 9999-12-31 23:59:59     |
+    | timestamp    | YYYY-MM-DD HH:MM:SS   | 4 Bytes  | 1980-01-01 00:00:00 UTC ~ 2038-01-19 03:14:07 UTC |
+
++ datetime vs timestamp
+
+  + 表格
+    + [table]
+      
+      |          |  datatime | timestamp |
+      | :------- | :-------- | :-------- |
+      | 时间长度   | 1000-01-01 00:00:00 ~ 9999-12-31 23:59:59 | 1980-01-01 00:00:00 UTC ~ 2038-01-19 03:14:07 UTC |
+      | 存储空间   | 8 Bytes   | 4 Bytes |
+      | 时间内容   | 不做时区转换 | 写，有时会从当前时区转为UTC；读，从UTC转换为当前时区 |  
+      | 高并发问题 |            | 默认操作系统时间，每次读写要调用tz_convert，须加锁。高并发，性能抖动  |
+
+  
 
 ### 字符串类型
 

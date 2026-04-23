@@ -1,0 +1,2 @@
+{\textstyle \pm 3.402 823 47 \times 10 ^ {38}
+}

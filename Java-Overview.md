@@ -1243,7 +1243,40 @@ SSh
                   + 使用"方法参数"传递请求数据
                   + 使用"ThreadLocal"存储线程私有数据
                   + 避免在 单例Bean 中使用成员变量保存状态 
- 
+
+              + 讨论
+                + Spring可以快速加载Bean
+                  原因是使用 `@Conditional` 注解
+        
+                  + `@Conditional`说明
+                    只有满足其条件，才能创建Bean实例
+        
+                    + 定义
+                      + [code]
+                        ```java
+                        Class<? extends Condition>[] value();
+                        ```
+        
+                    + 接口
+        
+                      + [code]
+                        ```java
+                        boolean matches(ConditionContext context,
+                                        AnnotatedTypeMetadata metadata);
+                        ```
+        
+                    + 机制
+                      返回 true --> 注册Bean
+                      返回 false --> 跳过
+        
+                  + 工作机制
+                    Spring容器在加载BeanDefinition阶段通过`@Conditional`筛选Bean。
+        
+                  + 派生注解
+                    + `@ConditionalOnClass`
+                    + `@ConditionalOnProperty`
+                    + `@ConditionalOnMissingBean`
+        
         + Context 上下文模块
           集成了 资源绑定、国际化支持、事件传播
           产生IoC容器/上下文容器？
@@ -1401,7 +1434,7 @@ SSh
         + 自动管理版本兼容
       + "spring-boot-cli" command line interface, 命令行工具
       + "spring-boot-actuator"  监控模块
-        
+
       + "spring-boot-actuator-autoconfigure"
       + "spring-boot-test"
       + "spring-boot-test-autoconfigure"
@@ -1648,37 +1681,6 @@ SSh
                   + 启动后须完成的逻辑
                 + 发布 "ApplicationReadyEvent"，即 启动业务
 
-        + Spring可以快速加载Bean
-          原因是使用 `@Conditional` 注解
-
-          + `@Conditional`说明
-            只有满足其条件，才能创建Bean实例
-
-            + 定义
-              + [code]
-                ```java
-                Class<? extends Condition>[] value();
-                ```
-
-            + 接口
-
-              + [code]
-                ```java
-                boolean matches(ConditionContext context,
-                                AnnotatedTypeMetadata metadata);
-                ```
-
-            + 机制
-              返回 true --> 注册Bean
-              返回 false --> 跳过
-
-          + 工作机制
-            Spring容器在加载BeanDefinition阶段通过`@Conditional`筛选Bean。
-
-          + 派生注解
-            + `@ConditionalOnClass`
-            + `@ConditionalOnProperty`
-            + `@ConditionalOnMissingBean`
 
   + Spring Cloud  
     + 说明
@@ -1884,6 +1886,8 @@ SSh
         + 配置第三方组件 
         + 自定义初始化逻辑的Bean
         
+
+    + `@BeanRegister`
 
     + `@Before`
       + 说明:
@@ -2702,7 +2706,7 @@ SSh
 
 + 《Java核心编程 12Ed / 机械工业出版社 / ISBN:978-7-111-70641-0》
 
-+ **《Spring Boot 3核心技术与最佳实践 / 电子工业出版社 / ISBN:978-7-121-45290-1》**
++ 《Spring Boot 3核心技术与最佳实践 / 电子工业出版社 / ISBN:978-7-121-45290-1》 **!**
 
 + ~~《Java EE企业级应用开发教程（Spring+Spring MVC+MyBatis）（第3版）/ 人民邮电出版社 / ISBN:978-7-115-66565-2》~~
 
