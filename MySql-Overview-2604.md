@@ -82,7 +82,7 @@ markmap:
       + 关系代数 relational-algebra
         + 选择 select
           + 代数表示
-            + [Diagram]
+            + [diagram]
               ![algebra select](./images2/algebra-select-260412a.svg)
           + SQL
             + [code]
@@ -96,7 +96,7 @@ markmap:
 
         + 投影 project
           + 代数表示
-            + [Diagram]
+            + [diagram]
               ![algebra project](./images2/algebra-project-260412a.svg)
           + SQL
             + [code]
@@ -110,7 +110,7 @@ markmap:
 
         + 笛卡尔积 Cartesian-product
           + 代数表示
-            + [Diagram]
+            + [diagram]
               ![algebra Cartesian-product](./images2/algebra-CartesianProduct-260412a.svg)
           + SQL
             + [code]
@@ -123,7 +123,7 @@ markmap:
 
         + 连接 Join
           + 代数表示
-            + [Diagram]
+            + [diagram]
               ![algebra join](./images2/algebra-join-260412a.svg)
           + SQL
             + [code]
@@ -137,7 +137,7 @@ markmap:
         + 集合
           + 合 union
             + 代数表示
-              + [Diagram]
+              + [diagram]
                 + ![algebra set union](./images2/algebra-SetUnion-260412.svg)
             + SQL
               + [code]
@@ -150,7 +150,7 @@ markmap:
 
           + 交 intersection
             + 代数表示
-              + [Diagram]
+              + [diagram]
                 + ![algebra set union](./images2/algebra-SetIntersection-260412.svg)
             + SQL
               + [code]
@@ -160,7 +160,7 @@ markmap:
 
           + 差 set-difference
             + 代数表示
-              + [Diagram]
+              + [diagram]
                 + ![algebra set union](./images2/algebra-SetDiff-260412.svg)
             + SQL
               + [code]
@@ -169,7 +169,12 @@ markmap:
                 ```
 
         + 赋值
+          + 代数表示 `<-`
         + 更名
+          + 代数表示
+            + [diagram]
+              + ![algebra rename](./images2/algebra-renmae-260423.svg)
+              + 以x命名的表达式E的结果
         + 聚集
         + 等价查询
 
@@ -180,7 +185,24 @@ markmap:
 
 + 数据库模式， 数据库的逻辑设计
   + 模式图 schema diagram
-  + Database + User
+  + Schema 是一个命名空间，包含一组数据库对象（如表、视图、索引、序列、函数等），用于逻辑分组和隔离。不同 Schema 可以包含同名对象，避免命名冲突。
+  + Schema 与 Database 的关系‌
+
+    + Database‌ 是最高层级的‌物理/逻辑容器‌，具有独立的存储、用户权限、配置（如字符集、排序规则）等。
+    + Schema‌ 是 Database 内部的‌逻辑组织单元‌，一个 Database 可包含多个 Schema。  
+    + **?** 二者关系类似于“公司（Database）→ 部门（Schema）”。
+    + 数据库产品差异
+
+      + [table]
+
+        | Database Product | Schema & Database | Notes  |
+        | :--------------- | :---------------- | :----- |
+        | PostgreSQL       | Schema 是 Database 的子集 | 一个 Database 可有多个 Schema；默认有 public Schema；跨 Schema 查询需指定 schema.table |
+        | MySql            | ~~Schema ≈ Database~~ **?** | ~~在 MySQL 中，SCHEMA 和 DATABASE 是同义词，可互换使用；CREATE SCHEMA mydb 等同于 CREATE DATABASE mydb~~ |
+        |                  | Schema ≈ DataTable      | 在 MySQL 中，SCHEMA 和 Table 是同义词，可互换使用；CREATE SCHEMA mytable 等同于 CREATE TABLE mytable。 参考 DBSC7 |
+        | Oracle           | Schema ≈ 用户      | 每个用户拥有一个同名 Schema；Schema 是用户拥有的所有对象的集合；创建用户即隐式创建 Schema |
+        | SQL Server‌       | Schema 是 Database 的子集 | Schema 独立于用户，可由多个用户共享；需显式创建（CREATE SCHEMA）‌|
+
 + 数据库实例， 给定时刻数据库中数据的一个快照
 
 ### 关系数据库
@@ -189,8 +211,12 @@ markmap:
 
 + Database -- 关联表(database tables)的集合
 + Data, 对客观事物进行描述并可以鉴别的符号(抽象)。
-+ Database
 + RDBMS (Relational Database Management System), 关系数据库管理系统
+  + 图示
+
+    + [diagram]
+      ![DBMS Struct](./images2/DB-structor.drawio.svg)
+  
 + DBAS (Database Application System) 数据库应用程序/系统
 + DBA (Database Administrator) 数据库管理员
   + 职责
@@ -211,20 +237,27 @@ markmap:
 + 冗余, redundancy, 存储多倍数据， 冗余降低了_性能_，但提高了_安全性_
   
 + SQL -- Structured Query Language
-  + DDL
-  + DML
-  + integrity
-  + view definition
-  + transaction control
-  + embedded SQL & dynamic SQL
-  + authorization
+  + DDL, Data-Definition Language 数据定义语言
+    + 每个关系/表的模式
+    + 每个属性/列的取值类型
+    + 完整性约束
+    + 为每个关系维护的索引集合
+    + 每个关系的安全性和权限信息
+    + 每个关系在磁盘上的物理存储结构
+
+  + DML, Data-Manipulation Language 数据操纵语言
+  + integrity, 完整性
+  + view definition, 视图定义
+  + transaction control, 事务控制
+  + embedded SQL & dynamic SQL, 嵌入式SQL 和 动态SQL
+  + authorization, 授权
 
 #### 数据库范式
 
 ##### Normal form - 范式
 
 + 示意图
-  + [Diagram]
+  + [diagram]
     ![DBNF](./images/DBNormalForm.webp)
 
 + 码，足以区分实体(记录)的属性或属性集/组。
@@ -332,9 +365,9 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 ## MySql Server 结构
 
 + 图示
-  + [Diagram]
+  + [diagram]
     ![MySql Structure](./images/MySql-Structrue-small.png)
-  + [Diagram]
+  + [diagram]
     ![MySql Structure Details](./images/MySql-StructrueDetails-small.png)
 
 + 连接层/连接器
@@ -348,7 +381,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + 图示
 
-        + [Diagram]
+        + [diagram]
           ![MySql Syntax Tree](./images/MySql-SyntaxTree-small.png)
 
   + 优化器
@@ -360,7 +393,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
   + InnoDB
     + 结构
       + 图示
-        + [Diagram]
+        + [diagram]
           ![InnoDB Memory structure](./images/MySql-InnoDBMemStructure-small.png)
 
     + BufferPool 缓冲池
@@ -492,7 +525,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
           + 空间大小: 48M
 
       + 图示
-        + [Diagram]
+        + [diagram]
           ![InnoDB Log Buffer](./images/MySql-Buffers2-small.png)
 
 ## 键 和 索引
@@ -604,7 +637,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
       B树索引，存储引擎不再需要进行全表扫描来获取数据
     + 示例
       + 图例
-        + [Diagram]
+        + [diagram]
           ![B-Tree Index](./images/DB-BTreeIndex.jpeg)
       + 过程 查找E
         1. 和 根节点M 比较， E < M, 搜索左侧分支
@@ -614,7 +647,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 + B+树索引
   + B树 vs. B+树
     + 图例
-      + [Diagram]
+      + [diagram]
         ![BTree compare B+Tree](./images/DB-BTreeCmpB+Tree.jpeg)
     + 区别
       + B树中无重复元素，B+树有
@@ -628,7 +661,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
     + 结构
       + 示例
         + 图例
-          + [Diagram]
+          + [diagram]
             ![B+-Tree Index](./images/DB-B+TreeIndex.jpeg)
         + 表结构
           + [code]
@@ -680,7 +713,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
     + 存储引擎负责实现索引，所以不是所有的存储引擎都支持聚集索引。 InnoDB表中聚集索引的索引列就是主键，所以也叫主键索引
   + 结构
     + 图例
-      + [Diagram]
+      + [diagram]
         ![Primary Index](./images/DB-PrimaryKeyIndex.jpeg)
     + 表结构
       + [code]
@@ -700,7 +733,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
   + 结构
     + 表结构
       + 图例
-        + [Diagram]
+        + [diagram]
           ![表数据](./images/DB-tbl-layout_test.jpeg)
       + 表结构
         + [code]
@@ -716,11 +749,11 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
       + InnoDB
         + 主键索引
           + 图示
-            + [Diagram]
+            + [diagram]
               ![InnoDB Primary key](./images/DB-tbl-layout_test-InnoDB-PrimaryKey.jpeg)
         + 二级索引
           + 图示
-            + [Diagram]
+            + [diagram]
               ![InnoDB Primary key](./images/DB-tbl-layout_test-InnoDB-L2Key.jpeg)
           + 说明
             + 二级索引叶子节点保存了主键，类似指针而非通常保存的下一叶子的地址 
@@ -729,17 +762,17 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
       + MyISAM
         + 主键索引
           + 图示
-            + [Diagram]
+            + [diagram]
               ![InnoDB Primary key](./images/DB-tbl-layout_test-MyISAM-PrimaryKey.jpeg)
         + 二级索引
           + 图示
-            + [Diagram]
+            + [diagram]
               ![InnoDB Primary key](./images/DB-tbl-layout_test-MyISAM-L2Key.jpeg)
           + 说明
             + 二级索引和主键索引无区别
       + 比较
         + 图示
-          + [Diagram]
+          + [diagram]
             ![InnoDB vs. MyISAM](./images/DB-tbl-layout_test-PrimaryKey_NoPrimary.jpeg)
         + 聚集索引的优点：
           + 可以把相关数据保存在一起，例如实现电子邮箱时，根据用户ID来聚集数据，读取少数的数据页就能获取某个用户的全部邮件。
@@ -772,26 +805,626 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 + [学习笔记](./MySql-data_type.md)
 
-### 函数
+### 函数 和 计算
+
+### 完整性约束
+
++ 非空约束
+  + 要求: 数据表指定字段 不能为空
+  + 关键字/语句/表达式: 
+    + `NOT NULL,` 或 `NOT NULL DEFAULT 缺省值,` 
+  + 示例 1
+
+    + [operating]
+
+      ```cmd
+      mysql> USE douma
+      Reading table information for completion of table and column names
+      You can turn off this feature to get a quicker startup with -A
+      
+      Database changed
+      mysql> CREATE TABLE member (
+      ,
+          name VARCHAR(20) NOT NULL
+      );
+          ->     member_id INT UNSIGNED,
+          ->     name VARCHAR(20) NOT NULL
+          -> );
+      Query OK, 0 rows affected (0.04 sec)
+      
+      mysql> SHOW TABLES;
+      +-----------------+
+      | Tables_in_douma |
+      +-----------------+
+      | member          |
+      | person          |
+      | person2         |
+      | person3         |
+      +-----------------+
+      4 rows in set (0.00 sec)
+      
+      mysql> INSERT INTO member (member_id, name) VALUES(1, 'douma');
+      Query OK, 1 row affected (0.02 sec)
+      
+      mysql> INSERT INTO member (member_id, name) VALUES(2, '');
+      Query OK, 1 row affected (0.02 sec)
+      
+      mysql> INSERT INTO member (member_id, name) VALUES(3, NULL);
+      ERROR 1048 (23000): Column 'name' cannot be null
+      mysql> INSERT INTO member (member_id)       VALUES(4);
+      ERROR 1364 (HY000): Field 'name' doesn't have a default value
+      mysql>
+      ```
+
+  + 示例 2
+
+    + [operating]
+
+      ```cmd
+      mysql> USE douma
+      Reading table information for completion of table and column names
+      You can turn off this feature to get a quicker startup with -A
+      
+      Database changed
+      mysql> CREATE TABLE member2 (
+          ->     member_id INT UNSIGNED,
+          ->     name VARCHAR(20) NOT NULL DEFAULT 'Tester'
+          -> );
+      Query OK, 0 rows affected (0.04 sec)
+      
+      mysql> SHOW TABLES;
+      +-----------------+
+      | Tables_in_douma |
+      +-----------------+
+      | member          |
+      | member2         |
+      | person          |
+      | person2         |
+      | person3         |
+      +-----------------+
+      5 rows in set (0.00 sec)
+      
+      mysql> INSERT INTO member2 (member_id, name) VALUES(1, 'douma');
+      Query OK, 1 row affected (0.02 sec)
+      
+      mysql> INSERT INTO member2 (member_id, name) VALUES(2, '');
+      Query OK, 1 row affected (0.01 sec)
+      
+      mysql> INSERT INTO member2 (member_id, name) VALUES(3, NULL);
+      ERROR 1048 (23000): Column 'name' cannot be null
+      mysql> INSERT INTO member2 (member_id)       VALUES(4);
+      Query OK, 1 row affected (0.02 sec)
+      
+      mysql>
+      ```
+
++ 唯一约束
+
+  + 要求: 数据表中所有记录的指定字段不能重复
+    + `NULL`可以重复
+    + `''`不可以重复
+  + 关键字/语句/表达式: 
+    + `UNIQUE,`
+  + 示例 1
+
+    + [operating]
+
+      ```cmd
+      mysql> USE douma
+      Reading table information for completion of table and column names
+      You can turn off this feature to get a quicker startup with -A
+      
+      Database changed
+      mysql> DROP TABLE IF EXISTS member3;
+      Query OK, 0 rows affected (0.03 sec)
+      
+      mysql> CREATE TABLE member3 (
+          ->     member_id INT UNSIGNED,
+          ->     name VARCHAR(20) NOT NULL DEFAULT 'Tester',
+          ->     email VARCHAR(30) UNIQUE
+          -> );
+      Query OK, 0 rows affected (0.04 sec)
+      
+      mysql> SHOW TABLES;
+      +-----------------+
+      | Tables_in_douma |
+      +-----------------+
+      | member          |
+      | member2         |
+      | member3         |
+      | person          |
+      | person2         |
+      | person3         |
+      +-----------------+
+      6 rows in set (0.00 sec)
+      
+      mysql> INSERT INTO member3 (member_id, name, email) VALUES(1, 'douma', 'douma_ok@163.com');
+      Query OK, 1 row affected (0.02 sec)
+      
+      mysql> INSERT INTO member3 (member_id, name, email) VALUES(2, 'jeffy', 'douma_ok@163.com');
+      ERROR 1062 (23000): Duplicate entry 'douma_ok@163.com' for key 'member3.email'
+      mysql> INSERT INTO member3 (member_id, name) VALUES(3, 'bob');
+      Query OK, 1 row affected (0.02 sec)
+      
+      mysql> INSERT INTO member3 (member_id, name) VALUES(3, 'auth');
+      Query OK, 1 row affected (0.01 sec)
+      
+      mysql> INSERT INTO member3 (member_id, name, email) VALUES(2, 'john', '');
+      Query OK, 1 row affected (0.01 sec)
+      
+      mysql> INSERT INTO member3 (member_id, name, email) VALUES(4, 'joy', '');
+      ERROR 1062 (23000): Duplicate entry '' for key 'member3.email'
+      mysql> SELECT * FROM member3;
+      +-----------+-------+------------------+
+      | member_id | name  | email            |
+      +-----------+-------+------------------+
+      |         1 | douma | douma_ok@163.com |
+      |         3 | bob   | NULL             |
+      |         3 | auth  | NULL             |
+      |         2 | john  |                  |
+      +-----------+-------+------------------+
+      4 rows in set (0.00 sec)
+      
+      mysql>
+      ```
+
++ 主键约束
+
+  + 要求：非空且唯一
+  + 关键字/语句/表达式: 
+    + `PRIMARY KEY,`
+    + `PRIMARY KEY (...),`
+
+  + 注意:
+    + 主键不要使用自增(`AUTO_INCREMENT,`)
+  + 示例 1
+
+    + [operating]
+
+      ```cmd
+      mysql> USE douma;
+      Database changed
+      mysql> DROP TABLE IF EXISTS member4;
+      Query OK, 0 rows affected, 1 warning (0.01 sec)
+      
+      mysql> CREATE TABLE member4 (
+          ->     member_id INT UNSIGNED PRIMARY KEY,
+          ->     name VARCHAR(20) NOT NULL DEFAULT 'Tester',
+          ->     email VARCHAR(30) UNIQUE
+          -> );
+      Query OK, 0 rows affected (0.04 sec)
+      
+      mysql> INSERT INTO member4 (member_id, name, email) VALUES(1, 'douma', 'douma_ok@163.com');
+      Query OK, 1 row affected (0.00 sec)
+      
+      mysql> INSERT INTO member4 (member_id, name, email) VALUES(2, 'jeffy', 'jeffy_ok@163.com');
+      Query OK, 1 row affected (0.00 sec)
+      
+      mysql> INSERT INTO member4 (member_id, name, email) VALUES(2, 'john', 'john_ok@163.com');
+      ERROR 1062 (23000): Duplicate entry '2' for key 'member4.PRIMARY'
+      mysql> INSERT INTO member4 (name, email) VALUES('kathy', '');
+      ERROR 1364 (HY000): Field 'member_id' doesn't have a default value
+      mysql>
+      ```
+
+  + 示例 2
+
+    + [code]
+
+      ```sql
+      USE dbsc7;
+      create table if not exists classroom
+          (building       varchar(15),
+           room_number    varchar(7),
+           capacity       numeric(4,0),
+           primary key (building, room_number)
+          );
+      insert into classroom values('Lamberton', 134, 10);
+      insert into classroom values('Chandler', 375, 10);
+      insert into classroom values('Fairchild', 145, 27);
+      insert into classroom values('Nassau', 45, 92);
+      insert into classroom values('Grace', 40, 34);
+      insert into classroom values('Whitman', 134, 120);
+      insert into classroom values('Lamberton', 143, 10);
+      insert into classroom values('Taylor', 812, 115);
+      insert into classroom values('Saucon', 113, 109);
+      insert into classroom values('Painter', 86, 97);
+      insert into classroom values('Alumni', 547, 26);
+      insert into classroom values('Alumni', 143, 47);
+      insert into classroom values('Drown', 757, 18);
+      insert into classroom values('Saucon', 180, 15);
+      insert into classroom values('Whitman', 434, 32);
+      insert into classroom values('Saucon', 844, 24);
+      insert into classroom values('Bronfman', 700, 12);
+      insert into classroom values('Polya', 808, 28);
+      insert into classroom values('Gates', 707, 65);
+      insert into classroom values('Gates', 314, 10);
+      insert into classroom values('Main', 45, 30);
+      insert into classroom values('Taylor', 183, 71);
+      insert into classroom values('Power', 972, 10);
+      insert into classroom values('Garfield', 119, 59);
+      insert into classroom values('Rathbone', 261, 60);
+      insert into classroom values('Stabler', 105, 113);
+      insert into classroom values('Power', 717, 12);
+      insert into classroom values('Main', 425, 22);
+      insert into classroom values('Lambeau', 348, 51);
+      insert into classroom values('Chandler', 804, 11);
+      ```
+
++ 检查约束
+
+  + 要求: 对指定字段进行检查
+  + 关键字/语句/表达式
+    + `CHECK(...),`
+    + `ENUM(...),`
+  
+  + 示例 1
+
+    + [operating]
+
+      ```cmd
+      mysql> USE douma;
+      Database changed
+      mysql> DROP TABLE IF EXISTS member5;
+      Query OK, 0 rows affected (0.03 sec)
+      
+      mysql> CREATE TABLE member5 (
+          ->     member_id INT UNSIGNED PRIMARY KEY,
+          ->     name VARCHAR(20) NOT NULL DEFAULT 'Tester',
+          ->     email VARCHAR(30) UNIQUE,
+          ->     age SMALLINT UNSIGNED CHECK(age > 0 AND age < 200),
+          ->     gender ENUM('MALE','FEMALE','OTHERS')
+          -> );
+      Query OK, 0 rows affected (0.06 sec)
+      
+      mysql> INSERT INTO member5 (member_id, name, email, age, gender) VALUES(1, 'douma', 'douma_ok@163.com', 29,'MALE');
+      Query OK, 1 row affected (0.01 sec)
+      
+      mysql> INSERT INTO member5 (member_id, name, email, age, gender) VALUES(2, 'jeffy', 'jeffy_ok@163.com', 248,'FEMALE');
+      ERROR 3819 (HY000): Check constraint 'member5_chk_1' is violated.
+      mysql> INSERT INTO member5 (member_id, name, email) VALUES(3, 'john', 'john_ok@163.com');
+      Query OK, 1 row affected (0.01 sec)
+      
+      mysql> INSERT INTO member5 (member_id, name, email, age, gender) VALUES(4, 'auth', 'auth_ok@163.com', 33, 'Nan');
+      ERROR 1265 (01000): Data truncated for column 'gender' at row 1
+      mysql> SELECT * FROM member5;
+      +-----------+-------+------------------+------+--------+
+      | member_id | name  | email            | age  | gender |
+      +-----------+-------+------------------+------+--------+
+      |         1 | douma | douma_ok@163.com |   29 | MALE   |
+      |         3 | john  | john_ok@163.com  | NULL | NULL   |
+      +-----------+-------+------------------+------+--------+
+      2 rows in set (0.00 sec)
+      
+      mysql>
+      ```
+
+  + 示例 2
+
+    + [code]
+
+      ```sql
+      USE dbsc7;
+      create table if not exists section
+          (course_id      varchar(8), 
+           sec_id         varchar(8),
+           semester       varchar(6)
+              check (semester in ('Fall', 'Winter', 'Spring', 'Summer')), 
+           year           numeric(4,0) check (year > 1701 and year < 2100), 
+           building       varchar(15),
+           room_number    varchar(7),
+           time_slot_id   varchar(4),
+           primary key (course_id, sec_id, semester, year),
+           foreign key (course_id) references course (course_id)
+              on delete cascade,
+           foreign key (building, room_number) references classroom (building, room_number)
+              on delete set null
+          );
+      ```
+
++ 外键约束
+
+  + 要求
+
+  + 关键字/语句/表达式
+
+  + 示例 1
+
+    + [code]
+
+      ```sql
+      USE douma;
+      
+      DROP TABLE IF EXISTS book;
+      DROP TABLE IF EXISTS student;
+      
+      
+      
+      CREATE TABLE student (
+          sid INT UNSIGNED,
+          name VARCHAR(40) NOT NULL,
+          PRIMARY KEY(sid)
+      );
+      
+      
+      CREATE TABLE book (
+          bid INT UNSIGNED,
+          title VARCHAR(100) NOT NULL,
+          sid INT UNSIGNED,
+          CONSTRAINT fk_sid FOREIGN KEY (sid) REFERENCES student(sid)
+      );
+      
+      
+      INSERT INTO student VALUES (1,'ZhangSan');
+      INSERT INTO student VALUES (2,'LiSi');
+      
+      INSERT INTO book VALUES (10,'高性能MySQL', 1);
+      INSERT INTO book VALUES (11,'MySQL技术内幕：InnoDB存储引擎', 1);
+      INSERT INTO book VALUES (12,'SQL必知必会', 2);
+      INSERT INTO book VALUES (13,'深入理解MySQ核心技术', 2);
+      ```
+
+    + [operating]
+
+      ```cmd
+      mysql> USE douma;
+      Database changed
+      mysql> INSERT INTO book VALUES (20,'MySql Action', 9);
+      ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`douma`.`book`, CONSTRAINT `fk_sid` FOREIGN KEY (`sid`) REFERENCES `student` (`sid`))
+      mysql>
+      ```
+
+    + 注意:
+      + DROP TABLE时，应先drop table book，因为student中sid是book的外键
+
+  + 示例 2
+
+    + [code]
+
+      ```sql
+      USE dbsc7;
+      create table if not exists course
+          (course_id      varchar(8), 
+           title          varchar(50), 
+           dept_name      varchar(20),
+           credits        numeric(2,0) check (credits > 0),
+           primary key (course_id),
+           foreign key (dept_name) references department (dept_name)
+              on delete set null
+          );
+      ```
+
+  + 限制
+    + 必须是有唯一约束(UNIQU)或主键约束(Primary Key)的字段才能作为另一张表的外键
+
+      + 示例
+
+        + [operating]
+
+          ```cdm
+          mysql> USE douma;
+          Database changed
+          mysql> CREATE TABLE book2 (
+              ->     bid INT UNSIGNED,
+              ->     title VARCHAR(100) NOT NULL,
+              ->     sid INT UNSIGNED,
+              ->     sname VARCHAR(40),
+              ->     CONSTRAINT fk_sname FOREIGN KEY (sname) REFERENCES student(name)
+              -> );
+          ERROR 6125 (HY000): Failed to add the foreign key constraint. Missing unique key for constraint 'fk_sname' in the referenced table 'student'
+          mysql>
+          ```
+
+    + 先删除子表，再删除父表
+      包括 DROP操作 和 DELETE操作
+      _子表 REFERENCES 父表; 子表无数据涉及父表除外_
+
+      + 示例 1
+
+        + [operating]
+
+          ```cmd
+          mysql> USE douma;
+          Database changed
+          mysql> DELETE FROM student WHERE sid = 1;
+          ERROR 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`douma`.`book`, CONSTRAINT `fk_sid` FOREIGN KEY (`sid`) REFERENCES `student` (`sid`))
+          mysql>
+          ```
+  
+      + 示例 2
+
+        + [operating]
+
+          ```cmd
+          mysql> USE douma;
+          Database changed
+          mysql> INSERT INTO student VALUES (12,'WangWu');
+          Query OK, 1 row affected (0.00 sec)
+          
+          mysql> COMMIT;
+          Query OK, 0 rows affected (0.00 sec)
+          
+          mysql> SELECT * FROM student FOR UPDATE;
+          +-----+----------+
+          | sid | name     |
+          +-----+----------+
+          |   1 | ZhangSan |
+          |   2 | LiSi     |
+          |  12 | WangWu   |
+          +-----+----------+
+          3 rows in set (0.00 sec)
+          
+          mysql> DELETE FROM student WHERE sid = 12;
+          OM student FOR UPDATE;Query OK, 1 row affected (0.02 sec)
+          
+          mysql>
+          mysql> SELECT * FROM student FOR UPDATE;
+          +-----+----------+
+          | sid | name     |
+          +-----+----------+
+          |   1 | ZhangSan |
+          |   2 | LiSi     |
+          +-----+----------+
+          2 rows in set (0.00 sec)
+          
+          mysql>
+          ```
 
 ### 数据库 + 数据表 + 视图 + 存储过程
-  + Create -- 创建
-  + Alter -- 修改
-  + Drop -- 抛弃
-  + Grant -- 授权
+
++ Create -- 创建
+  + 数据库
+    + [code]
+
+      ```sql
+      CREATE DATABASE 数据库名;
+      ```
+
++ Alter -- 修改
++ Drop -- 抛弃
+  + 数据库
+    + [code]
+
+      ```sql
+      DROP DATABASE 数据库名;
+      ```
+
++ Grant -- 授权
++ 退出当前数据库
+  + [operating]
+
+    ```cmd
+    mysql> select database();
+    +------------+
+    | database() |
+    +------------+
+    | douma      |
+    +------------+
+    1 row in set (0.00 sec)
+    
+    mysql> USE mysql;
+    Reading table information for completion of table and column names
+    You can turn off this feature to get a quicker startup with -A
+    
+    Database changed
+    mysql> select database();
+    +------------+
+    | database() |
+    +------------+
+    | mysql      |
+    +------------+
+    1 row in set (0.00 sec)
+    
+    mysql> 
+    ```
 
 ### 数据 
-  + Select -- Query 查询
-  + Update -- 更新
-  + Insert -- 插入
-  + Delete -- 删除
-  + Truncate -- 截断/删节
++ Select -- Query 查询
+  + 单表查询
+    + 默认, all, distinct
+      + 说明
+        + 默认是显示全部，all则显式指明显示全部
+        + distinct是去重，作用于整个select列表
+          + distinct vs. group by
+            + distinct
+              + **专门**用于去除重复的记录行
+              + 作用于**整个select列表**
+              + 查完计算（基本不计算），处理速度快，资源消耗低，
+              + 有更好的自动优化
+              + 大多数情况下，distinct是特殊的group by
+
+            + group by
+              + 主要作用为分组统计，对每组应用聚合函数，去重是副业
+              + 边查边计算（按指定列分组，每组返回一行数据，需要更多计算），资源消耗高
+
+            + 小于100k行，效率相差不大
+            + ![incorrect](./images/incorrect-trans-small.png)大于100k行，group by更优，因为 distinct 需要全表扫描
+            + 去除字段有索引时，性能接近
+            + 去除字段无索引时，distinct更优
+            + 多列去重，建议使用group by
+
+
+      + 表格
+
+        + [table]
+
+          | dept_name   | select dept_name | select all dept_name | select distinct dept_name |
+          | :---------- | :--------------: | :------------------: | :-----------------------: |
+          | Accounting  | [X]              | [X]                  | [X]                       |
+          | Accounting  | [X]              | [X]                  |                           |
+          | Accounting  | [X]              | [X]                  |                           |
+          | Accounting  | [X]              | [X]                  |                           |
+          | Astronomy   | [X]              | [X]                  | [X]                       |
+          | Athletics   | [X]              | [X]                  | [X]                       |
+          | Athletics   | [X]              | [X]                  |                           |
+          | Athletics   | [X]              | [X]                  |                           |
+          | Athletics   | [X]              | [X]                  |                           |
+          | Athletics   | [X]              | [X]                  |                           |
+          | Biology     | [X]              | [X]                  | [X]                       |
+          | Biology     | [X]              | [X]                  |                           |
+          | Comp. Sci.  | [X]              | [X]                  | [X]                       |
+          | Comp. Sci.  | [X]              | [X]                  |                           |
+          | Cybernetics | [X]              | [X]                  | [X]                       |
+          | Cybernetics | [X]              | [X]                  |                           |
+          | Cybernetics | [X]              | [X]                  |                           |
+          | Cybernetics | [X]              | [X]                  |                           |
+          | Elec. Eng.  | [X]              | [X]                  | [X]                       |
+          | Elec. Eng.  | [X]              | [X]                  |                           |
+          | Elec. Eng.  | [X]              | [X]                  |                           |
+          | Elec. Eng.  | [X]              | [X]                  |                           |
+          | English     | [X]              | [X]                  | [X]                       |
+          | English     | [X]              | [X]                  |                           |
+          | English     | [X]              | [X]                  |                           |
+          | English     | [X]              | [X]                  |                           |
+          | Finance     | [X]              | [X]                  | [X]                       |
+          | Geology     | [X]              | [X]                  | [X]                       |
+          | Languages   | [X]              | [X]                  | [X]                       |
+          | Languages   | [X]              | [X]                  |                           |
+          | Languages   | [X]              | [X]                  |                           |
+          | Marketing   | [X]              | [X]                  | [X]                       |
+          | Marketing   | [X]              | [X]                  |                           |
+          | Marketing   | [X]              | [X]                  |                           |
+          | Marketing   | [X]              | [X]                  |                           |
+          | Mech. Eng.  | [X]              | [X]                  | [X]                       |
+          | Mech. Eng.  | [X]              | [X]                  |                           |
+          | Physics     | [X]              | [X]                  | [X]                       |
+          | Physics     | [X]              | [X]                  |                           |
+          | Pol. Sci.   | [X]              | [X]                  | [X]                       |
+          | Pol. Sci.   | [X]              | [X]                  |                           |
+          | Pol. Sci.   | [X]              | [X]                  |                           |
+          | Psychology  | [X]              | [X]                  | [X]                       |
+          | Psychology  | [X]              | [X]                  |                           |
+          | Statistics  | [X]              | [X]                  | [X]                       |
+          | Statistics  | [X]              | [X]                  |                           |
+          | Statistics  | [X]              | [X]                  |                           |
+          | Statistics  | [X]              | [X]                  |                           |
+          | Statistics  | [X]              | [X]                  |                           |
+          | Statistics  | [X]              | [X]                  |                           |
+
++ Update -- 更新
++ Insert -- 插入
++ Delete -- 删除
++ Truncate -- 截断/删节
 
 ### 导入导出
 
 ### 备份恢复
 
+#### 备份
 
+##### 类型
+
++ 静态转储 / 冷备份
+
++ 动态转储 / 热备份
+
++ 完全备份
+
++ 差量备份
+  + 备份上一次**完全备份**之后变化的数据
+
++ 增量备份
+  + 备份上一次**备份**之后变化的数据
 
 ## 主题
 
@@ -846,6 +1479,8 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
     + 临键锁 Next Key
     + 插入意向锁 Insert intention
 
+#### MVCC -- Multi-Version Concurrency Control
+
 ## 数据库实例
 
 ### 检查
@@ -893,7 +1528,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
   [root@ThinkPadT14P-23 Workspace]#
   ```
 
-### Schema
+### 物理存储
 
 #### 说明
 
@@ -1017,38 +1652,26 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 + [operating]
 
   ```cmd
-  [root@ThinkPadT14P-23 Workspace]# mysql -h localhost -P 3306 -u root -p
-  Enter password:
-  Welcome to the MySQL monitor.  Commands end with ; or \g.
-  Your MySQL connection id is 16
-  Server version: 8.4.9 MySQL Community Server - GPL
-  
-  Copyright (c) 2000, 2026, Oracle and/or its affiliates.
-  
-  Oracle is a registered trademark of Oracle Corporation and/or its
-  affiliates. Other names may be trademarks of their respective
-  owners.
-  
-  Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-  
-  mysql> USE mysql;
-  T user, host FROM user;Reading table information for completion of table and column names
-  You can turn off this feature to get a quicker startup with -A
-  
-  Database changed
-  mysql> SELECT user, host FROM user;
-  +------------------+-----------+
-  | user             | host      |
-  +------------------+-----------+
-  | mysql.infoschema | localhost |
-  | mysql.session    | localhost |
-  | mysql.sys        | localhost |
-  | root             | localhost |
-  +------------------+-----------+
-  4 rows in set (0.00 sec)
+  mysql> SELECT user, host, Select_priv, Insert_priv, Update_priv, Delete_priv FROM mysql.user;
+  +------------------+-----------+-------------+-------------+-------------+-------------+
+  | user             | host      | Select_priv | Insert_priv | Update_priv | Delete_priv |
+  +------------------+-----------+-------------+-------------+-------------+-------------+
+  | mysql.infoschema | localhost | Y           | N           | N           | N           |
+  | mysql.session    | localhost | N           | N           | N           | N           |
+  | mysql.sys        | localhost | N           | N           | N           | N           |
+  | root             | localhost | Y           | Y           | Y           | Y           |
+  +------------------+-----------+-------------+-------------+-------------+-------------+
+  4 rows in set (0.01 sec)
   
   mysql>
   ```
+
++ [code]
+
+  ```sql
+  SHOW grants;
+  ```
+
 
 ##### 添加用户
 
@@ -1084,7 +1707,6 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 + [operating] 操作
   
-
 + [code] 代码
   + 与 [operating] 的区别
 
@@ -1092,8 +1714,8 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       | Example    | operating                               | code                      |
       | :--------- | :-------------------------------------- | :------------------------ |
-      | 01         |  `C:\Workspace>wsl --import AlmaLinux8` | `wsl --import AlmaLinux8` |
-      |            |  附带屏幕输出                             | 不附带屏幕输出               |
+      | 01         | `C:\Workspace>wsl --import AlmaLinux8`  | `wsl --import AlmaLinux8` |
+      |            | 附带屏幕输出                              | 不附带屏幕输出               |
       | 02         | `[root@ThinkPadT14P-23 Workspace]# rpm --upgrade` | `rpm --upgrade` |
       |            | 屏幕输出: "rpm: no packages given for install "     |                |
 
@@ -1165,6 +1787,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
       ```
 
   + 导出，注销，切换目录导入
+
     + [operating]
 
       ```cmd
@@ -1172,7 +1795,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
         NAME           STATE           VERSION
       * AlmaLinux-8    Stopped         2
       
-      C:\Workspace>wsl --export AlmaLinux-8 C:\Workspace\VirtualMachine\AlmaLinux8_260422_0.tar
+      C:\Workspace>wsl --export AlmaLinux-8 C:\Workspace\VirtualMachine\AlmaLinux8_260422_0000.tar
       Export in progress, this may take a few minutes. (315 MB)
       
       The operation completed successfully.
@@ -1182,7 +1805,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
       The operation completed successfully.
       
       
-      C:\Workspace>wsl --import AlmaLinux8 C:\Workspace\VirtualMachine\Alamlinux\AlamLinux8       C:\Workspace\VirtualMachine\AlmaLinux8_260422_0.tar
+      C:\Workspace>wsl --import AlmaLinux8 C:\Workspace\VirtualMachine\Alamlinux\AlamLinux8       C:\Workspace\VirtualMachine\AlmaLinux8_260422_0000.tar
       The operation completed successfully.
       
       C:\Workspace>dir  C:\Workspace\VirtualMachine\Alamlinux\AlamLinux8
@@ -1200,6 +1823,10 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
       
       C:\Workspace>
       ```
+
+    + 备份点
+
+      + 操作系统初始安装完成
 
   + 维护
     + 20260422
@@ -1270,13 +1897,17 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
           Complete!
           [root@ThinkPadT14P-23 Workspace]#
 
-          C:\Workspace>wsl --export AlmaLinux8 C:\Workspace\VirtualMachine\AlmaLinux8_260423_1.tar
+          C:\Workspace>wsl --export AlmaLinux8 C:\Workspace\VirtualMachine\AlmaLinux8_260423_0001.tar
           Export in progress, this may take a few minutes. (510 MB)
           
           The operation completed successfully.
           
           C:\Workspace>
           ```
+
+      + 备份点
+
+        + 操作系统更新至最新
 
       + 检查是否安装 MySql
 
@@ -1303,7 +1934,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
         + ~~安装MySql仓库~~
 
           + [operating]
-            
+
             ```cmd
             [root@ThinkPadT14P-23 Workspace]# ll /home/edgar/Downloads/
             total 20
@@ -1648,13 +2279,18 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
               Complete!
               [root@ThinkPadT14P-23 Workspace]#
 
-              C:\Workspace>wsl --export AlmaLinux8 C:\Workspace\VirtualMachine\AlmaLinux8_260423_2.tar
+              C:\Workspace>wsl --export AlmaLinux8 C:\Workspace\VirtualMachine\AlmaLinux8_260423_0002.tar
               Export in progress, this may take a few minutes. (972 MB)
               
               The operation completed successfully.
               
               C:\Workspace>
               ```
+          
+          + 备份点
+
+            + MySql软件安装完成
+
 
         + 初次运行
 
@@ -1756,18 +2392,21 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
             [root@ThinkPadT14P-23 Workspace]#
             ```
 
-        + 备份
+        + 备份WSL
 
           + [operating]
 
             ```cmd
-            C:\Workspace>wsl --export AlmaLinux8 C:\Workspace\VirtualMachine\AlmaLinux8_260423_3.tar
+            C:\Workspace>wsl --export AlmaLinux8 C:\Workspace\VirtualMachine\AlmaLinux8_260423_0003.tar
             Export in progress, this may take a few minutes. (1064 MB)
             
             The operation completed successfully.
             
             C:\Workspace>
             ```
+
+          + 备份点
+            + MySql服务测试完成
 
       + 升级
 
@@ -1782,40 +2421,512 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
           [root@ThinkPadT14P-23 Workspace]#
           ```
 
+    + 20260423
+
+      + MySql创建练习库
+        + ref: [【MySQL】十小时吃透MySQL全面知识体系，SQL基础+简单查询+复杂查询，从原理到实操一套全搞定！](https://www.bilibili.com/video/BV1C2QjB2EVg/?spm_id_from=333.788.videopod.episodes&vd_source=38fc599412349dcfe60484e3ff320c66&p=7)
+
+        + 创建数据库
+
+          + [code]
+
+            ```sql
+            CREATE DATABASE douma;
+            ```
+
+        + 创建数据表
+
+          + 切换数据库
+
+            + [code]
+
+              ```sql
+              USE douma;
+              ```
+
+          + 创建数据表
+
+            + [code]
+
+              ```sql
+              CREATE TABLE person (
+                id_card VARCHAR(20),
+                name    VARCHAR(20),
+                year_birth  INT,
+                month_birth INT,
+                day_birth   INT,
+                gender  VARCHAR(6),
+                email   VARCHAR(60)
+              );
+              ```
+
+          + 插入数据
+
+            + [code]
+
+              ```sql
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198006201234', 'Douma', 1980, 6, 20, 'MALE', 'douma_twq@163.com');
+              ```
+
+            + [code]
+
+              ```sql
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198003201234', 'Jane', 1980, 3, 20, 'MALE', 'Jane_twq@163.com');
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198007203573', 'George', 1980, 7, 20, 'MALE', 'George_twq@163.com');
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198008202664', 'Bob', 1980, 8, 20, 'MALE', 'Bob_twq@163.com');
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198009203215', 'Tom', 1980, 9, 20, 'MALE', 'Tom_twq@163.com');
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198010201234', 'Jeffy', 1980,10, 20, 'MALE', 'Jeffy_twq@163.com');
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198011201234', 'Kathy', 1980,11, 20, 'MALE', 'Kathy_twq@163.com');
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198012201234', 'Echo', 1980,12, 20, 'MALE', 'Echo_twq@163.com');
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198001201234', 'LiLei', 1980, 1, 20, 'MALE', 'LiLei_twq@163.com');
+              INSERT INTO person (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198002201234', 'WangMeimei', 1980, 2, 20, 'MALE', 'WangMeimei_twq@163.com');
+              ```
+
+          + 创建数据表
+
+            + [code]
+
+              ```sql
+              CREATE TABLE person2 (
+                id_card CHAR(18),
+                name    VARCHAR(20),
+                year_birth  SMALLINT,
+                month_birth TINYINT,
+                day_birth   TINYINT,
+                gender  VARCHAR(6),
+                email   VARCHAR(60),
+                price   DECIMAL(15,2)
+              );
+              ```
+
+          + 插入数据
+
+            + [code]
+
+              ```sql
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198006201234', 'Douma', 1980, 6, 20, 'MALE', 'douma_twq@163.com');
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198003201234', 'Jane', 1980, 3, 20, 'MALE', 'Jane_twq@163.com');
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198007203573', 'George', 1980, 7, 20, 'MALE', 'George_twq@163.com');
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198008202664', 'Bob', 1980, 8, 20, 'MALE', 'Bob_twq@163.com');
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198009203215', 'Tom', 1980, 9, 20, 'MALE', 'Tom_twq@163.com');
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198010201234', 'Jeffy', 1980,10, 20, 'MALE', 'Jeffy_twq@163.com');
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198011201234', 'Kathy', 1980,11, 20, 'MALE', 'Kathy_twq@163.com');
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198012201234', 'Echo', 1980,12, 20, 'MALE', 'Echo_twq@163.com');
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198001201234', 'LiLei', 1980, 1, 20, 'MALE', 'LiLei_twq@163.com');
+              INSERT INTO person2 (id_card, name, year_birth, month_birth, day_birth, gender, email) VALUES ('362329198002201234', 'WangMeimei', 1980, 2, 20, 'MALE', 'WangMeimei_twq@163.com');
+              ```
+
+              ```sql
+              update person2 set price = 150000 where id_card = '362329198006201234';
+              update person2 set price = 150000 where id_card = '362329198003201234';
+              update person2 set price = 150000 where id_card = '362329198007203573';
+              update person2 set price = 150000 where id_card = '362329198008202664';
+              update person2 set price = 150000 where id_card = '362329198009203215';
+              update person2 set price = 150000 where id_card = '362329198010201234';
+              update person2 set price = 150000 where id_card = '362329198011201234';
+              update person2 set price = 150000 where id_card = '362329198012201234';
+              update person2 set price = 150000 where id_card = '362329198001201234';
+              update person2 set price = 150000 where id_card = '362329198002201234';
+              ```
+
+          + 创建数据表
+
+            + [code]
+
+              ```sql
+              CREATE TABLE person3 (
+                id_card CHAR(18),
+                name    VARCHAR(20),
+                birthday DATE,
+                gender  VARCHAR(6),
+                email   VARCHAR(60),
+                price   DECIMAL(15,2)
+              );
+              ```
+
+          + 插入数据
+
+            + [code]
+
+              ```sql
+              INSERT INTO person3 (id_card, name, birthday, gender, email, price) VALUES ('362329198006201234', 'Douma', '1980-06-20', 'MALE', 'douma_twq@163.com',200000.56);
+              ```
+
+          + 切换到系统库 并创建 dbsc7 数据库 (i.e. database of book named 'Database System Conceptions Editio 7th')
+
+            + [code]
+
+              ```sql
+              SELECT database();
+
+              USE mysql
+
+              mysql> CREATE database dbsc7;
+
+              mysql>
+              ```
+
+          + 创建 DataTable of DBSC7，并插入数据
+
+            + [code]
+
+              ```sql
+              SELECT database();
+
+              USE dbsc7;
+
+              SHOW tables;
+
+              source /mnt/c/Workspace/Data/MySQL/scripts/MySQL8/DBSC7/DDL+drop.sql;
+              source /mnt/c/Workspace/Data/MySQL/scripts/MySQL8/DBSC7/largeRelationsInsertFile.sql;
+              ```
+
+            + 检查
+
+              + [operating]
+
+                ```cmd
+                mysql> select database();
+                +------------+
+                | database() |
+                +------------+
+                | dbsc7      |
+                +------------+
+                1 row in set (0.00 sec)
+                
+                mysql> SHOW tables;
+                +-----------------+
+                | Tables_in_dbsc7 |
+                +-----------------+
+                | advisor         |
+                | classroom       |
+                | course          |
+                | department      |
+                | instructor      |
+                | prereq          |
+                | section         |
+                | student         |
+                | takes           |
+                | teaches         |
+                | time_slot       |
+                +-----------------+
+                11 rows in set (0.00 sec)
+                
+                mysql> select count(*) from advisor;
+                +----------+
+                | count(*) |
+                +----------+
+                |     2000 |
+                +----------+
+                1 row in set (0.00 sec)
+                
+                mysql> select count(*) from classroom;
+                +----------+
+                | count(*) |
+                +----------+
+                |       30 |
+                +----------+
+                1 row in set (0.01 sec)
+                
+                mysql> select count(*) from course;
+                +----------+
+                | count(*) |
+                +----------+
+                |      200 |
+                +----------+
+                1 row in set (0.01 sec)
+                
+                mysql> select count(*) from department;
+                +----------+
+                | count(*) |
+                +----------+
+                |       20 |
+                +----------+
+                1 row in set (0.00 sec)
+                
+                mysql> select count(*) from instructor;
+                +----------+
+                | count(*) |
+                +----------+
+                |       50 |
+                +----------+
+                1 row in set (0.00 sec)
+                
+                mysql> select count(*) from prereq;
+                +----------+
+                | count(*) |
+                +----------+
+                |      100 |
+                +----------+
+                1 row in set (0.00 sec)
+                
+                mysql> select count(*) from section;
+                +----------+
+                | count(*) |
+                +----------+
+                |      100 |
+                +----------+
+                1 row in set (0.00 sec)
+                
+                mysql> select count(*) from student;
+                +----------+
+                | count(*) |
+                +----------+
+                |     2000 |
+                +----------+
+                1 row in set (0.00 sec)
+                
+                mysql> select count(*) from takes;
+                +----------+
+                | count(*) |
+                +----------+
+                |    30000 |
+                +----------+
+                1 row in set (0.01 sec)
+                
+                mysql> select count(*) from teaches;
+                +----------+
+                | count(*) |
+                +----------+
+                |      100 |
+                +----------+
+                1 row in set (0.00 sec)
+                
+                mysql> select count(*) from time_slot;
+                +----------+
+                | count(*) |
+                +----------+
+                |       20 |
+                +----------+
+                1 row in set (0.00 sec)
+                
+                mysql>
+                ```
+
+    + 20260424
+
+      + 备份WSL
+
+        + [operating]
+
+          ```cmd
+          C:\Workspace>wsl --export AlmaLinux8 C:\Workspace\VirtualMachine\AlmaLinux8_260424_0004.tar
+          Export in progress, this may take a few minutes. (1083 MB)
+          
+          The operation completed successfully.
+          
+          C:\Workspace>
+          ```
+
+        + 备份点
+
+          + 《Database System Conception Ed7》数据库构建完成 
+
+## Database:dbsc7说明
+
+### 数据表
+
++ "advisor" 师生指导
+  + **s_ID** 
+    + 学生ID
+    + `--> student.ID`
+  + i_ID 
+    + 导师ID
+    + `--> instructor.ID`
+
++ "classroom" 教室 (**实体集**/**Entity-Set**)
+
+  + **building**   
+    + 建筑物名称 
+  + **room_number** 
+    + 房间编号
+  + capacity 
+    + 教室容纳人数   
+
++ "course" (**实体集**/**Entity-Set**)
+
+  + **course_id** 课程
+    + 课程编号
+  + title     
+    + 课程名称
+  + dept_name 
+    + 主讲院系名称
+    + `--> department.dept_name`
+  + credits   
+
++ "department" 院系
+
+  + **dept_name**
+    + 院系名称
+    + `<-- course.dept_name`
+  + building 
+    + 院系主楼
+  + budget   
+    + 预算
+
++ "instructor" 导师/教师 (**实体集**/**Entity-Set**)
+
+  + **ID**
+    + 导师ID       
+  + name    
+    + 导师姓名 
+  + dept_name
+    + 所属院系
+    + `--> department.dept_name`
+  + salary   
+    + 薪水
+
++ "prereq" 前提/前置课程
+
+  + **course_id**
+    + 课程ID
+    + `--> course.course_id`
+
+  + **prereq_id**
+    + 前直课程ID
+    + `--> course.course_id`
+
++ "section" 课程安排 (**实体集**/**Entity-Set**)
+
+  + **course_id**
+    + 课程ID
+    + `--> course.course_id`
+  + **sec_id**   
+  + **semester** 
+  + **year**        
+  + building 
+    + 授课主楼
+    + `classroom.building`   
+  + room_number 
+    + 授课教室
+    + `classroom.room_number`
+  + time_slot_id
+    + 时间安排
+
++ "student" (**实体集**/**Entity-Set**)
+
+  + **ID**
+    + 学生ID       
+  + name    
+    + 学生姓名 
+  + dept_name
+    + 所属院系
+    + `--> department.dept_name`
+  + tot_cred 
+    + 累计学分
+
++ "takes"
+
+  + **ID**       
+  + **course_id**
+  + **sec_id**   
+  + **semester** 
+  + **year**     
+  + grade    
+
++ "teaches" 排课计划
+
+  + **ID**  
+    + 
+    + `--> instructor.ID`     
+  + **course_id**
+    + 
+    + `--> section.course_id`
+  + **sec_id**   
+    + 
+    + `--> section.sec_id`
+  + **semester** 
+    + 
+    + `--> section.semester`
+  + **year**     
+    + 
+    + `--> section.year`
+
++ "time_slot" 课时安排
+
+  + **time_slot_id**
+  + **day**         
+  + **start_hr**    
+  + **start_min**   
+  + end_hr      
+  + end_min     
+
+### 数据库图展
+
+#### ER图例 1
+
++ [diagram]
+
+  ![Database Diagram](./images/dbsc7-diagram-260424.png)
+
 ## 参考
 
-+ [568数据](http://www.568sj.cn/)
+### [568数据](http://www.568sj.cn/)
 
-  + [...]()
+#### [...]()
 
-    + [MySQL / DataType]()
+##### [MySQL / DataType]()
 
-      + [MySQL数据库数据类型详解与性能对比](http://www.568sj.cn/news/01121254636527947776.html)
++ [MySQL数据库数据类型详解与性能对比](http://www.568sj.cn/news/01121254636527947776.html)
 
-+ [bilibili](https://www.bilibili.com/)
+### [百度云]()
 
-  + [77sindu](https://space.bilibili.com/3546955412146263?spm_id_from=333.788.upinfo.detail.click)
+#### [很菜不狗]()
 
-  + [徐庶]()
+##### [Database / 分布式]()
 
-    + [MySql / Lock]
++ [分布式数据库DDB：架构解析、核心优势与实践指南](https://cloud.baidu.com/article/3555621)
 
-      + [2026吃透数据库MySQL锁机制全套教程，2天学完mysql10种锁，让你面试少走99%的弯路！](https://www.bilibili.com/video/BV1k4Q4BgEzv/?spm_id_from=333.1391.0.0&vd_source=38fc599412349dcfe60484e3ff320c66)
+### [bilibili](https://www.bilibili.com/)
 
-+ [腾讯](https://cloud.tencent.com)
+#### [77sindu](https://space.bilibili.com/3546955412146263?spm_id_from=333.788.upinfo.detail.click)
 
-  + [码农架构](https://cloud.tencent.com/developer/user/5395074)
+#### [徐庶]()
 
-    + [MySQL / index]()
+##### [MySql / Lock]()
 
-      + [MySQL索引的原理，B+树、聚集索引和二级索引的结构分析](https://cloud.tencent.com/developer/article/1735294)
++ [2026吃透数据库MySQL锁机制全套教程，2天学完mysql10种锁，让你面试少走99%的弯路！](https://www.bilibili.com/video/BV1k4Q4BgEzv/?spm_id_from=333.1391.0.0&vd_source=38fc599412349dcfe60484e3ff320c66)
 
-+ [知乎]()
+### [腾讯](https://cloud.tencent.com)
 
-  + [汉松]()
+#### [BookSea]()
 
-    + [Database / 分布式]()
+##### [Database / 锁]()
+
++ [六个案例搞懂间隙锁](https://cloud.tencent.com/developer/article/2380139)
+
+##### [MySQL / MVCC]()
+
++ [全网最详细MVCC讲解，一篇看懂](https://cloud.tencent.com/developer/article/2378614)
+
+##### [Database / 分布式]()
+
++ [分库分表核心理念](https://cloud.tencent.com/developer/article/2450714)
+
+#### [捡田螺的小男孩]()
+
+##### [MySQL / MVCC]()
+
++ [看一遍就理解：MVCC原理详解](https://cloud.tencent.com/developer/article/1890727)
+
+#### [码农架构](https://cloud.tencent.com/developer/user/5395074)
+
+##### [MySQL / index]()
+
++ [MySQL索引的原理，B+树、聚集索引和二级索引的结构分析](https://cloud.tencent.com/developer/article/1735294)
+
+### [知乎]()
+
+#### [神州数码AI实践工]()
+
+##### [Database / 分布式]()
+
++ [什么是分布式数据库？我不信，看完这篇你还不懂!!](https://zhuanlan.zhihu.com/p/503180808)
+
+#### [汉松]()
+
+##### [Database / 分布式]()
     
-      + [分布式系统：Lamport 逻辑时钟](https://zhuanlan.zhihu.com/p/56146800)
++ [分布式系统：Lamport 逻辑时钟](https://zhuanlan.zhihu.com/p/56146800)
 
-      + [分布式系统：向量时钟](https://zhuanlan.zhihu.com/p/56886156)
++ [分布式系统：向量时钟](https://zhuanlan.zhihu.com/p/56886156)

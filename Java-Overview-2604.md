@@ -2698,6 +2698,14 @@ Spring Boot 是 Spring Framework 的扩展，而非替代
 
 #### [阿里云开发者社区](https://developer.aliyun.com)
 
+##### [Java技术进阶]()
+
+###### [Java / 并发、线程]
+
++ [漫谈Java高并发方案](https://developer.aliyun.com/article/690949)
+
+  + 简介： 0 本文示例代码 1 基本概念 1.1 并发同时拥有两个或者多个线程，如果程序在单核处理器上运行多个线程将交替地换入或者换出内存,这些线程是同时“存在"的，每个线程都处于执行过程中的某个状态，如果运行在多核处理器上,此时，程序中的每个线程都将分配到一个处理器核上，因此可以同时运行.
+
 ##### [来一杯热Java]()
 
 ###### [Java / Spring]()
@@ -2787,6 +2795,14 @@ Spring Boot 是 Spring Framework 的扩展，而非替代
 
 
 #### [腾讯云开发者社区](https://cloud.tencent.com/developer/)
+
+##### [啦啦啦191]()
+
+###### [Java / 并发、线程]()
+
++ [如何理解Java中的并发？](https://cloud.tencent.com/developer/article/2577315)
+
+  + 文首，Java 中的并发（Concurrency） 指多个任务在同一时间段内交替执行（宏观上同时进行，微观上可能是 CPU 快速切换调度），目的是提高程序效率，充分利用系统资源（如 CPU、内存、I/O 等）。
 
 ##### [tcilay](https://cloud.tencent.com/developer/user/1414645)
 
