@@ -28,7 +28,7 @@ markmap:
           + 取消 break，且精简
             + before jdk17
               + [code]
-    
+
                 ```java
                 String name = "徐庶";
                 String alias;
@@ -44,9 +44,9 @@ markmap:
                     break;
                 }
                 ```
-    
+
               + [code]
-    
+
                 ```java
                 String name = "徐庶";
                 String country;
@@ -64,10 +64,10 @@ markmap:
                     break;
                 }
                 ```
-    
+
             + jdk17
               + [code]
-    
+
                 ```java
                 var name = "徐庶";
                 String alias = switch (name) {
@@ -76,9 +76,9 @@ markmap:
                   default -> "未知";
                 }
                 ```
-    
+
               + [code]
-    
+
                 ```java
                 var name = "徐庶";
                 String alias = switch (name) {
@@ -87,9 +87,9 @@ markmap:
                   default -> "未知";
                 }
                 ```
-    
+
               + [code]
-    
+
                 ```java
                 var name = "徐庶";
                 String alias = switch (name) {
@@ -107,9 +107,9 @@ markmap:
                   }
                 }
                 ```
-    
+
           + 对象类型支持
-    
+
         + 字符串增强
           + 引入 `'''... '''`
           + 引入 `\` 和 `\s`
