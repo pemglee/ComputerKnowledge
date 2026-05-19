@@ -8,9 +8,29 @@ markmap:
 
 ## 概述
 
-+ 应用
++ 定义
+  + 数据
+    对客观事物进行记录并可以鉴别的符号，是对客观事务的性质、状态以及相关关系等进行记者的的物理符号或这些物理符号的组合。
+
+  + 信息
+    + 数据是信息的表现形式和载体
+    + 信息是数据的内涵，加载于数据之上，对数据作具有含义的解释
+
+  + 数据库
+    + 长期存储在计算机内的、有组织的、可共享的数据集合
+    + 数据是数据库中存储的基本对象，是按一定舒徐排列组合的物理符号
+    + 数据库是一个存储数据的仓库，将数据按照特定规律存储在磁盘上。
+
+  + 数据库管理系统
+    + 一个相互关联的数据的集合以及一组用以访问这些数据的程序组成
+    + 主要目标是提供一种可以方便、高效的存取数据库信息的途径
+
++ 应用方式
   + 联机事务处理 online transaction processing
   + 数据分析 data analytics
+    + 预测模型 predictive model
+    + 数据挖掘 data mining
+    + ...
 
 + 目的
 
@@ -50,7 +70,9 @@ markmap:
   + 实体-联系模型 -- entity-relationship model, ER
   + 半结构化数据模型 -- semi-structured data model
   + 基于对象数据模型 -- object-based data model
+
 + 关系数据模型
+
 + 数据抽象 -- data abstraction
   + 物理层 -- physical level
     数据是怎样存储的，详细描述复杂的底层数据结构。
@@ -125,14 +147,34 @@ markmap:
           + 代数表示
             + [diagram]
               ![algebra join](./images2/algebra-join-260412a.svg)
-          + SQL
-            + [code]
 
-              ```sql
-              select *
-              from instructor join teaches
-              on instructor.ID = teaches.ID;
-              ```
+          + 图示
+
+            + [diagram]
+              ![SQL Join](./images/MySql-SQLJoin2.png)
+
+          + Join <==> Inner Join
+
+            + 示例
+              + [code]
+
+                ```sql
+                select *
+                from instructor join teaches
+                on instructor.ID = teaches.ID;
+                ```
+
+          + Outer Join
+
+            + Left Join <==> Left Outer Join
+              + `SELECT 字段列表 FROM 表1 LEFT [OUTER] JOIN 表2 ON 条件`
+              + 查询 表1(左表) 的所有数据，以及包含 表1 和 表2 交集部分的数据
+
+            + Right Join <==> Right Outer Join
+              + `SELECT 字段列表 FROM 表1 RIGHT [OUTER] JOIN 表2 ON 条件`
+              + 查询 表1(右表) 的所有数据，以及包含 表1 和 表2 交集部分的数据
+
+            + Full Join
 
         + 集合
           + 合 union
@@ -140,6 +182,7 @@ markmap:
               + [diagram]
                 + ![algebra set union](./images2/algebra-SetUnion-260412.svg)
             + SQL
+
               + [code]
 
                 ```sql
@@ -395,23 +438,182 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
   + [diagram]
     ![MySql Structure Details](./images/MySql-StructrueDetails-small.png)
 
++ 执行流程
+
+  + 示例 1
+
+    + 说明
+      + 客户端
+
+      + MySQL服务端网络模型: [reactor]() (非阻塞IO + 多路复用) + 线程池
+        + TCP/IP 连接请求， 三次握手，建立稳定连接
+        + 每个客户端在线程池中，都有一个线程为之服务
+        + 多路复用技术使用的是 [select]() (vs. epoll)
+
+
+    + [diagram]
+      ![MySql Work Flow](./images/MySql-Workflow.png)
+
+
 + 连接层/连接器
+  + 说明
+    + 当客户端登录MySQL时，对身份认证和权限判断 (mysql.user & mysql.db)
+  + 查询连接状态
+    + 状态
+      + Daemon, 守护进程/线程
+      + Locked, 线程正在等待表锁的释放
+      + Query, 正在查询，连接线程正在执行查询
+      + Sending Data, 向请前端返回数据
+      + Sleep, 空闲状态，正在等待客户端发数据
+      + Sorting Result, 线程正在对结果进行排序
+
+    + [operating]
+
+      ```sql
+      mysql> SHOW PROCESSLIST;
+      +----+-----------------+-----------------+-------+---------+-------+------------------------+------------------+
+      | Id | User            | Host            | db    | Command | Time  | State                  | Info             |
+      +----+-----------------+-----------------+-------+---------+-------+------------------------+------------------+
+      |  5 | event_scheduler | localhost       | NULL  | Daemon  | 31985 | Waiting on empty queue | NULL             |
+      | 11 | root            | localhost       | mysql | Query   |     0 | init                   | SHOW PROCESSLIST |
+      | 14 | root            | localhost:55864 | dbsc7 | Sleep   | 12762 |                        | NULL             |
+      | 15 | root            | localhost:55870 | dbsc7 | Sleep   | 10453 |                        | NULL             |
+      | 16 | root            | localhost:39098 | douma | Sleep   | 10226 |                        | NULL             |
+      +----+-----------------+-----------------+-------+---------+-------+------------------------+------------------+
+      5 rows in set, 1 warning (0.00 sec)
+      
+      mysql> SHOW STATUS like 'Threads%';
+      +-------------------+-------+
+      | Variable_name     | Value |
+      +-------------------+-------+
+      | Threads_cached    | 0     |
+      | Threads_connected | 4     |
+      | Threads_created   | 4     |
+      | Threads_running   | 2     |
+      +-------------------+-------+
+      4 rows in set (0.00 sec)
+
+      mysql>
+      ```
+
+    + 长连接 & 短链接
+      + 长连接, 客户端连接成功后，一直使用同一个连接
+        + 内存资源消耗过多
+        + 定期断开长连接，需要时再次创建
+        + 执行 mysql_reset_connection，释放内存，但保留连接。(MySQL5.7+)
+      + 短链接, 每次执行完成SQL请求后断开连接；新请求则建立新连接。
+        + 短连接会重复创建资源请求、释放，消耗资源(CPU+MEM & Time)过多
 
 + Server层
-  + 缓存
+  + ~~缓存~~
+    + 执行查询语句时，先查询缓存
+      + 前次查询结果以 key-value 形式缓存在内存中
+        + key, 查询语句
+        + value, 查询结果
+    + MySQL 8.0后删除
 
-  + 解析器
-    解析编译执行程序
-    + 语法树
+  + 解析器 / 分析器 Parser
+    + 说明
+      + 明确SQL要完成的任务，检查语法是否正确
+        + 词法分析 Lexical scanner, 从 SQL 中提取关键字，如 表、字段、查询条件、等
+          + 语法树
+            + 图示
+              + [diagram]
+                ![MySql Syntax Tree](./images/MySql-SyntaxTree-small.png)
 
-      + 图示
+        + 语法规则 Grammar rule module, 检查语法是否正确
+      + 解析编译执行程序
 
-        + [diagram]
-          ![MySql Syntax Tree](./images/MySql-SyntaxTree-small.png)
+  + 优化器 Optimizer
+    + 说明
+      + 优化执行方案
+        + 逻辑变换
+          + 图示
+            + [diagram]
+              ![Logic Trans](./images/MySql-LogicTrans.jpg)
+          + 步骤
+            + 否定消除，针对表达式“**和取**”或“**析取**”前面出现的”**否定**“情况进行拆分，从而将外层的 **NOT** 消除
+            + 等值常量传递，利用等值关系的传递特性，为了能够尽早执行”下推“运算。
+              下推的基本策略是始终将过滤表达式尽可能移至靠近数据源的位置
+            + 常量表达式计算，对于能立刻计算结果的表达式，直接计算结果
+            + 化简，将常量表达式结果与其他条件尽量提前进行化简，如, 9 <= 10 化简为 True
 
-  + 优化器
+        + 代价优化
+          + 说明
+            + 用来确定每个表，根据条件是否应用索引，应用哪个索引和确定多表连接的顺序等问题，找到找到一个代价最小的方案
+              即，是根据**全表检索**，还是**索引检索**
+          + 过程
+            + 赋值操作代价：针对每个数据库操作(创建表、返回数据集)设置对应的代价，这个代价值一般设置为1、0.2之类的值，没有具体的含义就是对操作的代价定义。
+            + 计算操作数量：将SQL语句中涉及到的操作进行逻辑，并且做计算。说白了就是看这次SQL请求需要做哪些具体的数据库操作。
+            + 求和操作代价：既然知道SQL由哪些数据库操作组成，同时知道每个操作对应的代价，求和以后就是知道整体SQL执行的代价。
+            + 选择代价计划：如果说没给SQL执行的操作都是一个计划，那么这些操作的不同组合就会对应不同的计划，这里需要选择整体执行代价最低的操作计划，作为这次执行SQL语句的代价计划，从而达到总代价最低。          + 代价估值
+          + 类型分类1
+            + 逻辑查询优化，通过SQL等价变化提升查询效率
+            + 物理查询优化，通过索引和表连接方式等技术进行优化
+          + 类型分类2
+            + MySQL服务层
+              + 说明
+                + 针对CPU
+                  + disk_temptable_create_cost，创建IonnDB临时表的代价
+                  + disk_temptable_row_cost，查询IonnDB临时表记录行的代价
+                  + key_compare_cost，键比较的代价，如排序
+                  + memory_temptable_create_cost，内存中创建临时表的代价
+                  + memory_temptable_row_cost，内存中历史表查询记录行的代价
+                  + row_evaluate_cost，计算符合条件的记录行的代价，行数越多，总体代价越高
+              + 估值
+                + [operating]
+
+                  ```sql
+                  mysql> select * from mysql.server_cost;
+                  +------------------------------+------------+---------------------+---------+---------------+
+                  | cost_name                    | cost_value | last_update         | comment | default_value |
+                  +------------------------------+------------+---------------------+---------+---------------+
+                  | disk_temptable_create_cost   |       NULL | 2026-04-23 00:50:21 | NULL    |            20 |
+                  | disk_temptable_row_cost      |       NULL | 2026-04-23 00:50:21 | NULL    |           0.5 |
+                  | key_compare_cost             |       NULL | 2026-04-23 00:50:21 | NULL    |          0.05 |
+                  | memory_temptable_create_cost |       NULL | 2026-04-23 00:50:21 | NULL    |             1 |
+                  | memory_temptable_row_cost    |       NULL | 2026-04-23 00:50:21 | NULL    |           0.1 |
+                  | row_evaluate_cost            |       NULL | 2026-04-23 00:50:21 | NULL    |           0.1 |
+                  +------------------------------+------------+---------------------+---------+---------------+
+                  6 rows in set (0.00 sec)
+                  
+                  mysql>
+                  ```
+
+            + MySQL存储引擎
+              + 说明
+                + 针对IO
+                  + io_block_read_cost，从磁盘读取一个Page数据(InnoDB)的代价
+                  + memory_block_read_cost，从内存buffer pool读取一个Page数据(InnoDB)的代价
+              + 估值
+                + [operating]
+
+                  ```sql
+                  mysql> select * from mysql.engine_cost;
+                  +-------------+-------------+------------------------+------------+---------------------+---------+---------------+
+                  | engine_name | device_type | cost_name              | cost_value | last_update         | comment | default_value |
+                  +-------------+-------------+------------------------+------------+---------------------+---------+---------------+
+                  | default     |           0 | io_block_read_cost     |       NULL | 2026-04-23 00:50:21 | NULL    |             1 |
+                  | default     |           0 | memory_block_read_cost |       NULL | 2026-04-23 00:50:21 | NULL    |          0.25 |
+                  +-------------+-------------+------------------------+------------+---------------------+---------+---------------+
+                  2 rows in set (0.01 sec)
+                  
+                  mysql>
+                  ```
 
   + 执行器
+    + 说明
+      + 将语句分发给存储引擎，并返回数据
+    + 执行顺序
+      + from
+      + on
+      + join
+      + where
+      + group by
+      + having
+      + select
+      + order by
+      + limit
 
 + 连接层 和 服务层 的边界
   + 架构原则
@@ -491,12 +693,12 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
       + 正确性
       + 版本兼容
       + 数据安全
-    
+
     + 定位
       + 系统内核
       + 核心业务域
       + 高稳定精密层
-    
+
   + ...
     + 两层间仅作数据透传
     + 无任何状态共享与交叉依赖
@@ -506,6 +708,31 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 + 存储引擎
   负责组织在磁盘中的数据，提供磁盘的数据读写接口
+  + 说明
+    + [operating]
+
+      ```sql
+      mysql> SHOW ENGINES;
+      +--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+      | Engine             | Support | Comment                                                        | Transactions | XA   | Savepoints |
+      +--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+      | ndbcluster         | NO      | Clustered, fault-tolerant tables                               | NULL         | NULL | NULL       |
+      | FEDERATED          | NO      | Federated MySQL storage engine                                 | NULL         | NULL | NULL       |
+      | MEMORY             | YES     | Hash based, stored in memory, useful for temporary tables      | NO           | NO   | NO         |
+      | InnoDB             | DEFAULT | Supports transactions, row-level locking, and foreign keys     | YES          | YES  | YES        |
+      | PERFORMANCE_SCHEMA | YES     | Performance Schema                                             | NO           | NO   | NO         |
+      | MyISAM             | YES     | MyISAM storage engine                                          | NO           | NO   | NO         |
+      | ndbinfo            | NO      | MySQL Cluster system information storage engine                | NULL         | NULL | NULL       |
+      | MRG_MYISAM         | YES     | Collection of identical MyISAM tables                          | NO           | NO   | NO         |
+      | BLACKHOLE          | YES     | /dev/null storage engine (anything you write to it disappears) | NO           | NO   | NO         |
+      | CSV                | YES     | CSV storage engine                                             | NO           | NO   | NO         |
+      | ARCHIVE            | YES     | Archive storage engine                                         | NO           | NO   | NO         |
+      +--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+      11 rows in set (0.00 sec)
+      
+      mysql>
+      ```
+
   + InnoDB
     + 结构
       + 图示
@@ -644,6 +871,215 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
         + [diagram]
           ![InnoDB Log Buffer](./images/MySql-Buffers2-small.png)
 
+
++ 性能分析
+
+  + 设置
+
+    + Checking
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT @@profiling;
+        +-------------+
+        | @@profiling |
+        +-------------+
+        |           0 |
+        +-------------+
+        1 row in set, 1 warning (0.00 sec)
+        
+        mysql>
+        ```
+
+    + Turn On
+
+      + [operating]
+
+        ```sql
+        mysql> SET profiling = 1;
+        Query OK, 0 rows affected, 1 warning (0.00 sec)
+        
+        mysql> SELECT @@profiling;
+        +-------------+
+        | @@profiling |
+        +-------------+
+        |           1 |
+        +-------------+
+        1 row in set, 1 warning (0.02 sec)
+        
+        mysql>
+        ```
+
+    + Working
+
+      + 示例 
+
+        + 登录 & 设置
+
+          + [operating]
+
+            ```sql
+            [edgar@ThinkPadT14P-23 Workspace]$ mysql -u dbsc7admin -p
+            Enter password:
+            Welcome to the MySQL monitor.  Commands end with ; or \g.
+            Your MySQL connection id is 10
+            Server version: 8.4.9 MySQL Community Server - GPL
+            
+            Copyright (c) 2000, 2026, Oracle and/or its affiliates.
+            
+            Oracle is a registered trademark of Oracle Corporation and/or its
+            affiliates. Other names may be trademarks of their respective
+            owners.
+            
+            Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+            
+            mysql> USE dbsc7;
+            Reading table information for completion of table and column names
+            You can turn off this feature to get a quicker startup with -A
+            
+            Database changed
+            mysql> SHOW TABLES;
+            +-----------------+
+            | Tables_in_dbsc7 |
+            +-----------------+
+            | advisor         |
+            | classroom       |
+            | course          |
+            | department      |
+            | instructor      |
+            | prereq          |
+            | section         |
+            | student         |
+            | takes           |
+            | teaches         |
+            | time_slot       |
+            +-----------------+
+            11 rows in set (0.01 sec)
+            
+            mysql> SHOW profiles;
+            Empty set, 1 warning (0.00 sec)
+            
+            mysql> SELECT @@profiling;
+            +-------------+
+            | @@profiling |
+            +-------------+
+            |           0 |
+            +-------------+
+            1 row in set, 1 warning (0.00 sec)
+            
+            mysql> SET profiling = 1;
+            Query OK, 0 rows affected, 1 warning (0.00 sec)
+            
+            mysql> SELECT @@profiling;
+            +-------------+
+            | @@profiling |
+            +-------------+
+            |           1 |
+            +-------------+
+            1 row in set, 1 warning (0.00 sec)
+            
+            mysql>
+            ```
+
+        + 查询用例
+
+          + [operating]
+
+            ```sql
+            mysql> select * from course;            
+            ... ...
+            mysql> select * from course;            
+            ... ...
+            mysql> select * from student;
+            ... ...
+            mysql> select * from student;
+            ... ...
+            mysql>
+            ```
+
+        + 分析
+
+          + 总查询 **profiles**
+
+            + [operating]
+  
+              ```sql
+              mysql> SHOW profiles;
+              +----------+------------+-----------------------+
+              | Query_ID | Duration   | Query                 |
+              +----------+------------+-----------------------+
+              |        1 | 0.00015475 | SELECT @@profiling    |
+              |        2 | 0.00043325 | select * from course  |
+              |        3 | 0.00026325 | select * from course  |
+              |        4 | 0.00081800 | select * from student |
+              |        5 | 0.00074925 | select * from student |
+              +----------+------------+-----------------------+
+              5 rows in set, 1 warning (0.00 sec)
+              
+              mysql>
+              ```
+
+          + 具体查询 **profile**
+
+            + [operating]
+
+              ```sql
+              mysql> SHOW profile for query 5;
+              +--------------------------------+----------+
+              | Status                         | Duration |
+              +--------------------------------+----------+
+              | starting                       | 0.000057 |
+              | Executing hook on transaction  | 0.000003 |
+              | starting                       | 0.000005 |
+              | checking permissions           | 0.000004 |
+              | Opening tables                 | 0.000090 |
+              | init                           | 0.000005 |
+              | System lock                    | 0.000005 |
+              | optimizing                     | 0.000002 |
+              | statistics                     | 0.000008 |
+              | preparing                      | 0.000007 |
+              | executing                      | 0.000472 |
+              | end                            | 0.000004 |
+              | query end                      | 0.000002 |
+              | waiting for handler commit     | 0.000004 |
+              | closing tables                 | 0.000005 |
+              | freeing items                  | 0.000070 |
+              | cleaning up                    | 0.000007 |
+              +--------------------------------+----------+
+              17 rows in set, 1 warning (0.00 sec)
+              
+              mysql>
+              mysql> SHOW profile cpu,block io for query 5;
+              +--------------------------------+----------+----------+------------+--------------+---------------+
+              | Status                         | Duration | CPU_user | CPU_system | Block_ops_in | Block_ops_out |
+              +--------------------------------+----------+----------+------------+--------------+---------------+
+              | starting                       | 0.000057 | 0.000000 |   0.000056 |            0 |             0 |
+              | Executing hook on transaction  | 0.000003 | 0.000000 |   0.000002 |            0 |             0 |
+              | starting                       | 0.000005 | 0.000000 |   0.000005 |            0 |             0 |
+              | checking permissions           | 0.000004 | 0.000000 |   0.000004 |            0 |             0 |
+              | Opening tables                 | 0.000090 | 0.000000 |   0.000091 |            0 |             0 |
+              | init                           | 0.000005 | 0.000000 |   0.000004 |            0 |             0 |
+              | System lock                    | 0.000005 | 0.000000 |   0.000005 |            0 |             0 |
+              | optimizing                     | 0.000002 | 0.000000 |   0.000002 |            0 |             0 |
+              | statistics                     | 0.000008 | 0.000000 |   0.000009 |            0 |             0 |
+              | preparing                      | 0.000007 | 0.000000 |   0.000006 |            0 |             0 |
+              | executing                      | 0.000472 | 0.000000 |   0.000473 |            0 |             0 |
+              | end                            | 0.000004 | 0.000000 |   0.000003 |            0 |             0 |
+              | query end                      | 0.000002 | 0.000000 |   0.000002 |            0 |             0 |
+              | waiting for handler commit     | 0.000004 | 0.000000 |   0.000004 |            0 |             0 |
+              | closing tables                 | 0.000005 | 0.000000 |   0.000004 |            0 |             0 |
+              | freeing items                  | 0.000070 | 0.000000 |   0.000071 |            0 |             0 |
+              | cleaning up                    | 0.000007 | 0.000000 |   0.000007 |            0 |             0 |
+              +--------------------------------+----------+----------+------------+--------------+---------------+
+              17 rows in set, 1 warning (0.00 sec)
+              
+              mysql>
+              ```
+
+              + 说明
+                + 如不在 "SHOW profile" 中使用 "for query 序号", 则默认最后的SQL语句
+
 ## 键 和 索引
 
 ### 主键, PK(Primary Key)
@@ -781,6 +1217,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
             ![B+-Tree Index](./images/DB-B+TreeIndex.jpeg)
         + 表结构
           + [code]
+
             ```sql
             create table Student(
               last_name varchar(50) not null,
@@ -790,8 +1227,11 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
               key (last_name, first_name, birth_date)
             );
             ```
+
             `Index{last_name, first_name, birth_date}`
+
         + 过程 
+
     + 查询效率 `O(log n)`
     + 特点 (i.e. B+树优点)
       + 所有的值都存储在叶子节点
@@ -833,6 +1273,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
         ![Primary Index](./images/DB-PrimaryKeyIndex.jpeg)
     + 表结构
       + [code]
+
         ```sql
         create table Student(
           id int(11) primary key auto_increment,
@@ -841,6 +1282,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
           birth_date not null
         );
         ```
+
 + 非聚簇索引/二级索引  
   + 说明
     + 对于InnoDB表，在非主键列的其他列上建的索引，即为二级索引。
@@ -853,6 +1295,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
           ![表数据](./images/DB-tbl-layout_test.jpeg)
       + 表结构
         + [code]
+
           ```sql
           create table layout_test (
             col1 int(11) primary key,
@@ -860,6 +1303,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
             key(col2)
           )
           ```
+
   + 比较
     + InnoDB vs. MyISAM
       + InnoDB
@@ -920,8 +1364,6 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 ### 数据类型
 
 + [学习笔记](./MySql-data_type.md)
-
-### 函数 和 计算
 
 ### 完整性约束
 
@@ -1418,6 +1860,41 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
   + 数据表
 
     + `ALTER TABLE 数据表名 ADD(字段名 数据类型 约束);`
+      + 示例
+
+        + [operating]
+
+          ```sql
+          mysql> USE douma;
+          Database changed
+          mysql> CREATE TABLE player (
+              -> player_id INT PRIMARY KEY AUTO_INCREMENT,
+              -> player_name VARCHAR(255) NOT NULL
+              -> );
+          Query OK, 0 rows affected (0.06 sec)
+          
+          mysql> ALTER TABLE player ADD (age TINYINT UNSIGNED);
+          Query OK, 0 rows affected (0.09 sec)
+          Records: 0  Duplicates: 0  Warnings: 0
+          
+          mysql>
+          mysql> SHOW CREATE TABLE player\G;
+          *************************** 1. row ***************************
+                 Table: player
+          Create Table: CREATE TABLE `player` (
+            `player_id` int NOT NULL AUTO_INCREMENT,
+            `player_name` varchar(255) NOT NULL,
+            `age` tinyint unsigned DEFAULT NULL,
+            PRIMARY KEY (`player_id`)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+          1 row in set (0.00 sec)
+          
+          ERROR:
+          No query specified
+          
+          mysql>
+          ```
+
     + `ALTER TABLE 数据表名 RENAME COLUMN 字段名 TO 新字段名;`
     + `ALTER TABLE 数据表名 MODIFY 字段名 数据类型 约束;`
     + `ALTER TABLE 数据表名 DROP COLUMN 字段名;`
@@ -1624,8 +2101,9 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
         
         mysql>
         ```
+
     + 示例 3, for "dbsc7admin"
-    
+
     + "mysql.user" vs "mysql.db"
 
       + 示例 2, for "douma"
@@ -1825,9 +2303,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
           mysql>
           ```
 
-          
       + [operating]
-
 
         ```cmd
         mysql> CREATE USER 'douma2'@'%' IDENTIFIED BY '!QAZ2wsx';
@@ -1962,94 +2438,2933 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 + Select -- Query 查询
   + 单表查询
-    + 默认, all, distinct
+    + `SELECT * FROM 表名;`
+    + `SELECT 字段1, 字段2, ..., 字段n FROM 表名;`
+    + `SELECT 字段1 as 别名1, 字段2 as 别名2, ..., 字段n as 别名n, 表达式1 ..., ... FROM 表名 as 简称;`
+
+  + 条件查询
+    + 大小写敏感问题
+
+      + 示例
+
+        + [operating]
+
+          ```sql
+          mysql> SELECT * FROM emp WHERE ename='smith';
+          +-------+-------+-------+------+------------+--------+------+--------+
+          | empno | ename | job   | mgr  | hiredate   | sal    | comm | deptno |
+          +-------+-------+-------+------+------------+--------+------+--------+
+          |  7369 | Smith | CLERK | 7902 | 1980-12-17 | 800.00 | NULL |     20 |
+          +-------+-------+-------+------+------------+--------+------+--------+
+          1 row in set (0.00 sec)
+          
+          mysql> SELECT * FROM emp WHERE BINARY ename='smith';
+          Empty set, 1 warning (0.00 sec)
+          
+          mysql> SELECT * FROM emp WHERE BINARY ename='Smith';
+          +-------+-------+-------+------+------------+--------+------+--------+
+          | empno | ename | job   | mgr  | hiredate   | sal    | comm | deptno |
+          +-------+-------+-------+------+------------+--------+------+--------+
+          |  7369 | Smith | CLERK | 7902 | 1980-12-17 | 800.00 | NULL |     20 |
+          +-------+-------+-------+------+------------+--------+------+--------+
+          1 row in set, 1 warning (0.00 sec)
+
+          mysql>
+          ```
+
+  + all vs. distinct
+    + 说明
+      + 默认是显示全部，all则显式指明显示全部
+      + distinct是去重，作用于整个select列表
+        + distinct vs. group by
+          + distinct
+            + **专门**用于去除重复的记录行
+            + 作用于**整个select列表**
+            + 查完计算（基本不计算），处理速度快，资源消耗低，
+            + 有更好的自动优化
+            + 大多数情况下，distinct是特殊的group by
+
+          + group by
+            + 主要作用为分组统计，对每组应用聚合函数，去重是副业
+            + 边查边计算（按指定列分组，每组返回一行数据，需要更多计算），资源消耗高
+
+          + 小于100k行，效率相差不大
+          + ![incorrect](./images/incorrect-trans-small.png)大于100k行，group by更优，因为 distinct 需要全表扫描
+          + 去除字段有索引时，性能接近
+          + 去除字段无索引时，distinct更优
+          + 多列去重，建议使用group by
+    + 查询过程
+      见 《查询器》 小节
+
+  + 排序 -- order by
+    + None
+    + asc 升序 (default)
+    + desc 降序
+    + 排列优先级按"order by"字段列表进行
+    + 示例 (无，升序，降序，默认，排序优先级)
+
+      + [operating]
+
+        ```sql
+        mysql> use douma
+        Reading table information for completion of table and column names
+        You can turn off this feature to get a quicker startup with -A
+        
+        Database changed
+        mysql> SELECT * FROM emp WHERE job = 'CLERK';
+        +-------+--------+-------+------+------------+---------+------+--------+
+        | empno | ename  | job   | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        |  7369 | Smith  | CLERK | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+        |  7876 | Adams  | CLERK | 7788 | 1987-05-23 | 1100.00 | NULL |     20 |
+        |  7900 | James  | CLERK | 7698 | 1981-12-03 |  950.00 | NULL |     30 |
+        |  7934 | Miller | CLERK | 7782 | 1982-01-23 | 1300.00 | NULL |     10 |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        4 rows in set (0.01 sec)
+        
+        mysql> SELECT * FROM emp WHERE job = 'CLERK' ORDER BY sal ASC;
+        +-------+--------+-------+------+------------+---------+------+--------+
+        | empno | ename  | job   | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        |  7369 | Smith  | CLERK | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+        |  7900 | James  | CLERK | 7698 | 1981-12-03 |  950.00 | NULL |     30 |
+        |  7876 | Adams  | CLERK | 7788 | 1987-05-23 | 1100.00 | NULL |     20 |
+        |  7934 | Miller | CLERK | 7782 | 1982-01-23 | 1300.00 | NULL |     10 |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        4 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM emp WHERE job = 'CLERK' ORDER BY sal DESC;
+        +-------+--------+-------+------+------------+---------+------+--------+
+        | empno | ename  | job   | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        |  7934 | Miller | CLERK | 7782 | 1982-01-23 | 1300.00 | NULL |     10 |
+        |  7876 | Adams  | CLERK | 7788 | 1987-05-23 | 1100.00 | NULL |     20 |
+        |  7900 | James  | CLERK | 7698 | 1981-12-03 |  950.00 | NULL |     30 |
+        |  7369 | Smith  | CLERK | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        4 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM emp WHERE job = 'CLERK' order by sal;
+        +-------+--------+-------+------+------------+---------+------+--------+
+        | empno | ename  | job   | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        |  7369 | Smith  | CLERK | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+        |  7900 | James  | CLERK | 7698 | 1981-12-03 |  950.00 | NULL |     30 |
+        |  7876 | Adams  | CLERK | 7788 | 1987-05-23 | 1100.00 | NULL |     20 |
+        |  7934 | Miller | CLERK | 7782 | 1982-01-23 | 1300.00 | NULL |     10 |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        4 rows in set (0.00 sec)
+        
+        mysql> SELECT ename, job, hiredate, sal FROM emp ORDER BY sal ASC, hiredate DESC;
+        +--------+-----------+------------+---------+
+        | ename  | job       | hiredate   | sal     |
+        +--------+-----------+------------+---------+
+        | Smith  | CLERK     | 1980-12-17 |  800.00 |
+        | James  | CLERK     | 1981-12-03 |  950.00 |
+        | Adams  | CLERK     | 1987-05-23 | 1100.00 |
+        | Martin | SALESMAN  | 1981-09-28 | 1250.00 |
+        | Ward   | SALESMAN  | 1981-02-22 | 1250.00 |
+        | Miller | CLERK     | 1982-01-23 | 1300.00 |
+        | Turner | SALESMAN  | 1981-09-08 | 1500.00 |
+        | Allen  | SALESMAN  | 1981-02-20 | 1600.00 |
+        | Clark  | MANAGER   | 1981-06-09 | 2450.00 |
+        | Blake  | MANAGER   | 1981-05-01 | 2850.00 |
+        | Jones  | MANAGER   | 1981-04-02 | 2975.00 |
+        | Scott  | ANALYST   | 1987-04-19 | 3000.00 |
+        | Ford   | ANALYST   | 1981-12-03 | 3000.00 |
+        | King   | PRESIDENT | 1981-11-17 | 5000.00 |
+        +--------+-----------+------------+---------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + 关联查询
+    + 说明
+
+      + 内连接
+      + 外连接
+      + 自连接
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> USE douma;
+        Reading table information for completion of table and column names
+        You can turn off this feature to get a quicker startup with -A
+        
+        Database changed
+        mysql> SELECT * FROM dept;
+        +--------+------------+-----------+
+        | deptno | dname      | loc       |
+        +--------+------------+-----------+
+        |     10 | ACCOUNTING | NEW YOURK |
+        |     20 | RESEARCH   | DALLAS    |
+        |     30 | SALES      | CHICAGO   |
+        |     40 | OPERATIONS | BOSTON    |
+        +--------+------------+-----------+
+        4 rows in set (0.01 sec)
+        
+        mysql> SELECT * FROM emp;
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno |
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        14 rows in set (0.00 sec)
+        ```
+
+        + 说明
+          + dept表 共有 3列字段，4行记录
+          + emp表 共有 8列字段， 14行记录
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT * FROM emp, dept ORDER BY empno;
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | deptno | dname      | loc       |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     30 | SALES      | CHICAGO   |
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     10 | ACCOUNTING | NEW YOURK |
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     40 | OPERATIONS | BOSTON    |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     40 | OPERATIONS | BOSTON    |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     20 | RESEARCH   | DALLAS    |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     10 | ACCOUNTING | NEW YOURK |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     40 | OPERATIONS | BOSTON    |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     20 | RESEARCH   | DALLAS    |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     10 | ACCOUNTING | NEW YOURK |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     10 | ACCOUNTING | NEW YOURK |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     30 | SALES      | CHICAGO   |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     40 | OPERATIONS | BOSTON    |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     40 | OPERATIONS | BOSTON    |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     20 | RESEARCH   | DALLAS    |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     10 | ACCOUNTING | NEW YOURK |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     40 | OPERATIONS | BOSTON    |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     20 | RESEARCH   | DALLAS    |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     10 | ACCOUNTING | NEW YOURK |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     40 | OPERATIONS | BOSTON    |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     30 | SALES      | CHICAGO   |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     20 | RESEARCH   | DALLAS    |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     40 | OPERATIONS | BOSTON    |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     10 | ACCOUNTING | NEW YOURK |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     30 | SALES      | CHICAGO   |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     40 | OPERATIONS | BOSTON    |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     30 | SALES      | CHICAGO   |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     20 | RESEARCH   | DALLAS    |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     40 | OPERATIONS | BOSTON    |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     20 | RESEARCH   | DALLAS    |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     10 | ACCOUNTING | NEW YOURK |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     10 | ACCOUNTING | NEW YOURK |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     30 | SALES      | CHICAGO   |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     40 | OPERATIONS | BOSTON    |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     40 | OPERATIONS | BOSTON    |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     20 | RESEARCH   | DALLAS    |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     10 | ACCOUNTING | NEW YOURK |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     40 | OPERATIONS | BOSTON    |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     30 | SALES      | CHICAGO   |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     10 | ACCOUNTING | NEW YOURK |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     40 | OPERATIONS | BOSTON    |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     30 | SALES      | CHICAGO   |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     20 | RESEARCH   | DALLAS    |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        56 rows in set (0.01 sec)
+        
+        mysql>
+        ```
+
+        + 说明
+          + 笛卡儿积  
+            emp 左表  
+            dept 右表
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT * FROM emp JOIN dept ON dept.deptno = emp.deptno ORDER BY empno;
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | deptno | dname      | loc       |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        14 rows in set (0.00 sec)
+        
+        mysql> 
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT * FROM emp, dept where dept.deptno = emp.deptno ORDER BY empno;
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | deptno | dname      | loc       |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT e.empno, e.ename, e.sal, s.grade
+            -> FROM emp e, salgrade s
+            -> WHERE e.sal BETWEEN s.losal AND s.hisal;
+        +-------+--------+---------+-------+
+        | empno | ename  | sal     | grade |
+        +-------+--------+---------+-------+
+        |  7369 | Smith  |  800.00 |     1 |
+        |  7499 | Allen  | 1600.00 |     3 |
+        |  7521 | Ward   | 1250.00 |     2 |
+        |  7566 | Jones  | 2975.00 |     4 |
+        |  7654 | Martin | 1250.00 |     2 |
+        |  7698 | Blake  | 2850.00 |     4 |
+        |  7782 | Clark  | 2450.00 |     4 |
+        |  7788 | Scott  | 3000.00 |     4 |
+        |  7839 | King   | 5000.00 |     5 |
+        |  7844 | Turner | 1500.00 |     3 |
+        |  7876 | Adams  | 1100.00 |     1 |
+        |  7900 | James  |  950.00 |     1 |
+        |  7902 | Ford   | 3000.00 |     4 |
+        |  7934 | Miller | 1300.00 |     2 |
+        +-------+--------+---------+-------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT e.empno, e.ename, d.dname, e.sal, s.grade
+            -> FROM emp e, dept d, salgrade s
+            -> WHERE e.deptno = d.deptno
+            ->   AND e.sal BETWEEN s.losal AND s.hisal;
+        +-------+--------+------------+---------+-------+
+        | empno | ename  | dname      | sal     | grade |
+        +-------+--------+------------+---------+-------+
+        |  7369 | Smith  | RESEARCH   |  800.00 |     1 |
+        |  7499 | Allen  | SALES      | 1600.00 |     3 |
+        |  7521 | Ward   | SALES      | 1250.00 |     2 |
+        |  7566 | Jones  | RESEARCH   | 2975.00 |     4 |
+        |  7654 | Martin | SALES      | 1250.00 |     2 |
+        |  7698 | Blake  | SALES      | 2850.00 |     4 |
+        |  7782 | Clark  | ACCOUNTING | 2450.00 |     4 |
+        |  7788 | Scott  | RESEARCH   | 3000.00 |     4 |
+        |  7839 | King   | ACCOUNTING | 5000.00 |     5 |
+        |  7844 | Turner | SALES      | 1500.00 |     3 |
+        |  7876 | Adams  | RESEARCH   | 1100.00 |     1 |
+        |  7900 | James  | SALES      |  950.00 |     1 |
+        |  7902 | Ford   | RESEARCH   | 3000.00 |     4 |
+        |  7934 | Miller | ACCOUNTING | 1300.00 |     2 |
+        +-------+--------+------------+---------+-------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> INSERT INTO dept VALUES(50, 'None', 'BEIJING');
+        mysql> INSERT INTO emp VALUES(8888, 'Tang', 'CLERK', 7902, '1999-10-10', 2000, null, 50);
+        mysql> SELECT * FROM emp;
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno |
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |
+        |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        15 rows in set (0.00 sec)
+
+        mysql> CREATE TABLE IF NOT EXISTS dept2 (
+            ->   deptno SMALLINT UNSIGNED PRIMARY KEY,
+            ->   dname  VARCHAR(14) NOT NULL,
+            ->   loc    VARCHAR(13)
+            -> );
+        mysql> INSERT INTO dept2 VALUES (10, 'ACCOUNTING', 'NEW YOURK');
+        Query OK, 1 row affected (0.02 sec)
+        mysql> INSERT INTO dept2 VALUES (20, 'RESEARCH',   'DALLAS');
+        Query OK, 1 row affected (0.02 sec)
+        mysql> INSERT INTO dept2 VALUES (30, 'SALES',      'CHICAGO');
+        Query OK, 1 row affected (0.02 sec)
+        mysql> INSERT INTO dept2 VALUES (40, 'OPERATIONS', 'BOSTON');   
+        Query OK, 1 row affected (0.02 sec)
+        mysql> INSERT INTO dept2 VALUES(90, 'CS', 'SHANGHAI');
+        Query OK, 1 row affected (0.02 sec)
+        
+        mysql> SELECT * FROM dept2;
+        +--------+------------+-----------+
+        | deptno | dname      | loc       |
+        +--------+------------+-----------+
+        |     10 | ACCOUNTING | NEW YOURK |
+        |     20 | RESEARCH   | DALLAS    |
+        |     30 | SALES      | CHICAGO   |
+        |     40 | OPERATIONS | BOSTON    |
+        |     90 | CS         | SHANGHAI  |
+        +--------+------------+-----------+
+        5 rows in set (0.00 sec)
+        ```
+
+        ```sql
+        mysql> SELECT * FROM emp JOIN dept2 ON dept2.deptno = emp.deptno ORDER BY empno;
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | deptno | dname      | loc       |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        14 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM emp JOIN dept2 USING(deptno) ORDER BY empno;
+        +--------+-------+--------+-----------+------+------------+---------+---------+------------+-----------+
+        | deptno | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | dname      | loc       |
+        +--------+-------+--------+-----------+------+------------+---------+---------+------------+-----------+
+        |     20 |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL | RESEARCH   | DALLAS    |
+        |     30 |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 | SALES      | CHICAGO   |
+        |     30 |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 | SALES      | CHICAGO   |
+        |     20 |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL | RESEARCH   | DALLAS    |
+        |     30 |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 | SALES      | CHICAGO   |
+        |     30 |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL | SALES      | CHICAGO   |
+        |     10 |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL | ACCOUNTING | NEW YOURK |
+        |     20 |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL | RESEARCH   | DALLAS    |
+        |     10 |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL | ACCOUNTING | NEW YOURK |
+        |     30 |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 | SALES      | CHICAGO   |
+        |     20 |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL | RESEARCH   | DALLAS    |
+        |     30 |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL | SALES      | CHICAGO   |
+        |     20 |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL | RESEARCH   | DALLAS    |
+        |     10 |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL | ACCOUNTING | NEW YOURK |
+        +--------+-------+--------+-----------+------+------------+---------+---------+------------+-----------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+        + 说明
+          + 内连接查询，俩个数据表的交集。  
+            无员工{8888, "Tang", ...}  
+            无部门{ {40, 'OPERATIONS', 'BOSTON'}, {90, 'CS', 'SHANGHAI'} }  
+          + 使用USING时，
+            + 必须字段名相同
+            + 必须等值
+            + 不得使用表名， 如 （~~e1.deptno~~)
+
+        ```sql
+        mysql> SELECT e.empno, e.ename, e.hiredate, e.sal, s.grade FROM emp e JOIN salgrade s ON e.sal BETWEEN s.losal AND s.hisal;
+        +-------+--------+------------+---------+-------+
+        | empno | ename  | hiredate   | sal     | grade |
+        +-------+--------+------------+---------+-------+
+        |  7369 | Smith  | 1980-12-17 |  800.00 |     1 |
+        |  7499 | Allen  | 1981-02-20 | 1600.00 |     3 |
+        |  7521 | Ward   | 1981-02-22 | 1250.00 |     2 |
+        |  7566 | Jones  | 1981-04-02 | 2975.00 |     4 |
+        |  7654 | Martin | 1981-09-28 | 1250.00 |     2 |
+        |  7698 | Blake  | 1981-05-01 | 2850.00 |     4 |
+        |  7782 | Clark  | 1981-06-09 | 2450.00 |     4 |
+        |  7788 | Scott  | 1987-04-19 | 3000.00 |     4 |
+        |  7839 | King   | 1981-11-17 | 5000.00 |     5 |
+        |  7844 | Turner | 1981-09-08 | 1500.00 |     3 |
+        |  7876 | Adams  | 1987-05-23 | 1100.00 |     1 |
+        |  7900 | James  | 1981-12-03 |  950.00 |     1 |
+        |  7902 | Ford   | 1981-12-03 | 3000.00 |     4 |
+        |  7934 | Miller | 1982-01-23 | 1300.00 |     2 |
+        |  8888 | Tang   | 1999-10-10 | 2000.00 |     3 |
+        +-------+--------+------------+---------+-------+
+        15 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+        + 说明
+
+        ```sql
+        mysql> SELECT * FROM emp LEFT JOIN dept2 ON dept2.deptno = emp.deptno ORDER BY empno;
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | deptno | dname      | loc       |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |   NULL | NULL       | NULL      |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        15 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM emp LEFT JOIN dept2 USING(deptno) ORDER BY empno;
+        +--------+-------+--------+-----------+------+------------+---------+---------+------------+-----------+
+        | deptno | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | dname      | loc       |
+        +--------+-------+--------+-----------+------+------------+---------+---------+------------+-----------+
+        |     20 |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL | RESEARCH   | DALLAS    |
+        |     30 |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 | SALES      | CHICAGO   |
+        |     30 |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 | SALES      | CHICAGO   |
+        |     20 |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL | RESEARCH   | DALLAS    |
+        |     30 |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 | SALES      | CHICAGO   |
+        |     30 |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL | SALES      | CHICAGO   |
+        |     10 |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL | ACCOUNTING | NEW YOURK |
+        |     20 |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL | RESEARCH   | DALLAS    |
+        |     10 |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL | ACCOUNTING | NEW YOURK |
+        |     30 |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 | SALES      | CHICAGO   |
+        |     20 |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL | RESEARCH   | DALLAS    |
+        |     30 |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL | SALES      | CHICAGO   |
+        |     20 |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL | RESEARCH   | DALLAS    |
+        |     10 |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL | ACCOUNTING | NEW YOURK |
+        |     50 |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL | NULL       | NULL      |
+        +--------+-------+--------+-----------+------+------------+---------+---------+------------+-----------+
+        15 rows in set (0.00 sec)
+
+        mysql>
+        ```
+
+        + 说明
+          + 左连接查询，左数据表的全集。  
+            **有**员工{8888, "Tang", ...}  
+            无部门{ {40, 'OPERATIONS', 'BOSTON'}, {90, 'CS', 'SHANGHAI'} }
+          + 无数据显示NULL
+
+        ```sql
+        mysql> SELECT * FROM emp RIGHT JOIN dept2 ON dept2.deptno = emp.deptno ORDER BY empno;
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | deptno | dname      | loc       |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        |  NULL | NULL   | NULL      | NULL | NULL       |    NULL |    NULL |   NULL |     40 | OPERATIONS | BOSTON    |
+        |  NULL | NULL   | NULL      | NULL | NULL       |    NULL |    NULL |   NULL |     90 | CS         | SHANGHAI  |
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     30 | SALES      | CHICAGO   |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+        +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+        16 rows in set (0.02 sec)
+        
+        mysql> SELECT * FROM emp RIGHT JOIN dept2 USING(deptno) ORDER BY empno;
+        +--------+------------+-----------+-------+--------+-----------+------+------------+---------+---------+
+        | deptno | dname      | loc       | empno | ename  | job       | mgr  | hiredate   | sal     | comm    |
+        +--------+------------+-----------+-------+--------+-----------+------+------------+---------+---------+
+        |     40 | OPERATIONS | BOSTON    |  NULL | NULL   | NULL      | NULL | NULL       |    NULL |    NULL |
+        |     90 | CS         | SHANGHAI  |  NULL | NULL   | NULL      | NULL | NULL       |    NULL |    NULL |
+        |     20 | RESEARCH   | DALLAS    |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |
+        |     30 | SALES      | CHICAGO   |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |
+        |     30 | SALES      | CHICAGO   |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |
+        |     20 | RESEARCH   | DALLAS    |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |
+        |     30 | SALES      | CHICAGO   |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |
+        |     30 | SALES      | CHICAGO   |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |
+        |     10 | ACCOUNTING | NEW YOURK |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |
+        |     20 | RESEARCH   | DALLAS    |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |
+        |     10 | ACCOUNTING | NEW YOURK |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |
+        |     30 | SALES      | CHICAGO   |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |
+        |     20 | RESEARCH   | DALLAS    |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |
+        |     30 | SALES      | CHICAGO   |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |
+        |     20 | RESEARCH   | DALLAS    |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |
+        |     10 | ACCOUNTING | NEW YOURK |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |
+        +--------+------------+-----------+-------+--------+-----------+------+------------+---------+---------+
+        16 rows in set (0.00 sec)
+
+        mysql>
+        ```
+
+        + 说明
+          + 右连接查询，右数据表的全集。  
+            无员工{8888, "Tang", ...}  
+            **有**部门{ {40, 'OPERATIONS', 'BOSTON'}, {90, 'CS', 'SHANGHAI'} }
+          + 无数据显示NULL
+
+        ```sql
+        mysql> SELECT * FROM emp FULL JOIN dept2 on emp.deptno = dept2.deptno ORDER BY empno;
+        ERROR 1054 (42S22): Unknown column 'emp.deptno' in 'on clause'
+        mysql>
+        ```
+
+        + 说明
+          + **MySQL不支持全外连接**
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT e.*, m.empno, m.ename FROM emp e JOIN emp m ON e.mgr = m.empno ORDER BY m.ename;
+        +-------+--------+----------+------+------------+---------+---------+--------+-------+-------+
+        | empno | ename  | job      | mgr  | hiredate   | sal     | comm    | deptno | empno | ename |
+        +-------+--------+----------+------+------------+---------+---------+--------+-------+-------+
+        |  7499 | Allen  | SALESMAN | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |  7698 | Blake |
+        |  7521 | Ward   | SALESMAN | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |  7698 | Blake |
+        |  7654 | Martin | SALESMAN | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |  7698 | Blake |
+        |  7844 | Turner | SALESMAN | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |  7698 | Blake |
+        |  7900 | James  | CLERK    | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |  7698 | Blake |
+        |  7934 | Miller | CLERK    | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |  7782 | Clark |
+        |  7369 | Smith  | CLERK    | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |  7902 | Ford  |
+        |  8888 | Tang   | CLERK    | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |  7902 | Ford  |
+        |  7788 | Scott  | ANALYST  | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |  7566 | Jones |
+        |  7902 | Ford   | ANALYST  | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |  7566 | Jones |
+        |  7566 | Jones  | MANAGER  | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |  7839 | King  |
+        |  7698 | Blake  | MANAGER  | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |  7839 | King  |
+        |  7782 | Clark  | MANAGER  | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |  7839 | King  |
+        |  7876 | Adams  | CLERK    | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |  7788 | Scott |
+        +-------+--------+----------+------+------------+---------+---------+--------+-------+-------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+        ```sql
+        mysql> SELECT e.*, m.empno, m.ename FROM emp e LEFT JOIN emp m ON e.mgr = m.empno ORDER BY m.ename;
+        +-------+--------+-----------+------+------------+---------+---------+--------+-------+-------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | empno | ename |
+        +-------+--------+-----------+------+------------+---------+---------+--------+-------+-------+
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |  NULL | NULL  |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |  7698 | Blake |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |  7698 | Blake |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |  7698 | Blake |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |  7698 | Blake |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |  7698 | Blake |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |  7782 | Clark |
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |  7902 | Ford  |
+        |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |  7902 | Ford  |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |  7566 | Jones |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |  7566 | Jones |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |  7839 | King  |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |  7839 | King  |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |  7839 | King  |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |  7788 | Scott |
+        +-------+--------+-----------+------+------------+---------+---------+--------+-------+-------+
+        15 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+ 
+  + 联合查询
+
+    + [operating]
+
+      ```sql
+      mysql> SELECT * FROM emp LEFT JOIN dept2 on emp.deptno = dept2.deptno UNION SELECT * FROM emp RIGHT JOIN dept2 on emp.deptno = dept2.deptno;
+      +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+      | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | deptno | dname      | loc       |
+      +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+      |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+      |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+      |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+      |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+      |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+      |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |   NULL | NULL       | NULL      |
+      |  NULL | NULL   | NULL      | NULL | NULL       |    NULL |    NULL |   NULL |     40 | OPERATIONS | BOSTON    |
+      |  NULL | NULL   | NULL      | NULL | NULL       |    NULL |    NULL |   NULL |     90 | CS         | SHANGHAI  |
+      +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+      17 rows in set (0.00 sec)
+      
+      mysql> SELECT * FROM emp LEFT JOIN dept2 on emp.deptno = dept2.deptno  UNION ALL SELECT * FROM emp RIGHT JOIN dept2 on emp.deptno = dept2.deptno;
+      +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+      | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | deptno | dname      | loc       |
+      +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+      |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+      |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+      |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+      |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+      |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+      |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |   NULL | NULL       | NULL      |
+      |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+      |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+      |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |     10 | ACCOUNTING | NEW YOURK |
+      |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |     20 | RESEARCH   | DALLAS    |
+      |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+      |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |     30 | SALES      | CHICAGO   |
+      |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |     30 | SALES      | CHICAGO   |
+      |  NULL | NULL   | NULL      | NULL | NULL       |    NULL |    NULL |   NULL |     40 | OPERATIONS | BOSTON    |
+      |  NULL | NULL   | NULL      | NULL | NULL       |    NULL |    NULL |   NULL |     90 | CS         | SHANGHAI  |
+      +-------+--------+-----------+------+------------+---------+---------+--------+--------+------------+-----------+
+      31 rows in set (0.00 sec)
+      
+      mysql>
+      ```
+
       + 说明
-        + 默认是显示全部，all则显式指明显示全部
-        + distinct是去重，作用于整个select列表
-          + distinct vs. group by
-            + distinct
-              + **专门**用于去除重复的记录行
-              + 作用于**整个select列表**
-              + 查完计算（基本不计算），处理速度快，资源消耗低，
-              + 有更好的自动优化
-              + 大多数情况下，distinct是特殊的group by
+        + UNION 去重
+        + UNION ALL 不去重
+    + [operating]
 
-            + group by
-              + 主要作用为分组统计，对每组应用聚合函数，去重是副业
-              + 边查边计算（按指定列分组，每组返回一行数据，需要更多计算），资源消耗高
+      ```sql
+      mysql> SELECT e1.empno, e1.ename, DATE_FORMAT(e1.hiredate, '%Y/%m%d'),
+          ->        d.deptno, d.dname, e2.ename, e1.job, e1.sal, e1.comm, (e1.sal * 12 + IFNULL(e1.comm, 0)),
+          ->        s.grade, d.loc
+          -> FROM emp e1, emp e2, dept2 d, salgrade s
+          -> WHERE e1.mgr = e2.empno
+          ->   AND e1.deptno = d.deptno
+          ->   AND e1.sal BETWEEN s.losal AND s.hisal
+          ->   AND e1.hiredate like '1981%'
+          ->   AND e1.sal BETWEEN 1500 AND 3500  ;
+      +-------+--------+-------------------------------------+--------+------------+-------+----------+---------+--------+------------------------------------+-------+-----------+
+      | empno | ename  | DATE_FORMAT(e1.hiredate, '%Y/%m%d') | deptno | dname      | ename | job      | sal     | comm   | (e1.sal * 12 + IFNULL(e1.comm, 0)) | grade | loc       |
+      +-------+--------+-------------------------------------+--------+------------+-------+----------+---------+--------+------------------------------------+-------+-----------+
+      |  7844 | Turner | 1981/0908                           |     30 | SALES      | Blake | SALESMAN | 1500.00 |   0.00 |                           18000.00 |     3 | CHICAGO   |
+      |  7499 | Allen  | 1981/0220                           |     30 | SALES      | Blake | SALESMAN | 1600.00 | 300.00 |                           19500.00 |     3 | CHICAGO   |
+      |  7902 | Ford   | 1981/1203                           |     20 | RESEARCH   | Jones | ANALYST  | 3000.00 |   NULL |                           36000.00 |     4 | DALLAS    |
+      |  7782 | Clark  | 1981/0609                           |     10 | ACCOUNTING | King  | MANAGER  | 2450.00 |   NULL |                           29400.00 |     4 | NEW YOURK |
+      |  7698 | Blake  | 1981/0501                           |     30 | SALES      | King  | MANAGER  | 2850.00 |   NULL |                           34200.00 |     4 | CHICAGO   |
+      |  7566 | Jones  | 1981/0402                           |     20 | RESEARCH   | King  | MANAGER  | 2975.00 |   NULL |                           35700.00 |     4 | DALLAS    |
+      +-------+--------+-------------------------------------+--------+------------+-------+----------+---------+--------+------------------------------------+-------+-----------+
+      6 rows in set (0.00 sec)
+      
+      mysql> SELECT e1.empno, e1.ename, DATE_FORMAT(e1.hiredate, '%Y/%m%d'),
+          ->        d.deptno, d.dname, e2.ename, e1.job, e1.sal, e1.comm, (e1.sal * 12 + IFNULL(e1.comm, 0)),
+          ->        s.grade, d.loc
+          -> FROM emp e1 JOIN emp e2 JOIN dept2 d JOIN salgrade s
+          -> ON e1.mgr = e2.empno
+          -> AND e1.deptno = d.deptno
+          -> AND e1.sal BETWEEN s.losal AND s.hisal
+          -> WHERE YEAR(e1.hiredate) = 1981
+          ->   AND e1.sal BETWEEN 1500 AND 3500  ;
+      +-------+--------+-------------------------------------+--------+------------+-------+----------+---------+--------+------------------------------------+-------+-----------+
+      | empno | ename  | DATE_FORMAT(e1.hiredate, '%Y/%m%d') | deptno | dname      | ename | job      | sal     | comm   | (e1.sal * 12 + IFNULL(e1.comm, 0)) | grade | loc       |
+      +-------+--------+-------------------------------------+--------+------------+-------+----------+---------+--------+------------------------------------+-------+-----------+
+      |  7844 | Turner | 1981/0908                           |     30 | SALES      | Blake | SALESMAN | 1500.00 |   0.00 |                           18000.00 |     3 | CHICAGO   |
+      |  7499 | Allen  | 1981/0220                           |     30 | SALES      | Blake | SALESMAN | 1600.00 | 300.00 |                           19500.00 |     3 | CHICAGO   |
+      |  7902 | Ford   | 1981/1203                           |     20 | RESEARCH   | Jones | ANALYST  | 3000.00 |   NULL |                           36000.00 |     4 | DALLAS    |
+      |  7782 | Clark  | 1981/0609                           |     10 | ACCOUNTING | King  | MANAGER  | 2450.00 |   NULL |                           29400.00 |     4 | NEW YOURK |
+      |  7698 | Blake  | 1981/0501                           |     30 | SALES      | King  | MANAGER  | 2850.00 |   NULL |                           34200.00 |     4 | CHICAGO   |
+      |  7566 | Jones  | 1981/0402                           |     20 | RESEARCH   | King  | MANAGER  | 2975.00 |   NULL |                           35700.00 |     4 | DALLAS    |
+      +-------+--------+-------------------------------------+--------+------------+-------+----------+---------+--------+------------------------------------+-------+-----------+
+      6 rows in set (0.00 sec)
+      
+      mysql> SELECT e1.empno, e1.ename, DATE_FORMAT(e1.hiredate, '%Y/%m%d'), 
+          ->        d.deptno, d.dname, e2.ename, e1.job, e1.sal, e1.comm, 
+          ->        (e1.sal * 12 + IFNULL(e1.comm, 0)) year_sal, 
+          ->        s.grade, d.loc
+          -> FROM emp e1 JOIN emp e2 ON e1.mgr = e2.empno
+          ->             JOIN dept2 d ON e1.deptno = d.deptno
+          ->             JOIN salgrade s ON e1.sal BETWEEN s.losal AND s.hisal
+          -> WHERE YEAR(e1.hiredate) = 1981 
+          ->   AND e1.sal BETWEEN 1500 AND 3500  
+          -> ORDER BY year_sal DESC, e1.hiredate ASC ;
+      +-------+--------+-------------------------------------+--------+------------+-------+----------+---------+--------+----------+-------+-----------+
+      | empno | ename  | DATE_FORMAT(e1.hiredate, '%Y/%m%d') | deptno | dname      | ename | job      | sal     | comm   | year_sal | grade | loc       |
+      +-------+--------+-------------------------------------+--------+------------+-------+----------+---------+--------+----------+-------+-----------+
+      |  7902 | Ford   | 1981/1203                           |     20 | RESEARCH   | Jones | ANALYST  | 3000.00 |   NULL | 36000.00 |     4 | DALLAS    |
+      |  7566 | Jones  | 1981/0402                           |     20 | RESEARCH   | King  | MANAGER  | 2975.00 |   NULL | 35700.00 |     4 | DALLAS    |
+      |  7698 | Blake  | 1981/0501                           |     30 | SALES      | King  | MANAGER  | 2850.00 |   NULL | 34200.00 |     4 | CHICAGO   |
+      |  7782 | Clark  | 1981/0609                           |     10 | ACCOUNTING | King  | MANAGER  | 2450.00 |   NULL | 29400.00 |     4 | NEW YOURK |
+      |  7499 | Allen  | 1981/0220                           |     30 | SALES      | Blake | SALESMAN | 1600.00 | 300.00 | 19500.00 |     3 | CHICAGO   |
+      |  7844 | Turner | 1981/0908                           |     30 | SALES      | Blake | SALESMAN | 1500.00 |   0.00 | 18000.00 |     3 | CHICAGO   |
+      +-------+--------+-------------------------------------+--------+------------+-------+----------+---------+--------+----------+-------+-----------+
+      6 rows in set (0.01 sec)
+      
+      mysql>
+      ```
 
-            + 小于100k行，效率相差不大
-            + ![incorrect](./images/incorrect-trans-small.png)大于100k行，group by更优，因为 distinct 需要全表扫描
-            + 去除字段有索引时，性能接近
-            + 去除字段无索引时，distinct更优
-            + 多列去重，建议使用group by
+  + 子查询
 
+    + 说明
 
-      + 表格
+      + 可以使用的语句/表达式
+        + WHERE 子句
+        + HAVING 子句
+        + FROM 子句
+        + WITH 子句
 
-        + [table]
+      + 条件
+        + "<", "<=", "=", ">=", ">", "<>", "!="
+        + "IN", "NOT IN"
+        + "ANY", "ALL"
 
-          | dept_name   | select dept_name | select all dept_name | select distinct dept_name |
-          | :---------- | :--------------: | :------------------: | :-----------------------: |
-          | Accounting  | [X]              | [X]                  | [X]                       |
-          | Accounting  | [X]              | [X]                  |                           |
-          | Accounting  | [X]              | [X]                  |                           |
-          | Accounting  | [X]              | [X]                  |                           |
-          | Astronomy   | [X]              | [X]                  | [X]                       |
-          | Athletics   | [X]              | [X]                  | [X]                       |
-          | Athletics   | [X]              | [X]                  |                           |
-          | Athletics   | [X]              | [X]                  |                           |
-          | Athletics   | [X]              | [X]                  |                           |
-          | Athletics   | [X]              | [X]                  |                           |
-          | Biology     | [X]              | [X]                  | [X]                       |
-          | Biology     | [X]              | [X]                  |                           |
-          | Comp. Sci.  | [X]              | [X]                  | [X]                       |
-          | Comp. Sci.  | [X]              | [X]                  |                           |
-          | Cybernetics | [X]              | [X]                  | [X]                       |
-          | Cybernetics | [X]              | [X]                  |                           |
-          | Cybernetics | [X]              | [X]                  |                           |
-          | Cybernetics | [X]              | [X]                  |                           |
-          | Elec. Eng.  | [X]              | [X]                  | [X]                       |
-          | Elec. Eng.  | [X]              | [X]                  |                           |
-          | Elec. Eng.  | [X]              | [X]                  |                           |
-          | Elec. Eng.  | [X]              | [X]                  |                           |
-          | English     | [X]              | [X]                  | [X]                       |
-          | English     | [X]              | [X]                  |                           |
-          | English     | [X]              | [X]                  |                           |
-          | English     | [X]              | [X]                  |                           |
-          | Finance     | [X]              | [X]                  | [X]                       |
-          | Geology     | [X]              | [X]                  | [X]                       |
-          | Languages   | [X]              | [X]                  | [X]                       |
-          | Languages   | [X]              | [X]                  |                           |
-          | Languages   | [X]              | [X]                  |                           |
-          | Marketing   | [X]              | [X]                  | [X]                       |
-          | Marketing   | [X]              | [X]                  |                           |
-          | Marketing   | [X]              | [X]                  |                           |
-          | Marketing   | [X]              | [X]                  |                           |
-          | Mech. Eng.  | [X]              | [X]                  | [X]                       |
-          | Mech. Eng.  | [X]              | [X]                  |                           |
-          | Physics     | [X]              | [X]                  | [X]                       |
-          | Physics     | [X]              | [X]                  |                           |
-          | Pol. Sci.   | [X]              | [X]                  | [X]                       |
-          | Pol. Sci.   | [X]              | [X]                  |                           |
-          | Pol. Sci.   | [X]              | [X]                  |                           |
-          | Psychology  | [X]              | [X]                  | [X]                       |
-          | Psychology  | [X]              | [X]                  |                           |
-          | Statistics  | [X]              | [X]                  | [X]                       |
-          | Statistics  | [X]              | [X]                  |                           |
-          | Statistics  | [X]              | [X]                  |                           |
-          | Statistics  | [X]              | [X]                  |                           |
-          | Statistics  | [X]              | [X]                  |                           |
-          | Statistics  | [X]              | [X]                  |                           |
+          + 示例
+
+            要求，获取月薪大于任意一位经理月薪的员工明细
+
+            + [operating]
+
+              ```sql
+              mysql> SELECT MIN(sal) FROM emp WHERE job = 'MANAGER';
+              +----------+
+              | MIN(sal) |
+              +----------+
+              |  2450.00 |
+              +----------+
+              1 row in set (0.00 sec)
+              
+              mysql>
+              mysql>
+              mysql> SELECT * FROM emp WHERE sal > ANY ( SELECT sal FROM emp WHERE job = 'MANAGER' );
+              +-------+-------+-----------+------+------------+---------+------+--------+
+              | empno | ename | job       | mgr  | hiredate   | sal     | comm | deptno |
+              +-------+-------+-----------+------+------------+---------+------+--------+
+              |  7566 | Jones | MANAGER   | 7839 | 1981-04-02 | 2975.00 | NULL |     20 |
+              |  7698 | Blake | MANAGER   | 7839 | 1981-05-01 | 2850.00 | NULL |     30 |
+              |  7788 | Scott | ANALYST   | 7566 | 1987-04-19 | 3000.00 | NULL |     20 |
+              |  7839 | King  | PRESIDENT | NULL | 1981-11-17 | 5000.00 | NULL |     10 |
+              |  7902 | Ford  | ANALYST   | 7566 | 1981-12-03 | 3000.00 | NULL |     20 |
+              +-------+-------+-----------+------+------------+---------+------+--------+
+              5 rows in set (0.00 sec)
+              
+              mysql>
+              ```
+
+          + 示例
+
+            要求，获取月薪大于所有经理月薪的员工明细
+
+            + [operating]
+
+              ```sql
+              mysql> SELECT MAX(sal) FROM emp WHERE job = 'MANAGER';
+              +----------+
+              | MAX(sal) |
+              +----------+
+              |  2975.00 |
+              +----------+
+              1 row in set (0.00 sec)
+              
+              mysql>
+              mysql>
+              mysql> SELECT * FROM emp WHERE sal > ALL ( SELECT sal FROM emp WHERE job = 'MANAGER' );
+              +-------+-------+-----------+------+------------+---------+------+--------+
+              | empno | ename | job       | mgr  | hiredate   | sal     | comm | deptno |
+              +-------+-------+-----------+------+------------+---------+------+--------+
+              |  7788 | Scott | ANALYST   | 7566 | 1987-04-19 | 3000.00 | NULL |     20 |
+              |  7839 | King  | PRESIDENT | NULL | 1981-11-17 | 5000.00 | NULL |     10 |
+              |  7902 | Ford  | ANALYST   | 7566 | 1981-12-03 | 3000.00 | NULL |     20 |
+              +-------+-------+-----------+------+------------+---------+------+--------+
+              3 rows in set (0.00 sec)
+              
+              mysql>
+              ```
+
+      + 讨论
+        + 在FROM子句中使用子查询，比FORM外使用 GROUP BY 减少了 笛卡尔积
+          + 示例
+
+            + [operating]
+
+              要求，获取各部门编号、名称、所在地、人数、平均月薪
+
+              ```sql
+              mysql> SELECT d.deptno, d.dname, d.loc, t.cnt, t.avg_sal
+                  -> FROM dept2 d JOIN (SELECT deptno, COUNT(empno) cnt, ROUND(AVG(sal),2) avg_sal FROM emp GROUP BY deptno) t USING(deptno) ;
+              +--------+------------+-----------+-----+---------+
+              | deptno | dname      | loc       | cnt | avg_sal |
+              +--------+------------+-----------+-----+---------+
+              |     10 | ACCOUNTING | NEW YOURK |   3 | 2916.67 |
+              |     20 | RESEARCH   | DALLAS    |   6 | 2029.17 |
+              |     30 | SALES      | CHICAGO   |   6 | 1566.67 |
+              +--------+------------+-----------+-----+---------+
+              3 rows in set (0.00 sec)
+              
+              mysql> SELECT d.deptno, d.dname, d.loc, COUNT(e.empno) cnt, ROUND(AVG(e.sal),2) avg_sal
+                  -> FROM dept2 d JOIN emp e USING(deptno)
+                  -> GROUP by d.deptno, d.dname, d.loc ;
+              +--------+------------+-----------+-----+---------+
+              | deptno | dname      | loc       | cnt | avg_sal |
+              +--------+------------+-----------+-----+---------+
+              |     20 | RESEARCH   | DALLAS    |   6 | 2029.17 |
+              |     30 | SALES      | CHICAGO   |   6 | 1566.67 |
+              |     10 | ACCOUNTING | NEW YOURK |   3 | 2916.67 |
+              +--------+------------+-----------+-----+---------+
+              3 rows in set (0.00 sec)
+
+              mysql> SELECT d.deptno, d.dname, d.loc, t.cnt, t.avg_sal
+                  -> FROM dept2 d LEFT JOIN (SELECT deptno, COUNT(empno) cnt, ROUND(AVG(sal),2) avg_sal FROM emp GROUP BY deptno) t USING(deptno) ;
+              +--------+------------+-----------+------+---------+
+              | deptno | dname      | loc       | cnt  | avg_sal |
+              +--------+------------+-----------+------+---------+
+              |     10 | ACCOUNTING | NEW YOURK |    3 | 2916.67 |
+              |     20 | RESEARCH   | DALLAS    |    6 | 2029.17 |
+              |     30 | SALES      | CHICAGO   |    6 | 1566.67 |
+              |     40 | OPERATIONS | BOSTON    | NULL |    NULL |
+              |     90 | CS         | SHANGHAI  | NULL |    NULL |
+              +--------+------------+-----------+------+---------+
+              5 rows in set (0.00 sec)
+              
+              mysql>
+              ```
+
+    + 示例
+
+      + [operating]
+
+        要求，查询工资最低的雇员信息
+
+        ```sql
+        mysql> SELECT * FROM emp
+            -> WHERE sal = (SELECT MIN(sal) FROM emp);
+        +-------+-------+-------+------+------------+--------+------+--------+
+        | empno | ename | job   | mgr  | hiredate   | sal    | comm | deptno |
+        +-------+-------+-------+------+------------+--------+------+--------+
+        |  7369 | Smith | CLERK | 7902 | 1980-12-17 | 800.00 | NULL |     20 |
+        +-------+-------+-------+------+------------+--------+------+--------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        要求，月薪低于Allen月薪的员工信息; 月薪不低于全体职员平均月薪的员工信息
+
+        ```sql
+        mysql> SELECT * FROM emp WHERE sal < (SELECT sal FROM emp WHERE ename = 'Allen');
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        | empno | ename  | job      | mgr  | hiredate   | sal     | comm    | deptno |
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        |  7369 | Smith  | CLERK    | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |
+        |  7521 | Ward   | SALESMAN | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+        |  7654 | Martin | SALESMAN | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+        |  7844 | Turner | SALESMAN | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+        |  7876 | Adams  | CLERK    | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |
+        |  7900 | James  | CLERK    | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |
+        |  7934 | Miller | CLERK    | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        7 rows in set (0.01 sec)
+        
+        mysql> SELECT * FROM emp WHERE sal >= (SELECT AVG(sal) FROM emp);
+        +-------+-------+-----------+------+------------+---------+------+--------+
+        | empno | ename | job       | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+-------+-----------+------+------------+---------+------+--------+
+        |  7566 | Jones | MANAGER   | 7839 | 1981-04-02 | 2975.00 | NULL |     20 |
+        |  7698 | Blake | MANAGER   | 7839 | 1981-05-01 | 2850.00 | NULL |     30 |
+        |  7782 | Clark | MANAGER   | 7839 | 1981-06-09 | 2450.00 | NULL |     10 |
+        |  7788 | Scott | ANALYST   | 7566 | 1987-04-19 | 3000.00 | NULL |     20 |
+        |  7839 | King  | PRESIDENT | NULL | 1981-11-17 | 5000.00 | NULL |     10 |
+        |  7902 | Ford  | ANALYST   | 7566 | 1981-12-03 | 3000.00 | NULL |     20 |
+        +-------+-------+-----------+------+------------+---------+------+--------+
+        6 rows in set (0.00 sec)
+        
+        mysql>
+        mysql>
+        ```
+
+      + [operating]
+
+        要求，获取于Scott从事同意工作且工作相同的员工信息
+
+        ```sql
+        mysql> SELECT * FROM emp WHERE (job, sal) = (SELECT job, sal FROM emp WHERE ename = 'Scott');
+        +-------+-------+---------+------+------------+---------+------+--------+
+        | empno | ename | job     | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+-------+---------+------+------------+---------+------+--------+
+        |  7788 | Scott | ANALYST | 7566 | 1987-04-19 | 3000.00 | NULL |     20 |
+        |  7902 | Ford  | ANALYST | 7566 | 1981-12-03 | 3000.00 | NULL |     20 |
+        +-------+-------+---------+------+------------+---------+------+--------+
+        2 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM emp WHERE (job, sal) = (SELECT job, sal FROM emp WHERE ename = 'Scott') AND ename != 'Scott';
+        +-------+-------+---------+------+------------+---------+------+--------+
+        | empno | ename | job     | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+-------+---------+------+------------+---------+------+--------+
+        |  7902 | Ford  | ANALYST | 7566 | 1981-12-03 | 3000.00 | NULL |     20 |
+        +-------+-------+---------+------+------------+---------+------+--------+
+        1 row in set (0.00 sec)
+
+        mysql>
+        ```
+
+      + [operating]
+
+        要求, 获取与Allen同年加入公司，且工种相同的全部员工的信息
+
+        ```sql
+        mysql> SELECT * FROM emp WHERE (job, YEAR(hiredate)) = (SELECT job, YEAR(hiredate) FROM emp WHERE ename = 'Allen');
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        | empno | ename  | job      | mgr  | hiredate   | sal     | comm    | deptno |
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        |  7499 | Allen  | SALESMAN | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |
+        |  7521 | Ward   | SALESMAN | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+        |  7654 | Martin | SALESMAN | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+        |  7844 | Turner | SALESMAN | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        4 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+    + 示例
+      + 要求，获取所有部门月薪最低的员工明细
+      + [operating]
+
+        ```sql
+        mysql> SELECT * FROM emp WHERE sal IN ( SELECT MIN(sal) FROM emp GROUP BY deptno);
+        +-------+--------+-------+------+------------+---------+------+--------+
+        | empno | ename  | job   | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        |  7369 | Smith  | CLERK | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+        |  7900 | James  | CLERK | 7698 | 1981-12-03 |  950.00 | NULL |     30 |
+        |  7934 | Miller | CLERK | 7782 | 1982-01-23 | 1300.00 | NULL |     10 |
+        |  8888 | Tang   | CLERK | 7902 | 1999-10-10 | 2000.00 | NULL |     50 |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        4 rows in set (0.02 sec)
+        
+        mysql>
+        ```
+
+      + ![incorrect](./images/incorrect-trans-small.png) 如果A部门员工最低月薪为m, B部门员工最低月薪为n, m < n，恰巧A部门另有员工C的月薪为n，此次会有偏差
+
+        + [operating]
+
+          ```sql
+          mysql> SELECT * FROM emp WHERE sal IN ( SELECT MIN(sal) FROM emp GROUP BY deptno);
+          +-------+--------+-------+------+------------+---------+------+--------+
+          | empno | ename  | job   | mgr  | hiredate   | sal     | comm | deptno |
+          +-------+--------+-------+------+------------+---------+------+--------+
+          |  7369 | Smith  | CLERK | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+          |  7900 | James  | CLERK | 7698 | 1981-12-03 |  950.00 | NULL |     30 |
+          |  7934 | Miller | CLERK | 7782 | 1982-01-23 | 1300.00 | NULL |     10 |
+          |  8888 | Tang   | CLERK | 7902 | 1999-10-10 | 2000.00 | NULL |     50 |
+          +-------+--------+-------+------+------------+---------+------+--------+
+          4 rows in set (0.02 sec)
+
+          mysql>
+          mysql>
+          mysql>
+          mysql>
+          mysql> INSERT INTO emp VALUES ( 8889, 'Liao', 'CLERK', 7902, '1981-12-17', 1300, NULL, 20);
+          Query OK, 1 row affected (0.02 sec)
+
+          mysql>
+          mysql>
+          mysql>
+          mysql> SELECT * FROM emp WHERE (deptno, sal) IN ( SELECT deptno, MIN(sal) FROM emp GROUP BY deptno);
+          +-------+--------+-------+------+------------+---------+------+--------+
+          | empno | ename  | job   | mgr  | hiredate   | sal     | comm | deptno |
+          +-------+--------+-------+------+------------+---------+------+--------+
+          |  7369 | Smith  | CLERK | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+          |  7900 | James  | CLERK | 7698 | 1981-12-03 |  950.00 | NULL |     30 |
+          |  7934 | Miller | CLERK | 7782 | 1982-01-23 | 1300.00 | NULL |     10 |
+          |  8888 | Tang   | CLERK | 7902 | 1999-10-10 | 2000.00 | NULL |     50 |
+          +-------+--------+-------+------+------------+---------+------+--------+
+          4 rows in set (0.00 sec)
+          
+          mysql> SELECT * FROM emp WHERE sal IN ( SELECT MIN(sal) FROM emp GROUP BY deptno);
+          +-------+--------+-------+------+------------+---------+------+--------+
+          | empno | ename  | job   | mgr  | hiredate   | sal     | comm | deptno |
+          +-------+--------+-------+------+------------+---------+------+--------+
+          |  7369 | Smith  | CLERK | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+          |  7900 | James  | CLERK | 7698 | 1981-12-03 |  950.00 | NULL |     30 |
+          |  7934 | Miller | CLERK | 7782 | 1982-01-23 | 1300.00 | NULL |     10 |
+          |  8888 | Tang   | CLERK | 7902 | 1999-10-10 | 2000.00 | NULL |     50 |
+          |  8889 | Liao   | CLERK | 7902 | 1981-12-17 | 1300.00 | NULL |     20 |
+          +-------+--------+-------+------+------------+---------+------+--------+
+          5 rows in set (0.00 sec)
+          
+          mysql>
+          ```
+
+    + 示例
+      + [operating]  
+        要求，获取所有部门月薪最低的员工明细
+
+        ```sql
+        mysql> SELECT * FROM emp WHERE (deptno, sal) = ANY( ( SELECT deptno, MIN(sal) FROM emp GROUP BY deptno) );
+        +-------+--------+-------+------+------------+---------+------+--------+
+        | empno | ename  | job   | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        |  7369 | Smith  | CLERK | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+        |  7900 | James  | CLERK | 7698 | 1981-12-03 |  950.00 | NULL |     30 |
+        |  7934 | Miller | CLERK | 7782 | 1982-01-23 | 1300.00 | NULL |     10 |
+        |  8888 | Tang   | CLERK | 7902 | 1999-10-10 | 2000.00 | NULL |     50 |
+        +-------+--------+-------+------+------------+---------+------+--------+
+        4 rows in set (0.01 sec)
+        
+        mysql>
+        ```
+
+      + [operating]  
+        要求，获取所有部门月薪不是最低的员工明细
+
+        ```sql
+        mysql> SELECT * FROM emp WHERE (deptno, sal) <> ALL ( SELECT deptno, MIN(sal) FROM emp GROUP BY deptno ) ;
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno |
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |
+        |  8889 | Liao   | CLERK     | 7902 | 1981-12-17 | 1300.00 |    NULL |     20 |
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        12 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+        "<> ALL" 可以用 "NOT IN" 替代
+
+  + 示例
+    + 要求:
+      + 查询所有月薪高于公司平均水平的员工信息
+      + 及所属部门的名称、所在地，部门人数、部门平均薪资、平均服务年限
+      + 直管领导的姓名、薪资等级
+
+    + [operating]
+
+      ```sql
+      mysql> USE douma;
+      Reading table information for completion of table and column names
+      You can turn off this feature to get a quicker startup with -A
+      
+      Database changed
+      mysql> WITH dept_sum AS (
+          -> SELECT deptno,
+          ->        COUNT(empno) cnt,
+          ->        ROUND(AVG(sal),2) avg_sal,
+          ->        ROUND(AVG(TIMESTAMPDIFF(YEAR, hiredate, CURRENT_DATE))) avg_srv_years
+          -> FROM emp
+          -> GROUP BY deptno
+          -> )
+          -> SELECT e.empno, e.ename, e.sal, e.job, e.hiredate,
+          ->        d.dname, d.loc,
+          ->        m.ename manager, s.grade manager_grade,
+          ->        dept_sum.cnt, dept_sum.avg_sal, dept_sum.avg_srv_years
+          -> FROM emp e JOIN dept2 d USING(deptno)
+          ->            LEFT JOIN emp m ON e.mgr = m.empno
+          ->            LEFT JOIN salgrade s ON m.sal BETWEEN s.losal AND s.hisal    # m.sal 则选择领导的薪资等级； e.sal 则选择本人的薪资等级，且可不使用外连接
+          ->            JOIN dept_sum on e.deptno = dept_sum.deptno
+          -> WHERE e.sal > (SELECT AVG(sal) FROM emp)
+          -> ;
+      +-------+-------+---------+-----------+------------+------------+-----------+---------+---------------+-----+---------+---------------+
+      | empno | ename | sal     | job       | hiredate   | dname      | loc       | manager | manager_grade | cnt | avg_sal | avg_srv_years |
+      +-------+-------+---------+-----------+------------+------------+-----------+---------+---------------+-----+---------+---------------+
+      |  7566 | Jones | 2975.00 | MANAGER   | 1981-04-02 | RESEARCH   | DALLAS    | King    |             5 |   6 | 2029.17 |            43 |
+      |  7698 | Blake | 2850.00 | MANAGER   | 1981-05-01 | SALES      | CHICAGO   | King    |             5 |   6 | 1566.67 |            45 |
+      |  7782 | Clark | 2450.00 | MANAGER   | 1981-06-09 | ACCOUNTING | NEW YOURK | King    |             5 |   3 | 2916.67 |            44 |
+      |  7788 | Scott | 3000.00 | ANALYST   | 1987-04-19 | RESEARCH   | DALLAS    | Jones   |             4 |   6 | 2029.17 |            43 |
+      |  7839 | King  | 5000.00 | PRESIDENT | 1981-11-17 | ACCOUNTING | NEW YOURK | NULL    |          NULL |   3 | 2916.67 |            44 |
+      |  7902 | Ford  | 3000.00 | ANALYST   | 1981-12-03 | RESEARCH   | DALLAS    | Jones   |             4 |   6 | 2029.17 |            43 |
+      +-------+-------+---------+-----------+------------+------------+-----------+---------+---------------+-----+---------+---------------+
+      6 rows in set (0.00 sec)
+      
+      mysql>
+      ```
 
 + Update -- 更新
 + Insert -- 插入
 + Delete -- 删除
 + Truncate -- 截断/删节
 
+### 函数 与 计算
+
+#### 标量函数 / 单行函数
+
++ 说明
+  + 不会改变返回的行数，但会某些指定的行进行计算/变化
+  + 可以使用也可以不使用 虚拟表dual
++ 字符串函数
+  + 说明
+    + 
+    + 在默认情况下，**MySQL对大小写不敏感**，包括字段名和字段值
+
+      + 示例，注意 字段名ename 和 字段值 Smith
+
+        + [operating]
+
+          ```sql
+          mysql> SELECT * FROm emp WHERE ENAME = 'smith';
+          +-------+-------+-------+------+------------+--------+------+--------+
+          | empno | ename | job   | mgr  | hiredate   | sal    | comm | deptno |
+          +-------+-------+-------+------+------------+--------+------+--------+
+          |  7369 | Smith | CLERK | 7902 | 1980-12-17 | 800.00 | NULL |     20 |
+          +-------+-------+-------+------+------------+--------+------+--------+
+          1 row in set (0.00 sec)
+          
+          mysql>          
+          ```
+
+  + CONCAT()
+  + INSTR()
+    + 说明
+      返回子字符串(第二字符串)在父字符串(第一字符串)中首次首次出现的位置
+
+    + 示例
+      + [operating]
+
+        ```sql
+        mysql> SELECT  INSTR('douma, shake you code', 'ou') FROM dual;
+        +--------------------------------------+
+        | INSTR('douma, shake you code', 'ou') |
+        +--------------------------------------+
+        |                                    2 |
+        +--------------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT
+            ->  INSTR('douma, shake you code', 'shake') find1,
+            ->  INSTR('douma, shake you code', 'douma') find2,
+            ->  INSTR('douma, shake you code', 'mysql') find3
+            -> FROM dual;
+        +-------+-------+-------+
+        | find1 | find2 | find3 |
+        +-------+-------+-------+
+        |     8 |     1 |     0 |
+        +-------+-------+-------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + LENGTH()
+    + 示例
+      + [operating]
+
+        ```sql
+        mysql> SELECT ename, LENGTH(ename) FROM emp WHERE LENGTH(ename) = 5;
+        +-------+---------------+
+        | ename | LENGTH(ename) |
+        +-------+---------------+
+        | Smith |             5 |
+        | Allen |             5 |
+        | Jones |             5 |
+        | Blake |             5 |
+        | Clark |             5 |
+        | Scott |             5 |
+        | Adams |             5 |
+        | James |             5 |
+        +-------+---------------+
+        8 rows in set (0.00 sec)
+        
+
+        mysql> SELECT ename, LENGTH(ename) FROM emp WHERE ename like '_____';
+        +-------+---------------+
+        | ename | LENGTH(ename) |
+        +-------+---------------+
+        | Smith |             5 |
+        | Allen |             5 |
+        | Jones |             5 |
+        | Blake |             5 |
+        | Clark |             5 |
+        | Scott |             5 |
+        | Adams |             5 |
+        | James |             5 |
+        +-------+---------------+
+        8 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT ename, LENGTH(ename) FROM emp WHERE LENGTH(ename) <> 5;
+        +--------+---------------+
+        | ename  | LENGTH(ename) |
+        +--------+---------------+
+        | Ward   |             4 |
+        | Martin |             6 |
+        | King   |             4 |
+        | Turner |             6 |
+        | Ford   |             4 |
+        | Miller |             6 |
+        +--------+---------------+
+        6 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + LPAD()
+
+  + LOWER()
+    + 说明
+    + 示例
+      + [operating]
+
+        ```sql
+        mysql> SELECT LOWER('HELLO, THE WORLD');
+        +---------------------------+
+        | LOWER('HELLO, THE WORLD') |
+        +---------------------------+
+        | hello, the world          |
+        +---------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>        
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT d.deptno, d.dname, e.ename FROM dept d JOIN emp e on e.deptno = d.deptno;
+        +--------+------------+--------+
+        | deptno | dname      | ename  |
+        +--------+------------+--------+
+        |     10 | ACCOUNTING | Clark  |
+        |     10 | ACCOUNTING | King   |
+        |     10 | ACCOUNTING | Miller |
+        |     20 | RESEARCH   | Smith  |
+        |     20 | RESEARCH   | Jones  |
+        |     20 | RESEARCH   | Scott  |
+        |     20 | RESEARCH   | Adams  |
+        |     20 | RESEARCH   | Ford   |
+        |     30 | SALES      | Allen  |
+        |     30 | SALES      | Ward   |
+        |     30 | SALES      | Martin |
+        |     30 | SALES      | Blake  |
+        |     30 | SALES      | Turner |
+        |     30 | SALES      | James  |
+        +--------+------------+--------+
+        14 rows in set (0.00 sec)
+        
+        mysql> SELECT d.deptno, LOWER(d.dname), UPPER(e.ename) FROM dept d JOIN emp e on e.deptno = d.deptno;
+        +--------+----------------+----------------+
+        | deptno | LOWER(d.dname) | UPPER(e.ename) |
+        +--------+----------------+----------------+
+        |     10 | accounting     | CLARK          |
+        |     10 | accounting     | KING           |
+        |     10 | accounting     | MILLER         |
+        |     20 | research       | SMITH          |
+        |     20 | research       | JONES          |
+        |     20 | research       | SCOTT          |
+        |     20 | research       | ADAMS          |
+        |     20 | research       | FORD           |
+        |     30 | sales          | ALLEN          |
+        |     30 | sales          | WARD           |
+        |     30 | sales          | MARTIN         |
+        |     30 | sales          | BLAKE          |
+        |     30 | sales          | TURNER         |
+        |     30 | sales          | JAMES          |
+        +--------+----------------+----------------+
+        14 rows in set (0.01 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT * FROm emp WHERE ename = 'smith';
+        +-------+-------+-------+------+------------+--------+------+--------+
+        | empno | ename | job   | mgr  | hiredate   | sal    | comm | deptno |
+        +-------+-------+-------+------+------------+--------+------+--------+
+        |  7369 | Smith | CLERK | 7902 | 1980-12-17 | 800.00 | NULL |     20 |
+        +-------+-------+-------+------+------------+--------+------+--------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + LTRIM()
+
+  + REPLACE()
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+
+        mysql> SELECT ename , REPLACE(ename, 'a', 'A') FROM emp;
+        +--------+--------------------------+
+        | ename  | REPLACE(ename, 'a', 'A') |
+        +--------+--------------------------+
+        | Smith  | Smith                    |
+        | Allen  | Allen                    |
+        | Ward   | WArd                     |  *
+        | Jones  | Jones                    |
+        | Martin | MArtin                   |  *
+        | Blake  | BlAke                    |  *
+        | Clark  | ClArk                    |
+        | Scott  | Scott                    |
+        | King   | King                     |
+        | Turner | Turner                   |
+        | Adams  | AdAms                    |  *
+        | James  | JAmes                    |  *
+        | Ford   | Ford                     |
+        | Miller | Miller                   |
+        +--------+--------------------------+
+        14 rows in set (0.01 sec)
+        
+        mysql>
+        ```
+
+  + RPAD()
+    + 说明
+      右补位
+
+    + 示例
+      + [operating]
+
+        ```sql
+        mysql> SELECT LPAD(RPAD(ename, 8, '*'), 10, '$') FROM emp;
+        +------------------------------------+
+        | LPAD(RPAD(ename, 8, '*'), 10, '$') |
+        +------------------------------------+
+        | $$Smith***                         |
+        | $$Allen***                         |
+        | $$Ward****                         |
+        | $$Jones***                         |
+        | $$Martin**                         |
+        | $$Blake***                         |
+        | $$Clark***                         |
+        | $$Scott***                         |
+        | $$King****                         |
+        | $$Turner**                         |
+        | $$Adams***                         |
+        | $$James***                         |
+        | $$Ford****                         |
+        | $$Miller**                         |
+        +------------------------------------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + RTRIM()
+    + 示例
+      + [operating]
+
+        ```sql
+        mysql> SELECT RTRIM('    HELLLO    ');
+        +-------------------------+
+        | RTRIM('    HELLLO    ') |
+        +-------------------------+
+        |     HELLLO              |
+        +-------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + STUFF()
+
+  + SUBSTR()
+    + 说明
+      字符串截取
+      截取长度不指定，则默认截取到字符串尾
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT ename, SUBSTR(ename, 1, 3) FROM emp;
+        +--------+---------------------+
+        | ename  | SUBSTR(ename, 1, 3) |
+        +--------+---------------------+
+        | Smith  | Smi                 |
+        | Allen  | All                 |
+        | Ward   | War                 |
+        | Jones  | Jon                 |
+        | Martin | Mar                 |
+        | Blake  | Bla                 |
+        | Clark  | Cla                 |
+        | Scott  | Sco                 |
+        | King   | Kin                 |
+        | Turner | Tur                 |
+        | Adams  | Ada                 |
+        | James  | Jam                 |
+        | Ford   | For                 |
+        | Miller | Mil                 |
+        +--------+---------------------+
+        14 rows in set (0.00 sec)
+        
+        mysql>        
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT ename, SUBSTR(ename, -3,2) FROM emp;
+        +--------+---------------------+
+        | ename  | SUBSTR(ename, -3,2) |
+        +--------+---------------------+
+        | Smith  | it                  |
+        | Allen  | le                  |
+        | Ward   | ar                  |
+        | Jones  | ne                  |
+        | Martin | ti                  |
+        | Blake  | ak                  |
+        | Clark  | ar                  |
+        | Scott  | ot                  |
+        | King   | in                  |
+        | Turner | ne                  |
+        | Adams  | am                  |
+        | James  | me                  |
+        | Ford   | or                  |
+        | Miller | le                  |
+        +--------+---------------------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT ename, CONCAT('***', SUBSTR(ename, 4)) FROM emp;
+        +--------+---------------------------------+
+        | ename  | CONCAT('***', SUBSTR(ename, 4)) |
+        +--------+---------------------------------+
+        | Smith  | ***th                           |
+        | Allen  | ***en                           |
+        | Ward   | ***d                            |
+        | Jones  | ***es                           |
+        | Martin | ***tin                          |
+        | Blake  | ***ke                           |
+        | Clark  | ***rk                           |
+        | Scott  | ***tt                           |
+        | King   | ***g                            |
+        | Turner | ***ner                          |
+        | Adams  | ***ms                           |
+        | James  | ***es                           |
+        | Ford   | ***d                            |
+        | Miller | ***ler                          |
+        +--------+---------------------------------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + TRIM()
+    + 说明
+      去空格
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT TRIM('    HELLLO    ');
+        +------------------------+
+        | TRIM('    HELLLO    ') |
+        +------------------------+
+        | HELLLO                 |
+        +------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + UPPER()
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT UPPER('hello, the world');
+        +---------------------------+
+        | UPPER('hello, the world') |
+        +---------------------------+
+        | HELLO, THE WORLD          |
+        +---------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
++ 数值函数
+  + ABS(字段)
+    + 说明
+      取绝对值
+
+  + CEIL()
+
+  + CEILING()
+
+  + FLOOR()
+
+  + MOD()
+    + 说明
+      求余
+
+  + RAND(x)
+    + 说明
+      + x，随机种子，相同的的x值会产生相同的随机数，**缺省无**
+
+  + ROUND(字段,n)
+    + 说明
+      合入取整
+      + n 为保留小数位，**缺省0**
+      + n 可以为负数
+
+    + 示例
+
+      + [opeating]
+
+        ```sql
+        mysql> SELECT e.empno, e.ename, (e.sal + 200) * 112 + 5000 as  year_sal, e.sal / 30 as day_sal         FROM emp as e;
+        +-------+--------+-----------+------------+
+        | empno | ename  | year_sal  | day_sal    |
+        +-------+--------+-----------+------------+
+        |  7369 | Smith  | 117000.00 |  26.666667 |
+        |  7499 | Allen  | 206600.00 |  53.333333 |
+        |  7521 | Ward   | 167400.00 |  41.666667 |
+        |  7566 | Jones  | 360600.00 |  99.166667 |
+        |  7654 | Martin | 167400.00 |  41.666667 |
+        |  7698 | Blake  | 346600.00 |  95.000000 |
+        |  7782 | Clark  | 301800.00 |  81.666667 |
+        |  7788 | Scott  | 363400.00 | 100.000000 |
+        |  7839 | King   | 587400.00 | 166.666667 |
+        |  7844 | Turner | 195400.00 |  50.000000 |
+        |  7876 | Adams  | 150600.00 |  36.666667 |
+        |  7900 | James  | 133800.00 |  31.666667 |
+        |  7902 | Ford   | 363400.00 | 100.000000 |
+        |  7934 | Miller | 173000.00 |  43.333333 |
+        +-------+--------+-----------+------------+
+        14 rows in set (0.01 sec)
+        
+        mysql> SELECT e.empno, e.ename, (e.sal + 200) * 112 + 5000 as  year_sal, ROUND(e.sal / 30, 2) as day_sal FROM emp as e;
+        +-------+--------+-----------+---------+
+        | empno | ename  | year_sal  | day_sal |
+        +-------+--------+-----------+---------+
+        |  7369 | Smith  | 117000.00 |   26.67 |
+        |  7499 | Allen  | 206600.00 |   53.33 |
+        |  7521 | Ward   | 167400.00 |   41.67 |
+        |  7566 | Jones  | 360600.00 |   99.17 |
+        |  7654 | Martin | 167400.00 |   41.67 |
+        |  7698 | Blake  | 346600.00 |   95.00 |
+        |  7782 | Clark  | 301800.00 |   81.67 |
+        |  7788 | Scott  | 363400.00 |  100.00 |
+        |  7839 | King   | 587400.00 |  166.67 |
+        |  7844 | Turner | 195400.00 |   50.00 |
+        |  7876 | Adams  | 150600.00 |   36.67 |
+        |  7900 | James  | 133800.00 |   31.67 |
+        |  7902 | Ford   | 363400.00 |  100.00 |
+        |  7934 | Miller | 173000.00 |   43.33 |
+        +-------+--------+-----------+---------+
+        14 rows in set (0.01 sec)
+        
+        mysql> SELECT e.empno, e.ename, ROUND(((e.sal + 200) * 112 + 5000), -3) as  year_sal, ROUND(e.sal / 30, 2) as day_sal FROM emp as e;
+        +-------+--------+----------+---------+
+        | empno | ename  | year_sal | day_sal |
+        +-------+--------+----------+---------+
+        |  7369 | Smith  |   117000 |   26.67 |
+        |  7499 | Allen  |   207000 |   53.33 |
+        |  7521 | Ward   |   167000 |   41.67 |
+        |  7566 | Jones  |   361000 |   99.17 |
+        |  7654 | Martin |   167000 |   41.67 |
+        |  7698 | Blake  |   347000 |   95.00 |
+        |  7782 | Clark  |   302000 |   81.67 |
+        |  7788 | Scott  |   363000 |  100.00 |
+        |  7839 | King   |   587000 |  166.67 |
+        |  7844 | Turner |   195000 |   50.00 |
+        |  7876 | Adams  |   151000 |   36.67 |
+        |  7900 | James  |   134000 |   31.67 |
+        |  7902 | Ford   |   363000 |  100.00 |
+        |  7934 | Miller |   173000 |   43.33 |
+        +-------+--------+----------+---------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + SQRT()
+    + 说明
+      平方根
+
+  + TRUNCATE()
+    + 说明
+      阶段取整
+
+    + 示例
+      + [operating]
+
+        ```sql
+        mysql> SELECT e.empno, e.ename, ROUND(((e.sal + 200) * 112 + 5000), -3) as  year_sal, ROUND(e.sal / 30, 2) as day_sal FROM emp as e;
+        +-------+--------+----------+---------+
+        | empno | ename  | year_sal | day_sal |
+        +-------+--------+----------+---------+
+        |  7369 | Smith  |   117000 |   26.67 |
+        |  7499 | Allen  |   207000 |   53.33 |
+        |  7521 | Ward   |   167000 |   41.67 |
+        |  7566 | Jones  |   361000 |   99.17 |
+        |  7654 | Martin |   167000 |   41.67 |
+        |  7698 | Blake  |   347000 |   95.00 |
+        |  7782 | Clark  |   302000 |   81.67 |
+        |  7788 | Scott  |   363000 |  100.00 |
+        |  7839 | King   |   587000 |  166.67 |
+        |  7844 | Turner |   195000 |   50.00 |
+        |  7876 | Adams  |   151000 |   36.67 |
+        |  7900 | James  |   134000 |   31.67 |
+        |  7902 | Ford   |   363000 |  100.00 |
+        |  7934 | Miller |   173000 |   43.33 |
+        +-------+--------+----------+---------+
+        14 rows in set (0.00 sec)
+        
+        mysql> SELECT e.empno, e.ename, ROUND(((e.sal + 200) * 112 + 5000), -3) as  year_sal, TRUNCATE(e.sal / 30, 2) as day_sal FROM emp as e;
+        +-------+--------+----------+---------+
+        | empno | ename  | year_sal | day_sal |
+        +-------+--------+----------+---------+
+        |  7369 | Smith  |   117000 |   26.66 |
+        |  7499 | Allen  |   207000 |   53.33 |
+        |  7521 | Ward   |   167000 |   41.66 |
+        |  7566 | Jones  |   361000 |   99.16 |
+        |  7654 | Martin |   167000 |   41.66 |
+        |  7698 | Blake  |   347000 |   95.00 |
+        |  7782 | Clark  |   302000 |   81.66 |
+        |  7788 | Scott  |   363000 |  100.00 |
+        |  7839 | King   |   587000 |  166.66 |
+        |  7844 | Turner |   195000 |   50.00 |
+        |  7876 | Adams  |   151000 |   36.66 |
+        |  7900 | James  |   134000 |   31.66 |
+        |  7902 | Ford   |   363000 |  100.00 |
+        |  7934 | Miller |   173000 |   43.33 |
+        +-------+--------+----------+---------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
++ 日期函数
+  + 关键词(1)
+    + CURRENT_DATE
+    + CURRENT_TIME
+    + CURRENT_TIMESTAMP
+  + 关键词(2)
+    + INTERVAL
+  + 关键词(3)，时间单位
+    + SECOND
+    + MINUTE
+    + HOUR
+    + DAY
+    + MONTH
+    + YEAR
+
+  + ~~ADD_MONTHS()~~
+    + 说明
+      未在官方文档中找到该函数
+
+  + ADDDATE()
+    + 说明
+
+      + [operating]  
+
+        ```sql
+        mysql> HELP ADDDATE
+        Name: 'ADDDATE'
+        Description:
+        Syntax:
+        ADDDATE(date,INTERVAL expr unit), ADDDATE(date,days)
+        
+        When invoked with the INTERVAL form of the second argument, ADDDATE()
+        is a synonym for DATE_ADD(). The related function SUBDATE() is a
+        synonym for DATE_SUB(). For information on the INTERVAL unit argument,
+        see
+        https://dev.mysql.com/doc/refman/8.4/en/expressions.html#temporal-inter
+        vals.
+        
+        mysql> SELECT DATE_ADD('2008-01-02', INTERVAL 31 DAY);
+                -> '2008-02-02'
+        mysql> SELECT ADDDATE('2008-01-02', INTERVAL 31 DAY);
+                -> '2008-02-02'
+        
+        When invoked with the days form of the second argument, MySQL treats it
+        as an integer number of days to be added to expr.
+        
+        URL: https://dev.mysql.com/doc/refman/8.4/en/date-and-time-functions.html
+        
+        Examples:
+        mysql> SELECT ADDDATE('2008-01-02', 31);
+                -> '2008-02-02'
+        
+        mysql>
+        ```
+
+  + ADDTIME()
+
+  + DATE_ADD()
+    + 说明
+    + 示例
+      + [operating]
+
+        ```sql
+        mysql> SELECT DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY);
+        +----------------------------------------+
+        | DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY) |
+        +----------------------------------------+
+        | 2026-05-18                             |
+        +----------------------------------------+
+        1 row in set (0.01 sec)
+        
+        mysql> SELECT DATE_ADD(CURRENT_DATE, INTERVAL 3 MONTH);
+        +------------------------------------------+
+        | DATE_ADD(CURRENT_DATE, INTERVAL 3 MONTH) |
+        +------------------------------------------+
+        | 2026-08-15                               |
+        +------------------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT DATE_ADD(CURRENT_DATE, INTERVAL 3 YEAR);
+        +-----------------------------------------+
+        | DATE_ADD(CURRENT_DATE, INTERVAL 3 YEAR) |
+        +-----------------------------------------+
+        | 2029-05-15                              |
+        +-----------------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```  
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT DATE_ADD('2020-12-31 23:59:59', INTERVAL 1 SECOND);
+        +----------------------------------------------------+
+        | DATE_ADD('2020-12-31 23:59:59', INTERVAL 1 SECOND) |
+        +----------------------------------------------------+
+        | 2021-01-01 00:00:00                                |
+        +----------------------------------------------------+
+        1 row in set (0.01 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT DATE_ADD('2020-12-31 23:59:59', INTERVAL '1:1' MINUTE_SECOND);
+        +---------------------------------------------------------------+
+        | DATE_ADD('2020-12-31 23:59:59', INTERVAL '1:1' MINUTE_SECOND) |
+        +---------------------------------------------------------------+
+        | 2021-01-01 00:01:00                                           |
+        +---------------------------------------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT DATE_ADD('2020-12-31 23:59:59', INTERVAL '2:1:10' HOUR_SECOND);
+        +----------------------------------------------------------------+
+        | DATE_ADD('2020-12-31 23:59:59', INTERVAL '2:1:10' HOUR_SECOND) |
+        +----------------------------------------------------------------+
+        | 2021-01-01 02:01:09                                            |
+        +----------------------------------------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        mysql>
+        ```
+
+  + DATE_SUB()
+    + 说明
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT DATE_SUB(CURRENT_DATE, INTERVAL 3 DAY) 3_days_later;
+        +--------------+
+        | 3_days_later |
+        +--------------+
+        | 2026-05-11   |
+        +--------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + DATEDIFF()
+
+    + 说明
+
+    + [operating]
+
+      ```sql
+      mysql> USE douma;
+      ... ...
+      mysql> SELECT ename, hiredate, DATEDIFF(CURRENT_DATE, hiredate) as hireddays FROM emp;
+      +--------+------------+----------+
+      | ename  | hiredate   | hireddays |
+      +--------+------------+----------+
+      | Smith  | 1980-12-17 |    16585 |
+      | Allen  | 1981-02-20 |    16520 |
+      | Ward   | 1981-02-22 |    16518 |
+      | Jones  | 1981-04-02 |    16479 |
+      | Martin | 1981-09-28 |    16300 |
+      | Blake  | 1981-05-01 |    16450 |
+      | Clark  | 1981-06-09 |    16411 |
+      | Scott  | 1987-04-19 |    14271 |
+      | King   | 1981-11-17 |    16250 |
+      | Turner | 1981-09-08 |    16320 |
+      | Adams  | 1987-05-23 |    14237 |
+      | James  | 1981-12-03 |    16234 |
+      | Ford   | 1981-12-03 |    16234 |
+      | Miller | 1982-01-23 |    16183 |
+      +--------+------------+----------+
+      14 rows in set (0.00 sec)
+      
+      mysql>
+      ```
+
+  + DAY()
+
+  + EXZTRACT()
+
+  + LAST_DAY()
+    + 说明
+    + 示例  
+      + [operating]
+
+        ```sql
+        mysql> SELECT * FROM emp WHERE hiredate = DATE_SUB(LAST_DAY(hiredate), INTERVAL 2 DAY);
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        | empno | ename  | job      | mgr  | hiredate   | sal     | comm    | deptno |
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        |  7654 | Martin | SALESMAN | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        1 row in set (0.01 sec)
+        
+        mysql>
+        ```
+
+  + MONTH()
+
+  + NOW()
+    + 说明
+
+    + 示例
+      + [oerating]
+
+        ```sql
+        mysql> SELECT NOW();
+        +---------------------+
+        | NOW()               |
+        +---------------------+
+        | 2026-05-14 16:34:36 |
+        +---------------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT CURRENT_TIMESTAMP;
+        +---------------------+
+        | CURRENT_TIMESTAMP   |
+        +---------------------+
+        | 2026-05-14 16:35:56 |
+        +---------------------+
+        1 row in set (0.00 sec)
+
+        mysql>
+        ```
+
+  + SYSDATE()
+    + 说明
+    + 示例
+      + [operating]
+
+        ```sql
+        mysql> SELECT SYSDATE();
+        +---------------------+
+        | SYSDATE()           |
+        +---------------------+
+        | 2026-05-14 19:04:23 |
+        +---------------------+
+        1 row in set (0.01 sec)
+        
+        mysql>
+        ```
+
+  + TIMESTAMPDIFF()
+
+    + 说明
+
+    + [operating]
+
+      ```sql
+      mysql> USE douma;
+      ...
+      mysql> SELECT ename, hiredate, TIMESTAMPDIFF(MONTH, hiredate, CURRENT_DATE) as hiredmonths FROM emp;
+      +--------+------------+-------------+
+      | ename  | hiredate   | hiredmonths |
+      +--------+------------+-------------+
+      | Smith  | 1980-12-17 |         544 |
+      | Allen  | 1981-02-20 |         542 |
+      | Ward   | 1981-02-22 |         542 |
+      | Jones  | 1981-04-02 |         541 |
+      | Martin | 1981-09-28 |         535 |
+      | Blake  | 1981-05-01 |         540 |
+      | Clark  | 1981-06-09 |         539 |
+      | Scott  | 1987-04-19 |         468 |
+      | King   | 1981-11-17 |         533 |
+      | Turner | 1981-09-08 |         536 |
+      | Adams  | 1987-05-23 |         467 |
+      | James  | 1981-12-03 |         533 |
+      | Ford   | 1981-12-03 |         533 |
+      | Miller | 1982-01-23 |         531 |
+      +--------+------------+-------------+
+      14 rows in set (0.00 sec)
+      
+      mysql>
+      ```
+
+  + TO_DAYS()
+    + 说明
+      + 转换为距离 "1970-01-01" 间的天数
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> USE douma;
+        ... ...
+        mysql> SELECT TO_DAYS(CURRENT_DATE);
+        +-----------------------+
+        | TO_DAYS(CURRENT_DATE) |
+        +-----------------------+
+        |                740116 |
+        +-----------------------+
+        1 row in set (0.00 sec)
+        
+        mysql> 
+        mysql> SELECT ename, hiredate, TO_DAYS(CURRENT_DATE) - TO_DAYS(hiredate) as hiredays FROM emp;
+        +--------+------------+----------+
+        | ename  | hiredate   | hiredays |
+        +--------+------------+----------+
+        | Smith  | 1980-12-17 |    16585 |
+        | Allen  | 1981-02-20 |    16520 |
+        | Ward   | 1981-02-22 |    16518 |
+        | Jones  | 1981-04-02 |    16479 |
+        | Martin | 1981-09-28 |    16300 |
+        | Blake  | 1981-05-01 |    16450 |
+        | Clark  | 1981-06-09 |    16411 |
+        | Scott  | 1987-04-19 |    14271 |
+        | King   | 1981-11-17 |    16250 |
+        | Turner | 1981-09-08 |    16320 |
+        | Adams  | 1987-05-23 |    14237 |
+        | James  | 1981-12-03 |    16234 |
+        | Ford   | 1981-12-03 |    16234 |
+        | Miller | 1982-01-23 |    16183 |
+        +--------+------------+----------+
+        14 rows in set (0.02 sec)
+        
+        mysql>
+        ```
+
+  + YEAR()
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT ename, hiredate, YEAR(hiredate) FROM emp;
+        +--------+------------+----------------+
+        | ename  | hiredate   | YEAR(hiredate) |
+        +--------+------------+----------------+
+        | Smith  | 1980-12-17 |           1980 |
+        | Allen  | 1981-02-20 |           1981 |
+        | Ward   | 1981-02-22 |           1981 |
+        | Jones  | 1981-04-02 |           1981 |
+        | Martin | 1981-09-28 |           1981 |
+        | Blake  | 1981-05-01 |           1981 |
+        | Clark  | 1981-06-09 |           1981 |
+        | Scott  | 1987-04-19 |           1987 |
+        | King   | 1981-11-17 |           1981 |
+        | Turner | 1981-09-08 |           1981 |
+        | Adams  | 1987-05-23 |           1987 |
+        | James  | 1981-12-03 |           1981 |
+        | Ford   | 1981-12-03 |           1981 |
+        | Miller | 1982-01-23 |           1982 |
+        +--------+------------+----------------+
+        14 rows in set (0.01 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT CURRENT_TIMESTAMP,
+            ->        YEAR(CURRENT_TIMESTAMP),
+            ->        MONTH(CURRENT_TIMESTAMP),
+            ->        DAY(CURRENT_TIMESTAMP),
+            ->        HOUR(CURRENT_TIMESTAMP),
+            ->        MINUTE(CURRENT_TIMESTAMP),
+            ->        SECOND(CURRENT_TIMESTAMP),
+            ->        WEEK(CURRENT_TIMESTAMP),
+            ->        WEEKDAY(CURRENT_TIMESTAMP)
+            -> FROM dual\G;
+        *************************** 1. row ***************************
+                 CURRENT_TIMESTAMP: 2026-05-16 14:56:29
+           YEAR(CURRENT_TIMESTAMP): 2026
+          MONTH(CURRENT_TIMESTAMP): 5
+            DAY(CURRENT_TIMESTAMP): 16
+           HOUR(CURRENT_TIMESTAMP): 14
+         MINUTE(CURRENT_TIMESTAMP): 56
+         SECOND(CURRENT_TIMESTAMP): 29
+           WEEK(CURRENT_TIMESTAMP): 19
+        WEEKDAY(CURRENT_TIMESTAMP): 5
+        1 row in set (0.00 sec)
+        
+        ERROR:
+        No query specified
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT YEAR(hiredate), count(1)
+            -> FROM emp
+            -> GROUP BY YEAR(hiredate);
+        +----------------+----------+
+        | YEAR(hiredate) | count(1) |
+        +----------------+----------+
+        |           1980 |        1 |
+        |           1981 |       10 |
+        |           1987 |        2 |
+        |           1982 |        1 |
+        +----------------+----------+
+        4 rows in set (0.01 sec)
+        
+        mysql>
+        ```
+
++ 转换函数
+  + 说明
+    在 字符串、数值、日期 间互相转换
+
+  + CAST()
+    + 说明
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT CAST(150 AS CHAR);
+        +-------------------+
+        | CAST(150 AS CHAR) |
+        +-------------------+
+        | 150               |
+        +-------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>      
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT CAST('2020/10/01' AS DATE);
+        +----------------------------+
+        | CAST('2020/10/01' AS DATE) |
+        +----------------------------+
+        | 2020-10-01                 |
+        +----------------------------+
+        1 row in set, 1 warning (0.00 sec)
+        
+        mysql> SELECT CAST('2020-10-01' AS DATE);
+        +----------------------------+
+        | CAST('2020-10-01' AS DATE) |
+        +----------------------------+
+        | 2020-10-01                 |
+        +----------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT CAST('20201001' AS DATE);
+        +--------------------------+
+        | CAST('20201001' AS DATE) |
+        +--------------------------+
+        | 2020-10-01               |
+        +--------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + DATE_FORMAT
+    + 说明
+      + Specifier
+        + `%a` -- Abbreviated weekday name (Sun..Sat)
+        + `%b` -- Abbreviated month name (Jan..Dec)
+        + `%c` -- Month, numeric (0..12)
+        + `%D` -- Day of the month with English suffix (0th, 1st, 2nd, 3rd, …)
+        + `%d` -- Day of the month, numeric (00..31)
+        + `%e` -- Day of the month, numeric (0..31)
+        + `%f` -- Microseconds (000000..999999)
+        + `%H` -- Hour (00..23)
+        + `%h` -- Hour (01..12)
+        + `%I` -- Hour (01..12)
+        + `%i` -- Minutes, numeric (00..59)
+        + `%j` -- Day of year (001..366)
+        + `%k` -- Hour (0..23)
+        + `%l` -- Hour (1..12)
+        + `%M` -- Month name (January..December)
+        + `%m` -- Month, numeric (00..12)
+        + `%p` -- AM or PM
+        + `%r` -- Time, 12-hour (hh:mm:ss followed by AM or PM)
+        + `%S` -- Seconds (00..59)
+        + `%s` -- Seconds (00..59)
+        + `%T` -- Time, 24-hour (hh:mm:ss)
+        + `%U` -- Week (00..53), where Sunday is the first day of the week; WEEK() mode 0
+        + `%u` -- Week (00..53), where Monday is the first day of the week; WEEK() mode 1
+        + `%V` -- Week (01..53), where Sunday is the first day of the week; WEEK() mode 2; used with %X
+        + `%v` -- Week (01..53), where Monday is the first day of the week; WEEK() mode 3; used with %x
+        + `%W` -- Weekday name (Sunday..Saturday)
+        + `%w` -- Day of the week (0=Sunday..6=Saturday)
+        + `%X` -- Year for the week where Sunday is the first day of the week, numeric, four digits; used with %V
+        + `%x` -- Year for the week, where Monday is the first day of the week, numeric, four digits; used with %v
+        + `%Y` -- Year, numeric, four digits
+        + `%y` -- Year, numeric (two digits)
+        + `%%` -- A literal % character
+        + `%x` -- x, for any “x” not listed above
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT CURRENT_TIMESTAMP, DATE_FORMAT(CURRENT_TIMESTAMP, '%Y-%m-%d %H:%i:%s') FROM dual;
+        +---------------------+-----------------------------------------------------+
+        | CURRENT_TIMESTAMP   | DATE_FORMAT(CURRENT_TIMESTAMP, '%Y-%m-%d %H:%i:%s') |
+        +---------------------+-----------------------------------------------------+
+        | 2026-05-16 15:55:08 | 2026-05-16 15:55:08                                 |
+        +---------------------+-----------------------------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + FROM_UNIXTIME()
+    + 说明
+    + 示例，见函数 UNIT_TIMESTAMP()
+
+  + STR_TO_DATE
+
+    + 说明
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT STR_TO_DATE('2029-08-15 12:23:34', '%Y-%m-%d %H:%i:%s');
+        +---------------------------------------------------------+
+        | STR_TO_DATE('2029-08-15 12:23:34', '%Y-%m-%d %H:%i:%s') |
+        +---------------------------------------------------------+
+        | 2029-08-15 12:23:34                                     |
+        +---------------------------------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + TO_CHAR()
+
+  + TO_DATE()
+  
+  + TO_NUMBER()
+
+  + UNIX_TIMESTAMP()
+
+    + 说明
+      + 距 1970-01-01 00:00:00 的秒数
+
+      + [quote]
+
+        ```text
+        it returns a Unix timestamp representing seconds since '1970-01-01 00:00:00' UTC. 
+        ```
+
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT UNIX_TIMESTAMP('2029-08-15 12:23:34');
+        +---------------------------------------+
+        | UNIX_TIMESTAMP('2029-08-15 12:23:34') |
+        +---------------------------------------+
+        |                            1881462214 |
+        +---------------------------------------+
+        1 row in set (0.01 sec)
+        
+        mysql> SELECT UNIX_TIMESTAMP('2029-08-15');
+        +------------------------------+
+        | UNIX_TIMESTAMP('2029-08-15') |
+        +------------------------------+
+        |                   1881417600 |
+        +------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT UNIX_TIMESTAMP('2029-08-15 00:00:00');
+        +---------------------------------------+
+        | UNIX_TIMESTAMP('2029-08-15 00:00:00') |
+        +---------------------------------------+
+        |                            1881417600 |
+        +---------------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT CURRENT_TIMESTAMP,UNIX_TIMESTAMP(CURRENT_TIMESTAMP);
+        +---------------------+-----------------------------------+
+        | CURRENT_TIMESTAMP   | UNIX_TIMESTAMP(CURRENT_TIMESTAMP) |
+        +---------------------+-----------------------------------+
+        | 2026-05-16 20:23:43 |                        1778934223 |
+        +---------------------+-----------------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT CURRENT_TIMESTAMP,UNIX_TIMESTAMP();
+        +---------------------+------------------+
+        | CURRENT_TIMESTAMP   | UNIX_TIMESTAMP() |
+        +---------------------+------------------+
+        | 2026-05-16 20:23:51 |       1778934231 |
+        +---------------------+------------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT FROM_UNIXTIME(1778934231);
+        +---------------------------+
+        | FROM_UNIXTIME(1778934231) |
+        +---------------------------+
+        | 2026-05-16 20:23:51       |
+        +---------------------------+
+        1 row in set (0.00 sec)
+        
+        mysql>        
+        ```
+
++ 通用函数
+
+  + 说明
+
+    + 不限于处理特定类型的数据
+
+  + CASE ... WHEN ... ELSE ... END
+    + 说明
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT empno, ename, job,
+            ->        CASE job WHEN 'CLERK' THEN '业务员'
+            ->                 WHEN 'SALESMAN' THEN '销售'
+            ->                 WHEN 'MANAGER' THEN '经理'
+            ->                 WHEN 'ANALYST' THEN '分析员'
+            ->                 WHEN 'PRESIDENT' THEN '总裁'
+            ->        ELSE '职员'
+            ->        END job_cn,
+            ->        sal, comm
+            -> FROM emp;
+        +-------+--------+-----------+-----------+---------+---------+
+        | empno | ename  | job       | job_cn    | sal     | comm    |
+        +-------+--------+-----------+-----------+---------+---------+
+        |  7369 | Smith  | CLERK     | 业务员     |  800.00 |    NULL |
+        |  7499 | Allen  | SALESMAN  | 销售      | 1600.00 |  300.00 |
+        |  7521 | Ward   | SALESMAN  | 销售      | 1250.00 |  500.00 |
+        |  7566 | Jones  | MANAGER   | 经理      | 2975.00 |    NULL |
+        |  7654 | Martin | SALESMAN  | 销售      | 1250.00 | 1400.00 |
+        |  7698 | Blake  | MANAGER   | 经理      | 2850.00 |    NULL |
+        |  7782 | Clark  | MANAGER   | 经理      | 2450.00 |    NULL |
+        |  7788 | Scott  | ANALYST   | 分析员    | 3000.00 |    NULL |
+        |  7839 | King   | PRESIDENT | 总裁      | 5000.00 |    NULL |
+        |  7844 | Turner | SALESMAN  | 销售      | 1500.00 |    0.00 |
+        |  7876 | Adams  | CLERK     | 业务员    | 1100.00 |    NULL |
+        |  7900 | James  | CLERK     | 业务员    |  950.00 |    NULL |
+        |  7902 | Ford   | ANALYST   | 分析员    | 3000.00 |    NULL |
+        |  7934 | Miller | CLERK     | 业务员    | 1300.00 |    NULL |
+        +-------+--------+-----------+-----------+---------+---------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT empno, ename, job, sal,
+            ->        CASE job WHEN 'CLERK' THEN sal * 1.1
+            ->                 WHEN 'SALESMAN' THEN sal * 1.2
+            ->                 WHEN 'MANAGER' THEN sal * 1.3
+            ->                 ELSE sal * 1.5
+            ->        END sale_new
+            -> FROM emp;
+        +-------+--------+-----------+---------+----------+
+        | empno | ename  | job       | sal     | sale_new |
+        +-------+--------+-----------+---------+----------+
+        |  7369 | Smith  | CLERK     |  800.00 |  880.000 |
+        |  7499 | Allen  | SALESMAN  | 1600.00 | 1920.000 |
+        |  7521 | Ward   | SALESMAN  | 1250.00 | 1500.000 |
+        |  7566 | Jones  | MANAGER   | 2975.00 | 3867.500 |
+        |  7654 | Martin | SALESMAN  | 1250.00 | 1500.000 |
+        |  7698 | Blake  | MANAGER   | 2850.00 | 3705.000 |
+        |  7782 | Clark  | MANAGER   | 2450.00 | 3185.000 |
+        |  7788 | Scott  | ANALYST   | 3000.00 | 4500.000 |
+        |  7839 | King   | PRESIDENT | 5000.00 | 7500.000 |
+        |  7844 | Turner | SALESMAN  | 1500.00 | 1800.000 |
+        |  7876 | Adams  | CLERK     | 1100.00 | 1210.000 |
+        |  7900 | James  | CLERK     |  950.00 | 1045.000 |
+        |  7902 | Ford   | ANALYST   | 3000.00 | 4500.000 |
+        |  7934 | Miller | CLERK     | 1300.00 | 1430.000 |
+        +-------+--------+-----------+---------+----------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT empno, ename, sal,
+            ->        CASE WHEN sal > 0 and sal <= 1500 THEN 'level 1'
+            ->             WHEN sal > 1500 and sal <= 2500 THEN 'level 2'
+            ->             WHEN sal > 2500 and sal <= 4500 THEN 'level 3'
+            ->             ELSE 'level 4'
+            ->        END sal_level
+            -> FROM emp;
+        +-------+--------+---------+-----------+
+        | empno | ename  | sal     | sal_level |
+        +-------+--------+---------+-----------+
+        |  7369 | Smith  |  800.00 | level 1   |
+        |  7499 | Allen  | 1600.00 | level 2   |
+        |  7521 | Ward   | 1250.00 | level 1   |
+        |  7566 | Jones  | 2975.00 | level 3   |
+        |  7654 | Martin | 1250.00 | level 1   |
+        |  7698 | Blake  | 2850.00 | level 3   |
+        |  7782 | Clark  | 2450.00 | level 2   |
+        |  7788 | Scott  | 3000.00 | level 3   |
+        |  7839 | King   | 5000.00 | level 4   |
+        |  7844 | Turner | 1500.00 | level 1   |
+        |  7876 | Adams  | 1100.00 | level 1   |
+        |  7900 | James  |  950.00 | level 1   |
+        |  7902 | Ford   | 3000.00 | level 3   |
+        |  7934 | Miller | 1300.00 | level 1   |
+        +-------+--------+---------+-----------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + COALESCE()
+
+  + DATABASE()
+
+    + [operating]
+
+      ```sql
+      mysql> USE douma;
+      ... ...
+      mysql> SELECT DATABASE();
+      +------------+
+      | DATABASE() |
+      +------------+
+      | douma      |
+      +------------+
+      1 row in set (0.00 sec)
+      
+      mysql>
+      ```
+
+  + GREATEEST()
+
+  + IF()
+
+    + 说明
+      + IF(表达式1, 表达式2, 表达式3)  
+        如果 表达式1 为 true，返回 表达式2 的值  
+        否则返回 表达式3 的值  
+
+  + IFNULL()
+
+    + 说明
+      + IFNULL(表达式, 默认值)  
+        如果表达式不为 null，返回表达式的值  
+        否则，返回默认值  
+
+      + [quote]
+
+        ```text
+        IFNULL(expr1,expr2)
+        If expr1 is not NULL, IFNULL() returns expr1; otherwise it returns expr2. 
+        ```
+
+    + 示例
+      + [operating]
+
+        ```sql
+        mysql> SELECT IFNULL(4, 1);
+        +--------------+
+        | IFNULL(4, 1) |
+        +--------------+
+        |            4 |
+        +--------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT IFNULL(NULL, 1);
+        +-----------------+
+        | IFNULL(NULL, 1) |
+        +-----------------+
+        |               1 |
+        +-----------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT empno, ename, job, hiredate, sal, comm, sal * 12 + comm  as YearSale FROM emp;
+        +-------+--------+-----------+------------+---------+---------+----------+
+        | empno | ename  | job       | hiredate   | sal     | comm    | YearSale |
+        +-------+--------+-----------+------------+---------+---------+----------+
+        |  7369 | Smith  | CLERK     | 1980-12-17 |  800.00 |    NULL |     NULL |
+        |  7499 | Allen  | SALESMAN  | 1981-02-20 | 1600.00 |  300.00 | 19500.00 |
+        |  7521 | Ward   | SALESMAN  | 1981-02-22 | 1250.00 |  500.00 | 15500.00 |
+        |  7566 | Jones  | MANAGER   | 1981-04-02 | 2975.00 |    NULL |     NULL |
+        |  7654 | Martin | SALESMAN  | 1981-09-28 | 1250.00 | 1400.00 | 16400.00 |
+        |  7698 | Blake  | MANAGER   | 1981-05-01 | 2850.00 |    NULL |     NULL |
+        |  7782 | Clark  | MANAGER   | 1981-06-09 | 2450.00 |    NULL |     NULL |
+        |  7788 | Scott  | ANALYST   | 1987-04-19 | 3000.00 |    NULL |     NULL |
+        |  7839 | King   | PRESIDENT | 1981-11-17 | 5000.00 |    NULL |     NULL |
+        |  7844 | Turner | SALESMAN  | 1981-09-08 | 1500.00 |    0.00 | 18000.00 |
+        |  7876 | Adams  | CLERK     | 1987-05-23 | 1100.00 |    NULL |     NULL |
+        |  7900 | James  | CLERK     | 1981-12-03 |  950.00 |    NULL |     NULL |
+        |  7902 | Ford   | ANALYST   | 1981-12-03 | 3000.00 |    NULL |     NULL |
+        |  7934 | Miller | CLERK     | 1982-01-23 | 1300.00 |    NULL |     NULL |
+        +-------+--------+-----------+------------+---------+---------+----------+
+        14 rows in set (0.00 sec)
+
+        mysql> SELECT empno, ename, job, hiredate, sal, comm, sal * 12 + NULLIF(comm,0)  as YearSale FROM emp;
+        +-------+--------+-----------+------------+---------+---------+----------+
+        | empno | ename  | job       | hiredate   | sal     | comm    | YearSale |
+        +-------+--------+-----------+------------+---------+---------+----------+
+        |  7369 | Smith  | CLERK     | 1980-12-17 |  800.00 |    NULL |     NULL |
+        |  7499 | Allen  | SALESMAN  | 1981-02-20 | 1600.00 |  300.00 | 19500.00 |
+        |  7521 | Ward   | SALESMAN  | 1981-02-22 | 1250.00 |  500.00 | 15500.00 |
+        |  7566 | Jones  | MANAGER   | 1981-04-02 | 2975.00 |    NULL |     NULL |
+        |  7654 | Martin | SALESMAN  | 1981-09-28 | 1250.00 | 1400.00 | 16400.00 |
+        |  7698 | Blake  | MANAGER   | 1981-05-01 | 2850.00 |    NULL |     NULL |
+        |  7782 | Clark  | MANAGER   | 1981-06-09 | 2450.00 |    NULL |     NULL |
+        |  7788 | Scott  | ANALYST   | 1987-04-19 | 3000.00 |    NULL |     NULL |
+        |  7839 | King   | PRESIDENT | 1981-11-17 | 5000.00 |    NULL |     NULL |
+        |  7844 | Turner | SALESMAN  | 1981-09-08 | 1500.00 |    0.00 |     NULL |
+        |  7876 | Adams  | CLERK     | 1987-05-23 | 1100.00 |    NULL |     NULL |
+        |  7900 | James  | CLERK     | 1981-12-03 |  950.00 |    NULL |     NULL |
+        |  7902 | Ford   | ANALYST   | 1981-12-03 | 3000.00 |    NULL |     NULL |
+        |  7934 | Miller | CLERK     | 1982-01-23 | 1300.00 |    NULL |     NULL |
+        +-------+--------+-----------+------------+---------+---------+----------+
+        14 rows in set (0.00 sec)
+        
+        mysql> SELECT empno, ename, job, hiredate, sal, comm, sal * 12 + IFNULL(comm,0)  as YearSale FROM emp;
+        +-------+--------+-----------+------------+---------+---------+----------+
+        | empno | ename  | job       | hiredate   | sal     | comm    | YearSale |
+        +-------+--------+-----------+------------+---------+---------+----------+
+        |  7369 | Smith  | CLERK     | 1980-12-17 |  800.00 |    NULL |  9600.00 |
+        |  7499 | Allen  | SALESMAN  | 1981-02-20 | 1600.00 |  300.00 | 19500.00 |
+        |  7521 | Ward   | SALESMAN  | 1981-02-22 | 1250.00 |  500.00 | 15500.00 |
+        |  7566 | Jones  | MANAGER   | 1981-04-02 | 2975.00 |    NULL | 35700.00 |
+        |  7654 | Martin | SALESMAN  | 1981-09-28 | 1250.00 | 1400.00 | 16400.00 |
+        |  7698 | Blake  | MANAGER   | 1981-05-01 | 2850.00 |    NULL | 34200.00 |
+        |  7782 | Clark  | MANAGER   | 1981-06-09 | 2450.00 |    NULL | 29400.00 |
+        |  7788 | Scott  | ANALYST   | 1987-04-19 | 3000.00 |    NULL | 36000.00 |
+        |  7839 | King   | PRESIDENT | 1981-11-17 | 5000.00 |    NULL | 60000.00 |
+        |  7844 | Turner | SALESMAN  | 1981-09-08 | 1500.00 |    0.00 | 18000.00 |
+        |  7876 | Adams  | CLERK     | 1987-05-23 | 1100.00 |    NULL | 13200.00 |
+        |  7900 | James  | CLERK     | 1981-12-03 |  950.00 |    NULL | 11400.00 |
+        |  7902 | Ford   | ANALYST   | 1981-12-03 | 3000.00 |    NULL | 36000.00 |
+        |  7934 | Miller | CLERK     | 1982-01-23 | 1300.00 |    NULL | 15600.00 |
+        +-------+--------+-----------+------------+---------+---------+----------+
+        14 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + LEAST()
+  + NULLIF()
+
+    + 说明
+      + NULLIF(表达式1,表达式2)  
+        如果 表达式1 == 表达式2，返回 NULL
+        否则返回 表达式1
+
+      + [quote]
+
+        ```text
+        NULLIF(expr1,expr2)
+        Returns NULL if expr1 = expr2 is true, otherwise returns expr1. This is the same as CASE WHEN expr1 = expr2 THEN NULL ELSE expr1 END. 
+        ```
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT NULLIF(4, 1);
+        +--------------+
+        | NULLIF(4, 1) |
+        +--------------+
+        |            4 |
+        +--------------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT NULLIF(1, 1);
+        +--------------+
+        | NULLIF(1, 1) |
+        +--------------+
+        |         NULL |
+        +--------------+
+        1 row in set (0.01 sec)
+        
+        mysql> SELECT NULLIF(NULL, 4);
+        +-----------------+
+        | NULLIF(NULL, 4) |
+        +-----------------+
+        |            NULL |
+        +-----------------+
+        1 row in set (0.01 sec)
+        
+        msysql>
+        ```
+
+#### 计算
+
++ 数学计算
+
++ 字符串
+
++ 其他
+
+#### 聚合函数 / 聚集函数 / 分组函数 / 统计函数
+
++ 说明
+
++ 聚合函数
+  + 加总 sum()
+  + 求平均 avg()
+  + 求最大 max()
+  + 求最小 min()
+  + 计数 count()
+
+    + COUNT(*) vs. COUNT(1) vs. COUNT(主键) vs. COUNT(非主键))
+
+      + 性能，依次降低
+
+    + COUNT(*) vs. COUNT(非主键)
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT COUNT(*) FROM emp;
+        +----------+
+        | COUNT(*) |
+        +----------+
+        |       15 |
+        +----------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT COUNT(comm) FROM emp;
+        +-------------+
+        | COUNT(comm) |
+        +-------------+
+        |           4 |
+        +-------------+
+        1 row in set (0.00 sec)
+        
+        mysql>
+        ```
+
+  + 示例
+
+    + [operating]
+
+      ```sql
+      mysql> SELECT deptno, COUNT(*), SUM(sal), MAX(sal), MIN(sal), AVG(sal) FROM emp GROUP BY deptno;
+      +--------+----------+----------+----------+----------+-------------+
+      | deptno | COUNT(*) | SUM(sal) | MAX(sal) | MIN(sal) | AVG(sal)    |
+      +--------+----------+----------+----------+----------+-------------+
+      |     10 |        3 |  8750.00 |  5000.00 |  1300.00 | 2916.666667 |
+      |     20 |        5 | 10875.00 |  3000.00 |   800.00 | 2175.000000 |
+      |     30 |        6 |  9400.00 |  2850.00 |   950.00 | 1566.666667 |
+      |     50 |        1 |  2000.00 |  2000.00 |  2000.00 | 2000.000000 |
+      +--------+----------+----------+----------+----------+-------------+
+      4 rows in set (0.00 sec)
+      
+      mysql>
+      ```
+
++ 使用方法
+
+  + 单独使用
+
+  + GROUP BY 子句
+
+    + 说明
+
+      对查询结果集进行分组
+
+    + 示例
+
+      + [operating]
+
+        要求，获取各部门、各工种的最高月薪、最低月薪和平均月薪
+
+        ```sql
+        mysql> SELECT d.dname, e.job, MAX(sal),  MIN(sal), AVG(sal) 
+            -> FROM emp e JOIN  dept2 d USING(deptno) 
+            -> GROUP BY d.dname, e.job 
+            -> ORDER BY d.dname, e.job;
+        +------------+-----------+----------+----------+-------------+
+        | dname      | job       | MAX(sal) | MIN(sal) | AVG(sal)    |
+        +------------+-----------+----------+----------+-------------+
+        | ACCOUNTING | CLERK     |  1300.00 |  1300.00 | 1300.000000 |
+        | ACCOUNTING | MANAGER   |  2450.00 |  2450.00 | 2450.000000 |
+        | ACCOUNTING | PRESIDENT |  5000.00 |  5000.00 | 5000.000000 |
+        | RESEARCH   | ANALYST   |  3000.00 |  3000.00 | 3000.000000 |
+        | RESEARCH   | CLERK     |  1100.00 |   800.00 |  950.000000 |
+        | RESEARCH   | MANAGER   |  2975.00 |  2975.00 | 2975.000000 |
+        | SALES      | CLERK     |   950.00 |   950.00 |  950.000000 |
+        | SALES      | MANAGER   |  2850.00 |  2850.00 | 2850.000000 |
+        | SALES      | SALESMAN  |  1600.00 |  1250.00 | 1400.000000 |
+        +------------+-----------+----------+----------+-------------+
+        9 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        要求，获取各部门的员工数、平均月薪、服务天数和服务年数
+
+        ```sql
+        mysql> SELECT d.dname, COUNT(e.empno), ROUND(AVG(SAL),0),
+            ->        ROUND(AVG(DATEDIFF(CURRENT_DATE, e.hiredate)),0) avg_hired_days,
+            ->        ROUND(AVG(TIMESTAMPDIFF(YEAR, e.hiredate, CURRENT_DATE)),0) avg_hired_years 
+            -> FROM dept d LEFT JOIN emp e USING(deptno) 
+            -> GROUP BY d.deptno;
+        +------------+----------------+-------------------+----------------+-----------------+
+        | dname      | COUNT(e.empno) | ROUND(AVG(SAL),0) | avg_hired_days | avg_hired_years |
+        +------------+----------------+-------------------+----------------+-----------------+
+        | ACCOUNTING |              3 |              2917 |          16284 |              44 |
+        | RESEARCH   |              5 |              2175 |          15564 |              42 |
+        | SALES      |              6 |              1567 |          16393 |              45 |
+        | OPERATIONS |              0 |              NULL |           NULL |            NULL |
+        | None       |              1 |              2000 |           9717 |              26 |
+        +------------+----------------+-------------------+----------------+-----------------+
+        5 rows in set (0.01 sec)
+        
+        mysql>        
+        ```
+
+      + [operating]
+
+        要求, 获取各薪酬等级的员工数和平均月薪
+
+        ```sql
+        mysql> SELECT s.grade, COUNT(e.ename), ROUND(AVG(e.sal),2)
+            -> FROM emp e JOIN salgrade s ON e.sal BETWEEN s.losal AND s.hisal
+            -> GROUP BY s.grade
+            -> ORDER BY s.grade ;
+        +-------+----------------+---------------------+
+        | grade | COUNT(e.ename) | ROUND(AVG(e.sal),2) |
+        +-------+----------------+---------------------+
+        |     1 |              3 |              950.00 |
+        |     2 |              3 |             1266.67 |
+        |     3 |              3 |             1700.00 |
+        |     4 |              5 |             2855.00 |
+        |     5 |              1 |             5000.00 |
+        +-------+----------------+---------------------+
+        5 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+  + HAVING 子句
+
+    + 说明
+      + 用来对分组之后的数据进行过滤的子句
+
+    + 示例
+
+      + [operating]
+
+        要求，员工数超过4人的部门
+
+        ```sql
+        mysql> SELECT deptno, COUNT(*)
+            -> FROM emp
+            -> GROUP BY deptno
+            -> HAVING COUNT(*) >= 5;
+        +--------+----------+
+        | deptno | COUNT(*) |
+        +--------+----------+
+        |     20 |        5 |
+        |     30 |        6 |
+        +--------+----------+
+        2 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        要求，查询所有平均月薪大于2000的职位信息，平均工资、雇佣人数
+
+        ```sql
+        mysql> SELECT e.job, ROUND(AVG(sal),2), COUNT(*)
+            -> FROM emp e
+            -> GROUP BY e.job
+            -> HAVING AVG(e.sal) > 2000 ;
+        +-----------+-------------------+----------+
+        | job       | ROUND(AVG(sal),2) | COUNT(*) |
+        +-----------+-------------------+----------+
+        | MANAGER   |           2758.33 |        3 |
+        | ANALYST   |           3000.00 |        2 |
+        | PRESIDENT |           5000.00 |        1 |
+        +-----------+-------------------+----------+
+        3 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        要求， 查询各部门中员工月薪高于全公司平均水平的人数和平均月薪
+
+        ```sql
+        mysql> SELECT e.deptno, COUNT(*), AVG(sal) 
+            -> FROM emp e
+            -> GROUP BY e.deptno
+            -> HAVING AVG(sal) > (SELECT AVG(sal) FROM emp) ;
+        +--------+----------+-------------+
+        | deptno | COUNT(*) | AVG(sal)    |
+        +--------+----------+-------------+
+        |     10 |        3 | 2916.666667 |
+        |     20 |        6 | 2029.166667 |
+        +--------+----------+-------------+
+        2 rows in set (0.01 sec)
+        
+        mysql>        
+        ```
+
+#### 窗口函数
+
++ 说明
+  针对范围进行计算
+
 ### 编程
 
-#### 函数
+#### 自定义函数
+
+#### 视图
 
 #### 存储过程
 
@@ -2077,11 +5392,11 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 ### 锁
 
-#### 说明
+#### MySQL锁的说明
 
 + 围绕 高并发 + 一致性
 
-#### 类型
+#### MySQL锁类型
 
 + 类型，粒度
   + 全局锁
@@ -2135,6 +5450,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 #### 服务
 
 ##### 状态
+
 + [operating]
   
   ```cmd
@@ -2159,7 +5475,6 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 ##### 配置
 
-
 #### 连接
 
 + [operating]
@@ -2182,7 +5497,8 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 #### 数据文件
 
 + [operating]
-  ```cmd
+
+  ```sh
   [root@ThinkPadT14P-23 Workspace]# mysql -h localhost -P 3306 -u root -p -e "select @@datadir;"
   Enter password:
   +-----------------+
@@ -2195,7 +5511,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 + [operating]
 
-  ```cmd
+  ```sh
   [root@ThinkPadT14P-23 Workspace]# ll /var/lib/mysql/
   total 99412
   -rw-r----- 1 mysql mysql       56 Apr 23 00:50  auto.cnf
@@ -2235,7 +5551,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
   + [code]
 
-    ```cmd
+    ```sh
     systemctl start mysqld
     ```
 
@@ -2243,7 +5559,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
   + [code]
 
-    ```cmd
+    ```sh
     systemctl stop mysqld
     ```
 
@@ -2251,7 +5567,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
   + [code]
 
-    ```cmd
+    ```sh
     systemctl restart mysqld
     ```
 
@@ -2259,18 +5575,19 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
   + [code]
 
-    ```cmd
+    ```sh
     systemctl enable mysqld
     ```
 
 ### 数据库操作
+
 #### Schema / Database
 
 ##### 检索
 
 + [operating]
 
-  ```cmd
+  ```sh
   [root@ThinkPadT14P-23 Workspace]# mysql -h localhost -P 3306 -u root -p -e "SHOW DATABASES;"
   Enter password:
   +--------------------+
@@ -2288,6 +5605,617 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
   + 通常情况下，一个database/schema 在 "/var/lib/mysql" 下对应一个同名目录
   + {database:information_schema} 在 "/var/lib/mysql" 下**无**对应目录
 
+##### mysql系统表
+
++ 概述
+
+  + mysql
+
+    + 包括了MySQL的用户、权限等信息
+    + 核心表
+      + mysql.user
+        + 存储所有MySQL用户的账号信息、全局权限和密码哈希值
+      + mysql.db
+        + 存储数据库级别的权限配置（控制用户对某一数据库的操作权限）
+
+  + infomation_schema
+    + MySQL的元数据仓库，存储了数据库实例中所有的库、表、列、索引等结构化元数据
+    + 存储当前数据库连接、事务状态等动态信息
+    + 核心表
+      + information_schema.schemata
+        + 存储当前MySQL实例中所有数据库的基本信息，如 数据库名、字符集
+        + 示例
+          + [operating]
+
+            ```sql
+            [edgar@ThinkPadT14P-23 MySQL8]$ mysql -uadmin -pLiHaobo#1119
+            mysql: [Warning] Using a password on the command line interface can be insecure.
+            Welcome to the MySQL monitor.  Commands end with ; or \g.
+            Your MySQL connection id is 15
+            Server version: 8.4.9 MySQL Community Server - GPL
+            
+            Copyright (c) 2000, 2026, Oracle and/or its affiliates.
+            
+            Oracle is a registered trademark of Oracle Corporation and/or its
+            affiliates. Other names may be trademarks of their respective
+            owners.
+            
+            Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+            
+            mysql> SELECT DATABASE();
+            +------------+
+            | DATABASE() |
+            +------------+
+            | NULL       |
+            +------------+
+            1 row in set (0.00 sec)
+            
+            mysql> SELECT schema_name as db_name, default_character_set_name as char_set from information_schema.schemata;
+            +--------------------+----------+
+            | db_name            | char_set |
+            +--------------------+----------+
+            | mysql              | utf8mb4  |
+            | information_schema | utf8mb3  |
+            | performance_schema | utf8mb4  |
+            | sys                | utf8mb4  |
+            | douma              | utf8mb4  |
+            | dbsc7              | utf8mb4  |
+            +--------------------+----------+
+            6 rows in set (0.01 sec)
+            
+            mysql>
+            ```
+
+      + information_schema.table
+        + 存储所有表的元数据，如 表名、所属数据库、存储引擎、创建时间
+        + 示例
+          + [operating]
+
+            ```sql
+            [edgar@ThinkPadT14P-23 MySQL8]$ mysql -uadmin -pLiHaobo#1119
+            mysql: [Warning] Using a password on the command line interface can be insecure.
+            Welcome to the MySQL monitor.  Commands end with ; or \g.
+            Your MySQL connection id is 15
+            Server version: 8.4.9 MySQL Community Server - GPL
+            
+            Copyright (c) 2000, 2026, Oracle and/or its affiliates.
+            
+            Oracle is a registered trademark of Oracle Corporation and/or its
+            affiliates. Other names may be trademarks of their respective
+            owners.
+            
+            Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+            
+            mysql> SELECT DATABASE();
+            +------------+
+            | DATABASE() |
+            +------------+
+            | NULL       |
+            +------------+
+            1 row in set (0.00 sec)
+            
+            mysql> SELECT table_name, engine, table_rows FROM information_schema.tables WHERE table_schema = 'douma';
+            +------------+--------+------------+
+            | TABLE_NAME | ENGINE | TABLE_ROWS |
+            +------------+--------+------------+
+            | book       | InnoDB |          4 |
+            | dept       | InnoDB |          4 |
+            | dept2      | InnoDB |          4 |
+            | emp        | InnoDB |         14 |
+            | member     | InnoDB |          2 |
+            | member2    | InnoDB |          2 |
+            | member3    | InnoDB |          4 |
+            | member4    | InnoDB |          2 |
+            | member5    | InnoDB |          2 |
+            | person     | InnoDB |         10 |
+            | person2    | InnoDB |         10 |
+            | person3    | InnoDB |          0 |
+            | player     | InnoDB |          0 |
+            | salgrade   | InnoDB |          5 |
+            | student    | InnoDB |          2 |
+            | t1         | InnoDB |          0 |
+            | t2         | InnoDB |          0 |
+            +------------+--------+------------+
+            17 rows in set (0.00 sec)
+            
+            mysql>
+            ```
+
+            + TABLE_ROWS 
+              + 为预读行数，非数据表存储行数
+              + 
+              + 示例
+
+                + [operating]
+
+                  ```sql
+                  mysql> SELECT COUNT(*) FROM douma.emp;
+                  +----------+
+                  | COUNT(*) |
+                  +----------+
+                  |       16 |
+                  +----------+
+                  1 row in set (0.00 sec)
+                  
+                  mysql>
+                  ```
+
+      + information_schema.processlist
+        + 显示当前MySQL的所有活跃连接，可排查慢查询、空闲连接
+
+        + 示例
+          + [operating]
+
+            ```sql
+            [edgar@ThinkPadT14P-23 MySQL8]$ mysql -uadmin -pLiHaobo#1119
+            mysql: [Warning] Using a password on the command line interface can be insecure.
+            Welcome to the MySQL monitor.  Commands end with ; or \g.
+            Your MySQL connection id is 15
+            Server version: 8.4.9 MySQL Community Server - GPL
+            
+            Copyright (c) 2000, 2026, Oracle and/or its affiliates.
+            
+            Oracle is a registered trademark of Oracle Corporation and/or its
+            affiliates. Other names may be trademarks of their respective
+            owners.
+            
+            Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+            
+            mysql> SELECT DATABASE();
+            +------------+
+            | DATABASE() |
+            +------------+
+            | NULL       |
+            +------------+
+            1 row in set (0.00 sec)
+            
+            mysql> SELECT id, user, host, db, command, time FROM information_schema.processlist;
+            +----+-----------------+-----------------+-------+---------+-------+
+            | id | user            | host            | db    | command | time  |
+            +----+-----------------+-----------------+-------+---------+-------+
+            |  9 | root            | localhost:45280 | dbsc7 | Sleep   |  4040 |
+            | 10 | root            | localhost:45284 | dbsc7 | Sleep   |  2640 |
+            | 11 | root            | localhost:45298 | douma | Sleep   |  9030 |
+            | 12 | douma           | localhost       | douma | Sleep   |  2420 |
+            |  5 | event_scheduler | localhost       | NULL  | Daemon  | 25188 |
+            | 13 | root            | localhost:52196 | mysql | Sleep   |  2377 |
+            | 14 | root            | localhost:33382 | douma | Sleep   |  2291 |
+            | 15 | admin           | localhost       | NULL  | Query   |     0 |
+            +----+-----------------+-----------------+-------+---------+-------+
+            8 rows in set, 1 warning (0.00 sec)
+            
+            mysql>
+            ```
+
+        + 状态
+          + Daemon, 守护进程/线程
+          + Locked, 线程正在等待表锁的释放
+          + Query, 正在查询，连接线程正在执行查询
+          + Sending Data, 向请前端返回数据
+          + Sleep, 空闲状态，正在等待客户端发数据
+          + Sorting Result, 线程正在对结果进行排序
+
+
+      + information_schema.innodb_trx
+        + 显示InnoDB引擎当前正在执行的所有事务，可定位长事务
+        + 示例
+          + [operating]
+
+            ```sql
+            [edgar@ThinkPadT14P-23 MySQL8]$ mysql -uadmin -pLiHaobo#1119
+            mysql: [Warning] Using a password on the command line interface can be insecure.
+            Welcome to the MySQL monitor.  Commands end with ; or \g.
+            Your MySQL connection id is 15
+            Server version: 8.4.9 MySQL Community Server - GPL
+            
+            Copyright (c) 2000, 2026, Oracle and/or its affiliates.
+            
+            Oracle is a registered trademark of Oracle Corporation and/or its
+            affiliates. Other names may be trademarks of their respective
+            owners.
+            
+            Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+            
+            mysql> SELECT DATABASE();
+            +------------+
+            | DATABASE() |
+            +------------+
+            | NULL       |
+            +------------+
+            1 row in set (0.00 sec)
+            
+            mysql> SELECT * FROM information_schema.innodb_trx;
+            Empty set (0.00 sec)
+            
+            mysql>
+            ```
+
+  + performance_schema
+    + MySQL性能是MySQL的性能监控核心库
+    + 专注收集数据库运行过程中的资源消耗，如 CPU、IO、事件等待{锁、IO}
+    + 核心表
+      + performance_schema.events_statements_current
+        + 记录当前正在执行的SQL语句事件，包含执行时间、锁等待时间等
+          + 定位当前执行的慢SQL
+      + performance_schema.events_statements_history
+        + 记录每个线程已执行完成的SQL语句历史，默认10条
+      + performance_schema.events_waits_current
+        + 记录当前线程的事件等待信息，如 IO等待，互斥锁等待等
+      + performance_schema.table_io_waits_summary_by_table
+        + 按表统计IO等待事件，可定位IO密集型表
+          + 查找IO操作频繁的数据表，优化索引和制定分表策略
+      + performance_schema.events_waits_histroy
+        + 记录历史等待事件
+      + performance_schema.file_summary_by_event_name
+        + 汇总有关IO操作的信息
+
+  + sys
+    + 是 information_schema 和 performance_schema 的简化库
+    + 核心表
+      + sys.host_summary
+        + 按客户端IP统计资源消耗，如 CPU、IO、连接数
+        + 示例
+          + [operating]
+
+            ```sql
+            mysql> SELECT * FROM sys.host_summary\G;
+            *************************** 1. row ***************************
+                              host: localhost
+                        statements: 848
+                 statement_latency: 2.78 s
+             statement_avg_latency: 3.28 ms
+                       table_scans: 252
+                          file_ios: 464
+                   file_io_latency: 354.32 ms
+               current_connections: 8
+                 total_connections: 9
+                      unique_users: 4
+                    current_memory: 38.03 MiB
+            total_memory_allocated: 287.32 MiB
+            1 row in set (0.00 sec)
+            
+            ERROR:
+            No query specified
+            
+            mysql>
+            ```
+
+      + sys.innodb_lock_waits
+        + 显示InnoDB锁 etc. 等待信息
+        + 示例
+          + [operating]
+
+            ```sql
+            mysql> SELECT * FROM sys.innodb_lock_waits;
+            Empty set (0.02 sec)
+            
+            mysql> 
+            ```
+
+      + sys.memory_global_total
+        + 查看 MySQL实例的总内存使用情况
+        + 示例
+          + [operating]
+
+            ```sql
+            mysql> SELECT * FROM sys.memory_global_total;
+            +-----------------+
+            | total_allocated |
+            +-----------------+
+            | 509.03 MiB      |
+            +-----------------+
+            1 row in set (0.02 sec)
+            
+            mysql>
+            ```
+
+      + sys.statement_analysis
+        + 统计SQL语句执行情况
+        + 示例
+          + [operating]
+
+            ```sql
+            mysql> SELECT query, db, exec_count, avg_latency
+                -> FROM sys.statement_analysis
+                -> ORDER BY exec_count desc
+                -> LIMIT 10;
+            +-------------------------------------------------------------------+-------+------------+-------------+
+            | query                                                             | db    | exec_count | avg_latency |
+            +-------------------------------------------------------------------+-------+------------+-------------+
+            | SHOW FULL TABLES FROM `douma` WHERE `Tables_in_douma` = ?         | dbsc7 |         13 | 511.79 us   |
+            | SET `autocommit` = ?                                              | dbsc7 |         10 | 56.23 us    |
+            | SELECT @@SESSION . `auto_incre ... ait_timeout` AS `wait_timeout` | dbsc7 |          5 | 339.21 us   |
+            | SET `character_set_results` = ?                                   | dbsc7 |          5 | 83.23 us    |
+            | SELECT `kc` . `CONSTRAINT_NAME ... E` , `kc` . `ORDINAL_POSITION` | dbsc7 |          5 | 1.59 ms     |
+            | SELECT `tc` . `TABLE_NAME` , ` ... ME` , `cc` . `CONSTRAINT_NAME` | dbsc7 |          5 | 941.56 us   |
+            | SELECT DISTINCTROW `A` . `REFE ...  ) JOIN `INFORMATION_SCHEMA` . | dbsc7 |          5 | 3.23 ms     |
+            | SELECT `d` . `deptno` , `d` .  ...  , `d` . `dname` , `d` . `loc` | douma |          4 | 695.15 us   |
+            | SELECT * FROM `information_sch ...  ? ORDER BY `ORDINAL_POSITION` | dbsc7 |          4 | 886.45 us   |
+            | SELECT `d` . `deptno` , `d` .  ... ptno` ) `t` USING ( `deptno` ) | douma |          4 | 636.10 us   |
+            +-------------------------------------------------------------------+-------+------------+-------------+
+            10 rows in set (0.02 sec)
+            
+            mysql>
+            ```
+
+      + sys.schema_unused_indexes
+        + 检索未被使用的索引
+        + 示例
+          + [operating]
+
+             ```sql
+             mysql> SELECT * FROM sys.schema_unused_indexes;
+             +--------------------+-------------------------------------------+----------------------------------+
+             | object_schema      | object_name                               | index_name                       |
+             +--------------------+-------------------------------------------+----------------------------------+
+             | douma              | book                                      | fk_sid                           |
+             | douma              | emp                                       | fk_mgr                           |
+             | performance_schema | cond_instances                            | NAME                             |
+             | performance_schema | data_lock_waits                           | REQUESTING_ENGINE_LOCK_ID        |
+             | performance_schema | data_lock_waits                           | BLOCKING_ENGINE_LOCK_ID          |
+             | performance_schema | data_lock_waits                           | REQUESTING_ENGINE_TRANSACTION_ID |
+             | performance_schema | data_lock_waits                           | BLOCKING_ENGINE_TRANSACTION_ID   |
+             | performance_schema | data_lock_waits                           | REQUESTING_THREAD_ID             |
+             | performance_schema | data_lock_waits                           | BLOCKING_THREAD_ID               |
+             | performance_schema | data_locks                                | ENGINE_TRANSACTION_ID            |
+             | performance_schema | data_locks                                | THREAD_ID                        |
+             | performance_schema | data_locks                                | OBJECT_SCHEMA                    |
+             | performance_schema | error_log                                 | THREAD_ID                        |
+             | performance_schema | error_log                                 | SUBSYSTEM                        |
+             | performance_schema | error_log                                 | ERROR_CODE                       |
+             | performance_schema | error_log                                 | PRIO                             |
+             | performance_schema | events_waits_summary_by_instance          | EVENT_NAME                       |
+             | performance_schema | file_instances                            | EVENT_NAME                       |
+             | performance_schema | file_summary_by_instance                  | FILE_NAME                        |
+             | performance_schema | file_summary_by_instance                  | EVENT_NAME                       |
+             | performance_schema | host_cache                                | HOST                             |
+             | performance_schema | metadata_locks                            | OWNER_THREAD_ID                  |
+             | performance_schema | metadata_locks                            | OBJECT_TYPE                      |
+             | performance_schema | mutex_instances                           | NAME                             |
+             | performance_schema | mutex_instances                           | LOCKED_BY_THREAD_ID              |
+             | performance_schema | prepared_statements_instances             | STATEMENT_ID                     |
+             | performance_schema | prepared_statements_instances             | STATEMENT_NAME                   |
+             | performance_schema | prepared_statements_instances             | OWNER_OBJECT_TYPE                |
+             | performance_schema | replication_applier_status_by_coordinator | THREAD_ID                        |
+             | performance_schema | replication_applier_status_by_worker      | THREAD_ID                        |
+             | performance_schema | replication_connection_status             | THREAD_ID                        |
+             | performance_schema | rwlock_instances                          | NAME                             |
+             | performance_schema | rwlock_instances                          | WRITE_LOCKED_BY_THREAD_ID        |
+             | performance_schema | socket_instances                          | THREAD_ID                        |
+             | performance_schema | socket_instances                          | IP                               |
+             | performance_schema | socket_instances                          | SOCKET_ID                        |
+             | performance_schema | socket_summary_by_instance                | EVENT_NAME                       |
+             | performance_schema | table_handles                             | OBJECT_TYPE                      |
+             | performance_schema | table_handles                             | OWNER_THREAD_ID                  |
+             | performance_schema | threads                                   | PROCESSLIST_ID                   |
+             | performance_schema | threads                                   | THREAD_OS_ID                     |
+             | performance_schema | threads                                   | NAME                             |
+             | performance_schema | threads                                   | PROCESSLIST_ACCOUNT              |
+             | performance_schema | threads                                   | PROCESSLIST_HOST                 |
+             | performance_schema | threads                                   | RESOURCE_GROUP                   |
+             +--------------------+-------------------------------------------+----------------------------------+
+             45 rows in set (0.01 sec)
+             
+             mysql>
+             ```
+
+          + 说明
+            + 建议加条件 "where object_name = '指定数据库' "
+
+      + sys.schema_redundant_indexes
+        + 检索冗余索引，即同一列上的多个普通索引
+        + 示例
+          + [operating]
+
+            ```sql
+            mysql> SELECT * FROM sys.schema_redundant_indexes;
+            Empty set (0.01 sec)
+            
+            mysql>
+            ```
+
+      + sys.io_global_by_file_by_bytes
+        + IO使用统计
+        + 示例
+          + [operating]
+
+            ```sql
+            mysql> SELECT * FROM sys.io_global_by_file_by_bytes;
+            +----------------------------------------------+------------+------------+------------+-------------+---------------+------------+------------+-----------+
+            | file                                         | count_read | total_read | avg_read   | count_write | total_written | avg_write  | total      | write_pct |
+            +----------------------------------------------+------------+------------+------------+-------------+---------------+------------+------------+-----------+
+            | @@datadir/ibtmp1                             |          0 |    0 bytes |    0 bytes |         143 | 14.05 MiB     | 100.59 KiB | 14.05 MiB  |    100.00 |
+            | @@datadir/#ib_16384_0.dblwr                  |          1 | 4.00 MiB   | 4.00 MiB   |          15 | 9.14 MiB      | 624.00 KiB | 13.14 MiB  |     69.56 |
+            | @@datadir/#ib_16384_1.dblwr                  |          1 | 12.00 MiB  | 12.00 MiB  |           0 |    0 bytes    |    0 bytes | 12.00 MiB  |      0.00 |
+            | @@datadir/undo_001                           |        382 | 6.02 MiB   | 16.13 KiB  |         267 | 4.17 MiB      | 16.00 KiB  | 10.19 MiB  |     40.95 |
+            | @@datadir/undo_002                           |        376 | 5.92 MiB   | 16.13 KiB  |         270 | 4.22 MiB      | 16.00 KiB  | 10.14 MiB  |     41.60 |
+            | @@datadir/mysql.ibd                          |        365 | 5.75 MiB   | 16.13 KiB  |          40 | 640.00 KiB    | 16.00 KiB  | 6.38 MiB   |      9.80 |
+            | @@basedir/share/mysql-8.4/english/errmsg.sys |          3 | 402.73 KiB | 134.24 KiB |           0 |    0 bytes    |    0 bytes | 402.73 KiB |      0.00 |
+            | @@datadir/ibdata1                            |         10 | 208.00 KiB | 20.80 KiB  |           8 | 128.00 KiB    | 16.00 KiB  | 336.00 KiB |     38.10 |
+            | @@datadir/#innodb_redo/#ib_redo11            |          6 | 66.50 KiB  | 11.08 KiB  |         256 | 233.50 KiB    |  934 bytes | 300.00 KiB |     77.83 |
+            | @@datadir/#innodb_temp/temp_10.ibt           |          2 | 32.00 KiB  | 16.00 KiB  |           5 | 80.00 KiB     | 16.00 KiB  | 112.00 KiB |     71.43 |
+            | @@datadir/douma/emp.ibd                      |          5 | 80.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 80.00 KiB  |      0.00 |
+            | @@datadir/#innodb_temp/temp_9.ibt            |          0 |    0 bytes |    0 bytes |           5 | 80.00 KiB     | 16.00 KiB  | 80.00 KiB  |    100.00 |
+            | @@datadir/douma/dept2.ibd                    |          4 | 64.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 64.00 KiB  |      0.00 |
+            | @@datadir/douma/dept.ibd                     |          4 | 64.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 64.00 KiB  |      0.00 |
+            | @@datadir/douma/person.ibd                   |          4 | 64.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 64.00 KiB  |      0.00 |
+            | @@datadir/sys/sys_config.ibd                 |          4 | 64.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 64.00 KiB  |      0.00 |
+            | @@datadir/#innodb_temp/temp_4.ibt            |          0 |    0 bytes |    0 bytes |           2 | 32.00 KiB     | 16.00 KiB  | 32.00 KiB  |    100.00 |
+            | @@datadir/#innodb_temp/temp_3.ibt            |          0 |    0 bytes |    0 bytes |           2 | 32.00 KiB     | 16.00 KiB  | 32.00 KiB  |    100.00 |
+            | @@datadir/#innodb_temp/temp_2.ibt            |          0 |    0 bytes |    0 bytes |           2 | 32.00 KiB     | 16.00 KiB  | 32.00 KiB  |    100.00 |
+            | @@datadir/#innodb_temp/temp_1.ibt            |          0 |    0 bytes |    0 bytes |           2 | 32.00 KiB     | 16.00 KiB  | 32.00 KiB  |    100.00 |
+            | @@datadir/#innodb_temp/temp_5.ibt            |          0 |    0 bytes |    0 bytes |           2 | 32.00 KiB     | 16.00 KiB  | 32.00 KiB  |    100.00 |
+            | @@datadir/#innodb_temp/temp_6.ibt            |          0 |    0 bytes |    0 bytes |           2 | 32.00 KiB     | 16.00 KiB  | 32.00 KiB  |    100.00 |
+            | @@datadir/#innodb_temp/temp_7.ibt            |          0 |    0 bytes |    0 bytes |           2 | 32.00 KiB     | 16.00 KiB  | 32.00 KiB  |    100.00 |
+            | @@datadir/#innodb_temp/temp_8.ibt            |          0 |    0 bytes |    0 bytes |           2 | 32.00 KiB     | 16.00 KiB  | 32.00 KiB  |    100.00 |
+            | @@basedir/share/mysql-8.4/charsets/Index.xml |          1 | 19.07 KiB  | 19.07 KiB  |           0 |    0 bytes    |    0 bytes | 19.07 KiB  |      0.00 |
+            | @@datadir/douma/member5.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/student.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/member4.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/person2.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/t1.ibd                       |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/member2.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/book.ibd                     |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/player.ibd                   |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/member.ibd                   |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/person3.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/section.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/t2.ibd                       |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/member3.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/douma/salgrade.ibd                 |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/time_slot.ibd                |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/student.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/classroom.ibd                |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/prereq.ibd                   |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/department.ibd               |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/course.ibd                   |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/instructor.ibd               |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/advisor.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/takes.ibd                    |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/dbsc7/teaches.ibd                  |          1 | 16.00 KiB  | 16.00 KiB  |           0 |    0 bytes    |    0 bytes | 16.00 KiB  |      0.00 |
+            | @@datadir/binlog.000025                      |          3 | 1006 bytes |  335 bytes |           0 |    0 bytes    |    0 bytes | 1006 bytes |      0.00 |
+            | @@datadir/binlog.index                       |          2 |  832 bytes |  416 bytes |           0 |    0 bytes    |    0 bytes |  832 bytes |      0.00 |
+            | @@datadir/binlog.000001                      |          1 |  503 bytes |  503 bytes |           0 |    0 bytes    |    0 bytes |  503 bytes |      0.00 |
+            | @@datadir/binlog.000026                      |          0 |    0 bytes |    0 bytes |           2 |  158 bytes    |   79 bytes |  158 bytes |    100.00 |
+            | @@datadir/auto.cnf                           |          3 |   56 bytes |   18 bytes |           0 |    0 bytes    |    0 bytes |   56 bytes |      0.00 |
+            | /run/mysqld/mysqld.pid                       |          0 |    0 bytes |    0 bytes |           1 |    4 bytes    |    4 bytes |    4 bytes |    100.00 |
+            | @@datadir/#innodb_redo/#ib_redo32_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo41_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo40_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo29_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo30_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo31_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo38_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo33_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo34_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo35_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo36_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo42_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo37_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo39_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo20_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo12_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo13_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo14_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo15_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo16_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo17_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo18_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo19_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo28_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo21_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo22_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo23_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo24_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo25_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo26_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            | @@datadir/#innodb_redo/#ib_redo27_tmp        |          0 |    0 bytes |    0 bytes |           0 |    0 bytes    |    0 bytes |    0 bytes |      0.00 |
+            +----------------------------------------------+------------+------------+------------+-------------+---------------+------------+------------+-----------+
+            86 rows in set (0.04 sec)
+            
+            mysql>
+            ```
+
+      + sys.innodb_buffer_stats_by_table
+        + 总结了表使用buffer pool的信息
+        + 示例
+          + [operating]
+
+            ```sql
+            mysql> SELECT * FROM sys.innodb_buffer_stats_by_table;
+            +---------------+------------------------------------------------------+------------+------------+-------+--------------+-----------+-------------+
+            | object_schema | object_name                                          | allocated  | data       | pages | pages_hashed | pages_old | rows_cached |
+            +---------------+------------------------------------------------------+------------+------------+-------+--------------+-----------+-------------+
+            | mysql         | columns                                              | 1.48 MiB   | 1.09 MiB   |    95 |            0 |        53 |        3889 |
+            | mysql         | tables                                               | 800.00 KiB | 548.96 KiB |    50 |            0 |        19 |         396 |
+            | mysql         | routines                                             | 288.00 KiB | 137.11 KiB |    18 |            0 |         7 |          50 |
+            | mysql         | index_column_usage                                   | 256.00 KiB | 129.84 KiB |    16 |            0 |         6 |        1422 |
+            | mysql         | help_topic                                           | 176.00 KiB | 111.54 KiB |    11 |            0 |         4 |         270 |
+            | mysql         | help_keyword                                         | 144.00 KiB | 77.71 KiB  |     9 |            0 |         3 |         495 |
+            | mysql         | triggers                                             | 112.00 KiB | 1.12 KiB   |     7 |            0 |         2 |           2 |
+            | mysql         | table_partitions                                     | 112.00 KiB |    0 bytes |     7 |            0 |         3 |           0 |
+            | mysql         | indexes                                              | 96.00 KiB  | 52.14 KiB  |     6 |            0 |         2 |         328 |
+            | mysql         | global_grants                                        | 96.00 KiB  | 33.49 KiB  |     6 |            0 |         3 |         101 |
+            | mysql         | events                                               | 96.00 KiB  |    0 bytes |     6 |            0 |         3 |           0 |
+            | mysql         | collations                                           | 80.00 KiB  | 31.04 KiB  |     5 |            0 |         2 |         287 |
+            | mysql         | column_type_elements                                 | 64.00 KiB  | 35.22 KiB  |     4 |            0 |         3 |         904 |
+            | mysql         | foreign_keys                                         | 64.00 KiB  | 13.22 KiB  |     4 |            0 |         1 |          67 |
+            | mysql         | parameters                                           | 48.00 KiB  | 10.38 KiB  |     3 |            0 |         1 |          83 |
+            | mysql         | help_relation                                        | 48.00 KiB  | 28.61 KiB  |     3 |            0 |         1 |        1128 |
+            | mysql         | index_partitions                                     | 48.00 KiB  |    0 bytes |     3 |            0 |         1 |           0 |
+            | mysql         | foreign_key_column_usage                             | 48.00 KiB  | 6.99 KiB   |     3 |            0 |         2 |          74 |
+            | mysql         | character_sets                                       | 48.00 KiB  | 4.20 KiB   |     3 |            0 |         1 |          41 |
+            | mysql         | check_constraints                                    | 48.00 KiB  | 2.16 KiB   |     3 |            0 |         3 |          11 |
+            | mysql         | schemata                                             | 48.00 KiB  |  684 bytes |     3 |            0 |         3 |           6 |
+            | mysql         | column_statistics                                    | 48.00 KiB  |    0 bytes |     3 |            0 |         1 |           0 |
+            | mysql         | innodb_index_stats                                   | 32.00 KiB  | 7.79 KiB   |     2 |            0 |         1 |          88 |
+            | mysql         | proxies_priv                                         | 32.00 KiB  | 1.16 KiB   |     2 |            0 |         0 |           1 |
+            | mysql         | replication_asynchronous_connection_failover         | 32.00 KiB  |    0 bytes |     2 |            0 |         0 |           0 |
+            | mysql         | tables_priv                                          | 32.00 KiB  | 3.48 KiB   |     2 |            0 |         1 |           4 |
+            | mysql         | tablespace_files                                     | 32.00 KiB  | 3.03 KiB   |     2 |            0 |         2 |          34 |
+            | mysql         | tablespaces                                          | 32.00 KiB  | 5.82 KiB   |     2 |            0 |         2 |          34 |
+            | mysql         | procs_priv                                           | 32.00 KiB  |    0 bytes |     2 |            0 |         1 |           0 |
+            | mysql         | help_category                                        | 32.00 KiB  | 8.33 KiB   |     2 |            0 |         1 |          53 |
+            | mysql         | replication_group_member_actions                     | 32.00 KiB  | 1.54 KiB   |     2 |            0 |         1 |           2 |
+            | mysql         | resource_groups                                      | 32.00 KiB  | 2.14 KiB   |     2 |            0 |         0 |           2 |
+            | mysql         | db                                                   | 32.00 KiB  | 2.92 KiB   |     2 |            0 |         0 |           4 |
+            | mysql         | view_routine_usage                                   | 32.00 KiB  | 1.59 KiB   |     2 |            0 |         1 |          18 |
+            | mysql         | catalogs                                             | 32.00 KiB  |   56 bytes |     2 |            0 |         0 |           1 |
+            | mysql         | view_table_usage                                     | 32.00 KiB  | 23.41 KiB  |     2 |            0 |         1 |         184 |
+            | douma         | emp                                                  | 32.00 KiB  |  996 bytes |     2 |            0 |         0 |          16 |
+            | mysql         | slave_relay_log_info                                 | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | slave_worker_info                                    | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | slave_master_info                                    | 16.00 KiB  |    0 bytes |     1 |            0 |         1 |           0 |
+            | sys           | sys_config                                           | 16.00 KiB  |  338 bytes |     1 |            0 |         0 |           6 |
+            | mysql         | server_cost                                          | 16.00 KiB  |  279 bytes |     1 |            0 |         0 |           6 |
+            | mysql         | table_partition_values                               | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | table_stats                                          | 16.00 KiB  | 6.45 KiB   |     1 |            0 |         0 |          67 |
+            | mysql         | time_zone                                            | 16.00 KiB  |    0 bytes |     1 |            0 |         1 |           0 |
+            | mysql         | time_zone_leap_second                                | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | time_zone_name                                       | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | time_zone_transition                                 | 16.00 KiB  |    0 bytes |     1 |            0 |         1 |           0 |
+            | mysql         | time_zone_transition_type                            | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | user                                                 | 16.00 KiB  | 3.91 KiB   |     1 |            0 |         1 |           8 |
+            | douma         | dept                                                 | 16.00 KiB  |  187 bytes |     1 |            0 |         0 |           5 |
+            | mysql         | innodb_ddl_log                                       | 16.00 KiB  |    0 bytes |     1 |            0 |         1 |           0 |
+            | douma         | dept2                                                | 16.00 KiB  |  186 bytes |     1 |            0 |         0 |           5 |
+            | douma         | person                                               | 16.00 KiB  |  850 bytes |     1 |            0 |         1 |          10 |
+            | mysql         | columns_priv                                         | 16.00 KiB  | 1012 bytes |     1 |            0 |         0 |           2 |
+            | mysql         | component                                            | 16.00 KiB  |   61 bytes |     1 |            0 |         0 |           1 |
+            | mysql         | dd_properties                                        | 16.00 KiB  |   47 bytes |     1 |            0 |         1 |           1 |
+            | mysql         | default_roles                                        | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | engine_cost                                          | 16.00 KiB  |  112 bytes |     1 |            0 |         1 |           2 |
+            | mysql         | func                                                 | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | gtid_executed                                        | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | index_stats                                          | 16.00 KiB  | 9.58 KiB   |     1 |            0 |         0 |         144 |
+            | mysql         | servers                                              | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | innodb_dynamic_metadata                              | 16.00 KiB  |  598 bytes |     1 |            0 |         0 |          16 |
+            | mysql         | innodb_table_stats                                   | 16.00 KiB  | 1.74 KiB   |     1 |            0 |         0 |          30 |
+            | mysql         | ndb_binlog_index                                     | 16.00 KiB  |    0 bytes |     1 |            0 |         1 |           0 |
+            | mysql         | parameter_type_elements                              | 16.00 KiB  | 1.21 KiB   |     1 |            0 |         1 |          32 |
+            | mysql         | password_history                                     | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | plugin                                               | 16.00 KiB  |    0 bytes |     1 |            0 |         0 |           0 |
+            | mysql         | replication_asynchronous_connection_failover_managed | 16.00 KiB  |    0 bytes |     1 |            0 |         1 |           0 |
+            | mysql         | replication_group_configuration_version              | 16.00 KiB  |  281 bytes |     1 |            0 |         0 |           1 |
+            | mysql         | role_edges                                           | 16.00 KiB  |    0 bytes |     1 |            0 |         1 |           0 |
+            +---------------+------------------------------------------------------+------------+------------+-------+--------------+-----------+-------------+
+            72 rows in set (0.05 sec)
+            
+            mysql>
+            ```
+  
++ mysql vs. sys
+
+  + [table]
+
+    |        | mysql                 | sys                                           |
+    | :----- | :-------------------- | :-------------------------------------------- |
+    | 主要目的 | 权限、账户、配置管理     | 性能监控、慢查询分析、诊断                         |
+    | 数据来源 | 内部系统表，持久化保存    | performance_schema，内存中、实时                |
+    | 删除能否 | **否**                | 不建议                                         |
+    | 典型用户 | DBA(权限关联)          | DBA + DEV (性能调优)                           |
+    | 关键对象 | user, db, tables_priv | host_summary, statement_analysis, sys_config |
+
 ##### 创建
 
 + [code]
@@ -2304,13 +6232,29 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
   DROP DATABASE dbsc7;
   ```
 
+##### 确认当前数据库
+
++ [operating]
+  
+  ```sql
+  mysql> SELECT DATABASE();
+  +------------+
+  | DATABASE() |
+  +------------+
+  | douma      |
+  +------------+
+  1 row in set (0.00 sec)
+  
+  mysql>
+  ```
+
 #### User / Role
 
-##### 检索
+##### 检索用户
 
 + [operating]
 
-  ```cmd
+  ```sql
   mysql> SELECT user, host, Select_priv, Insert_priv, Update_priv, Delete_priv FROM mysql.user;
   +------------------+-----------+-------------+-------------+-------------+-------------+
   | user             | host      | Select_priv | Insert_priv | Update_priv | Delete_priv |
@@ -2338,9 +6282,10 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 + 数据库管理用户
 
   + 增加
+
     + [operating]
 
-      ```cmd
+      ```sql
       mysql> CREATE USER 'dbsc7admin'@'localhost' IDENTIFIED BY 'P@ssw0rd';
       Query OK, 0 rows affected (0.02 sec)
       
@@ -2355,7 +6300,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
     + [operating]
 
-      ```cmd
+      ```sql
       mysql> GRANT ALL PRIVILEGES ON dbsc7.* TO 'dbsc7admin'@'localhost';
       Query OK, 0 rows affected (0.01 sec)
       
@@ -2400,7 +6345,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
     + [operating]
 
-      ```cmd
+      ```sh
       [edgar@ThinkPadT14P-23 Workspace]$ mysql -u dbsc7admin -p
       Enter password:
       Welcome to the MySQL monitor.  Commands end with ; or \g.
@@ -2432,7 +6377,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
     + [operating]
 
-      ```cmd
+      ```sql
       mysql> REVOKE ALL PRIVILEGES ON dbsc7.* FROM 'dbsc7admin'@'localhost';
       Query OK, 0 rows affected (0.01 sec)
       
@@ -2451,7 +6396,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 + [operating]
   
-  ```cmd
+  ```sh
   [root@ThinkPadT14P-23 Workspace]# mysql -u root -p
   ...
   mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'LiHaobo#1119';
@@ -2462,11 +6407,90 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
   ```
 
 ### 故障解决
+
 #### 启动
 
+# 分布式数据库 DDB -- Distributed Database
 
+## 分布式数据库概述
 
-# 分布式数据库
+### 分布式数据库概念
+
+通过网络将数据分散存储在多个物理节点上，并通过统一接口对外提供服务的数据库系统。
+
+### 核心目标
+
+解决单机数据库在 **数据规模**、**并发访问** 和 **高可用性** 三个维度上的瓶颈问题
+
+### 本质特征
+
++ 数据分片 Sharding，
+  采用水平分片策略将数据分布到不同节点
+
+  + 哈希分片
+  + 范围分片
+  + 复合分片
+
++ 多副本机制
+  通过 Raft, Paxos 等共识算法维护数据副本
+  典型配置为3副本
++ 分布式事务
+  支持跨节点ACID事务，如 2PC协议
+
+### 核心架构
+
++ 分成架构
+
+  + 接入层
+    + ![question](./images/question-trans-small.png)SQL解析
+    + 路由分发
+
+  + 计算层
+    + 查询优化
+    + 分布式执行计划
+
+  + 存储层
+    基于 LSM-Tree 或 B+Tree 的分布式存储引擎
+
++ 关键技术
+
+  + 一致性哈希
+    实现动态扩缩容时最小化数据迁移
+  + 向量时钟
+    解决多副本场景下的版本冲突
+  + MVCC + 2PC
+    分布式事务
+
++ 优势
+
+  + 线性扩展能力
+    + 理论支持无限水平扩展，每增加一个节点可提升约 70% 吞吐量
+    + QPS 从 5K 提升至 50W+
+
+  + 高可用保障
+    + 自动故障检测和转移
+    + 多可用区部署
+
+  + 弹性伸缩
+    + 在线添加节点
+    + 存储容量可动态扩展
+
+  + 混合负载处理
+    + 通过读写分离架构同时支持 OLTP 和 OLAP
+    + 典型配置
+      3副本 （ 1主 2从 ）+ 列存分析节点
+
+  + 全球化部署
+    + 异地多活架构
+    + 跨地域同步延迟
+
+### 术语
+
++ GTM -- 全局事务管理器/全局事务节点
+
++ CN -- 计算节点
+
++ DN -- 数据节点
 
 # GlodenDB
 
@@ -2474,35 +6498,732 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 ### 题库
 
+#### GDCA认证考试核心知识点 2025-12-29
+
+ref [百度文库:GDCA认证考试核心知识点精粹 / 2025-12-29](https://wenku.baidu.com/view/40db11235327a5e9856a561252d380eb629423e2.html?fr=aladdin266&ind=1&aigcsid=0&qtype=0&lcid=1&queryKey=GDCA%E8%AE%A4%E8%AF%81%E8%80%83%E8%AF%95&verifyType=undefined&_wkts_=1778151197679&bdQuery=GDCA%E8%AE%A4%E8%AF%81%E8%80%83%E8%AF%95&chatType=chat)
+
++ 数据库基础理论
+
+  + 日志恢复技术主要保障事务的哪项特性？
+    + [ ] 一致性
+    + [ ] 隔离性
+    + [ ] 原子性
+    + [X] 持久性
+
+  + 数据独立性概念解析
+    + 当数据的物理存储改变而应用程序无需修改的特性称为
+      + [ ] 物理独立性
+      + [ ] 数据独立性
+      + [ ] 应用程序独立性
+      + [X] 逻辑独立性
+      === ===
+      ![incorrect](./images/incorrect-trans-small.png) 应该是物理独立性
+
+    **解答**，
+    数据独立性，应用程序与数据之间的分离程度
+    + 物理独立性:
+      + 应用程序不受数据库存储结构(如文件组织方式、索引技术)改变的影响。
+      + 当数据库的内模式(存储模式)发生变化时，通过模式/内模式映像保证应用程序不变
+
+    + 逻辑独立性:
+      + 应用程序不受数据库逻辑结构(如表格结构调整)改变的影响
+      + 当数据库的概念模式发生变化时，通过外模式/模式映像保证应用程序不变
+
+  + 传统集中式架构数据库的局限性，不正确的描述是:
+    + [ ] 方便简单
+    + [ ] 系统成熟稳定
+    + [ ] 管理成本低
+    + [X] 灵活性大
+
++ GoldenDB专项知识
+  + 发展历程里程碑
+    + 金融产业分布式数据库立项年份
+      + [ ] 2002年
+      + [ ] 2011年
+      + [X] 2014年
+      + [ ] 2019年
+
+    + 高可用性指标
+      + 同城RTO可达
+        + [ ] 0秒
+        + [X] < 30秒
+        + [ ] < 3分钟
+        + [ ] < 30分钟
+
+    + 事务异常处理机制
+      + 针对部分节点事务失败的解决方案
+        + [ ] 引入多个计算节点快同步机制
+        + [X] 引入全局回滚机制
+        + [ ] 引入一主多备机制
+
++ 技术实现细节
+  + 分片路由功能由哪个组件实现
+    + [ ] 管理节点
+    + [ ] 数据节点
+    + [X] 计算节点
+    + [ ] GTM节点
+
+  + 安装配置文件规范
+    + 标准安装使用的ini文件是
+      + [ ] install_senior.ini
+      + [X] install_fast.ini
+      + [ ] install_advance.ini
+      + [ ] install_triple.ini
+
+  + 分片水位配置逻辑
+    + 当有效team数量低于低水位时，系统将：
+      + [ ] 正常读写
+      + [X] 触发告警转为只读
+      + [ ] 自动切换主节点
+      + [ ] 停止服务
+
++ 分布式特性验证
+  + 分布式数据库具有物理分布性及逻辑整体性
+    + [X] True
+    + [ ] False
+
+  + 行业地位确认
+    + 国内首家在大型银行核心系统投产的国产数据库
+      + [X] True
+      + [ ] False
+  + 技术限制说明
+    + 安装管理节点机器内存 >= 1G
+      + [ ] True
+      + [ ] False
+
+#### GDCA认证考试 2025-11-21
+
++ 单选题
+  + GDCA认证的主要目的
+    + [ ] 提高个人计算机水平
+    + [X] 评估企业信息安全管理能力
+    + [ ] 促进电子商务发展
+    + [ ] 推广网络技术
+
+    **解答**，
+    *GDCA认证(国际数据管理认证)主要目的是 评估和认证企业的信息安全管理能力，确保企业数据安全*
+
+  + 以下哪项不是GDCA认证的五个关键控制领域之一
+    + [ ] 访问控制
+    + [X] 安全意识培训
+    + [ ] 物理安全
+    + [ ] 网路安全
+
+    **解答**，
+    *GDCA认证的五个关键控制领域*
+    + *物理安全*
+    + *网络安全  {访问控制，}*
+    + *系统安全*
+    + *数据安全*
+    + *组织安全*
+
+  + GDCA认证的认证等级分为几个级别
+    + [ ] 一级
+    + [ ] 二级
+    + [X] 三级
+    + [ ] 四级
+
+
+    **解答**，
+    *GDCA认证三个级别*
+    + *一级，基础级*
+    + *二级，中级*
+    + *三级，高级*
+
+  + 在GDCA认证过程中，以下哪个不是认证机构审查的重点
+    + [ ] 组织政策与程序
+    + [ ] 员工培训与意识
+    + [X] 客户服务流程
+    + [ ] 系统审计与监控
+
+    **解答**，
+    *GDCA认证的审查重点包括组织政策与程序、员工培训与意识、系统设计与监控等方面，客户服务流程不是直接审查的内容*
+
+  + GDCA认证的周期时多长时间
+    + [ ] 一年
+    + [ ] 两年
+    + [X] 三年
+    + [ ] 四年
+
+  + 以下哪个不是GDCA认证的基本原则之一
+    + [ ] 透明度
+    + [X] 可持续性
+    + [ ] 公平性
+    + [ ] 可靠性
+
+    **解答**
+    *GDCA认证的基本原则包括透明度、公平性、可靠性和可审计性，可持续性不是基本原则之一*
+
+  + 在GDCA认证过程中，以下哪个不是认证机构需要审查的文件类型
+    + [ ] 政策与程序文件
+    + [ ] 审计报告
+    + [X] 法律文件
+    + [ ] 员工培训记录
+
+    **解答**
+    *GDCA认证过程中，认证机构需要审查政策、程序文件、审计报告和员工培训记录等，法律文件不是直接审查的文件类型*
+
+  + GDCA认证适用于哪种类型企业
+    + [ ] 金融机构
+    + [ ] 制造业企业
+    + [ ] 医疗机构
+    + [X] 以上都是
+
+    **解答**
+    *GDCA认证适用于各类型企业，包括金融机构、制造业企业和医疗机构等，只要企业需要保障信息安全管理*
+
+  + 以下哪个不是GDCA认证的认证周期审查内容
+    + [ ] 安全策略的有效性
+    + [ ] 系统漏洞的修复
+    + [ ] 法律法规的遵守
+    + [X] 员工离职流程
+
+    **解答**
+    *GDCA认证周期中审查内容包括安全策略的有效性、系统漏洞的修复和法律法规的遵守等。员工离职流程不是直接审查的内容*
+
+  + GDCA认证的最终目标是实现什么
+    + [ ] 数据安全保护
+    + [ ] 信息技术合规
+    + [ ] 信息安全治理
+    + [X] 以上都是
+
+    **解答**
+    *GDCA认证的最终目标是实现数据安全包含、信息技术合规和信息安全治理等多方面的目标*
+
++ 多选题
+
+  + GDCA认证过程中，以下哪些因素会影响企业的认证结果
+    + [X] 企业的组织结构
+    + [X] 员工的信息安全意识
+    + [X] 系统的物理安全措施
+    + [X] 管理层的支持和承诺
+    + [X] 法律法规的遵守
+
+  + 在GDCA认证中，以下哪些是组织必须建立的策略与程序
+    + [X] 信息安全策略
+    + [X] 风险评估程序
+    + [X] 内部审计程序
+    + [X] 员工培训与意识提升计划
+    + [X] 紧急响应程序
+
+  + 以下哪些是GDCA认证评估的五个关键控制领域
+    + [X] 访问控制
+    + [X] 系统安全
+    + [X] 物理安全
+    + [X] 数据安全
+    + [X] 组织安全
+
+  + 企业在准备GDCA认证时，以下哪些步骤时必要的
+    + [X] 进行内部审计和风险评估
+    + [X] 建立信息安全策略和程序
+    + [X] 对员工进行信息安全培训
+    + [X] 准备认证所需文件和记录
+    + [X] 选择合适的认证机构
+
+  + GDCA认证对企业的信息安全管理有哪些积极影响
+    + [X] 提高客户对企业的信任度
+    + [X] 降低信息安全风险和损失
+    + [X] 提升企业的市场竞争力
+    + [X] 符合行业规范和法律法规要求
+    + [X] 增强员工的信息安全意识
+
++ 填空题
+
+  + GDCA认证的全称时国际数据管理认证(International Data Management Certification)，简称 IDMC
+  + GDCA认证的五个关键控制领域分别为 物理安全，网络安全，系统安全， 数据安全，组织安全
+  + GDCA认证的有限期为三年，企业需要在认证到期前进行复评
+  + GDCA认证要求企业建立信息安全策略和程序、包括风险评估、内部审计和紧急响应等
+  + GDCA认证旨在帮助企业提高信息安全管理水平，降低信息泄露风险
+
++ 判断题
+
+  + GDCA认证针对个人，而非企业
+    + [ ] True
+    + [X] False
+
+    **解答**
+    *GDCA认证是针对企业的信息安全管理能力进行的认证，指针提高企业的信息安全水平*
+
+  + GDCA认证的五个关键控制领域不包括物理安全
+    + [ ] True
+    + [X] False
+
+    **解答**，
+    *GDCA认证的五个关键控制领域*
+    + **_物理安全_**
+    + *网络安全 {访问控制，}*
+    + *系统安全*
+    + *数据安全*
+    + *组织安全*
+
+  + 获得GDCA认证的企业可以永久免除信息安全审查
+    + [ ] True
+    + [X] False
+
+    **解答**
+    *即使企业获得了GDCA认证，也需要定期进行复评以维持认证状态，确保信息安全持续符合标准*
+
+  + GDCA认证只适用于大型企业
+    + [ ] True
+    + [X] False
+
+    **解答**
+    *GDCA认证适用于所有类型和规模的企业，无论大小，只要需要进行信息安全管理的都可以申请*
+  
+  + GDCA认证目的时为了提高企业的经济效益
+    + [ ] True
+    + [X] False
+
+    **解答**
+    *GDCA认证的主要目的是提高企业的信息安全管理水平，确保信息安全，而非直接提高经济效益*
+  
++ 简答题
+
+  + 什么是GDCA认证中的风险评估过程
+
+    **解答**
+    *风险评估过程是GDCA认证中的一个重要环节，它涉及识别、分析和评估企业面临的信息安全风险，以确定哪些风险需要采取控制措施*
+    *风险评估是信息安全管理体系的重要组成部分，通过这个过程，企业可以系统地识别和分析潜在的安全风险，评估它们可能对企业造成的影响，并据此制定响应的风险管理策略*
+
+  + GDCA认证中，如何确保员工的信息安全意识得到提升
+
+    **解答**
+    *确保员工信息安全意识提升的方法包括定期进行信息安全培训、制定明确的信息安全策略和程序、以及通过内部沟通和宣传来强化员工的安全意识*
+    *员工是信息安全的第一道防线，通过培训、政策和内部沟通，可以提高员工对信息安全重要性的认识，使其在日常工作中学会识别和防范安全风险*
+
+  + GDCA认证对于企业的合规性有何意义
+
+    **解答**
+    *GDCA认证有助于企业满足相关法律法规和行业标准的要求，增强企业的合规性，降低法律风险，同时也有利于提升企业在市场上的竞争力和信誉*
+    *合规性是企业运营的重要方面，通过GDCA认证，企业可以确保其信息安全实践符合国家法律法规和国际标准，这对于企业的长期发展和市场竞争力至关重要*
+
+  + 在GDCA认证过程中，如何进行内部审计
+
+    **解答**
+    *内部审计是GDCA认证的一部分，它涉及对企业信息安全管理体系的有效性进行独立的、系统的和规范化的检查和评价，以确保体系的有效运行*
+    *内部审计是评估信息安全挂了体系是否按照既定政策和程序有效运行的重要手段，它有助于发现潜在的问题和不足，并提出改进建议*
+
+  + GDCA认证对于提升企业品牌形象有何作用
+
+    **解答**，
+    *GDCA认证可以作为企业品牌形象的一部分，展示企业在信息安全方面的专业性和承诺，增强客户和合作伙伴的信任，从而提升企业的品牌形象和竞争力*
+    *品牌形象是企业竞争力的重要组成部分，通过获得GDCA认证，企业可以向外界传递出其在信息安全方面的专业性和可靠性，对于建立和维护良好的品牌形象具有积极影响*
+
 #### GDCA认证考试 2024-06-05
 
 ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/4966b6d932b765ce0508763231126edb6e1a7646.html?_wkts_=1777294564100&bdQuery=goldendb%E8%AE%A4%E8%AF%81%E8%80%83%E8%AF%95&chatType=chat)
 
-1. 日志恢复技术保证了事务
-   + [X] 一致性
-   + [ ] 隔离性
-   + [ ] 原子性
-   + [ ] 持久性
++ 日志恢复技术保证了事务
+  + [X] 一致性
+  + [ ] 隔离性
+  + [ ] 原子性
+  + [ ] 持久性
 
-2. 下来不属于字符串类型的是
-   + [ ] CHAR
-   + [ ] VARCHAR
-   + [ ] MEDIUMTEXT
-   + [X] TINYINT
++ 下来不属于字符串类型的是
+  + [ ] CHAR
+  + [ ] VARCHAR
+  + [ ] MEDIUMTEXT
+  + [X] TINYINT
 
-3. ()是MySql的物理日志，也叫重做日志，记录存储引擎InnoDB的事务日志
-   + [ ] errorlog
-   + [X] redolog
-   + [ ] binglog
-   + [ ] warnninglog
++ (  )是MySql的物理日志，也叫重做日志，记录存储引擎InnoDB的事务日志
+  + [ ] errorlog
+  + [X] redolog
+  + [ ] binglog
+  + [ ] warnninglog
 
-4. ()指用户的应用程序与数据库中数据的物理存储是相互独立的。当数据的物理存储改变了，应用程序不用改变
-   + [X] 物理独立性
-   + [ ] 数据独立性
-   + [ ] 应用程序独立性
-   + [ ] 逻辑独立性
++ (  )指用户的应用程序与数据库中数据的物理存储是相互独立的。当数据的物理存储改变了，应用程序不用改变
+  + [X] 物理独立性
+  + [ ] 数据独立性
+  + [ ] 应用程序独立性
+  + [ ] 逻辑独立性
 
++ 关于 _传统集中式架构数据库_，那种说法 **不准确** （*mark_0005*)
+  + [ ] 方便简单
+  + [ ] 系统成熟稳定
+  + [X] 管理成本低
+  + [ ] 灵活性大
 
++ GoldenDB金融分布式数据库在哪一年立项
+  + [ ] 2002
+  + [ ] 2011
+  + [X] 2014
+  + [ ] 2019
+
++ GoldenDB同城RTO可到达
+  + [ ] 0 秒
+  + [X] 小于 30 秒
+  + [ ] 小于 3 分钟
+  + [ ] 小于 30 分钟
+
++ 针对部分节点事务失败的问题，GoldenDB的解决方案是
+  + [ ] 引入多个计算节点
+  + [X] 引入全局回滚机制
+  + [ ] 引入一主多备机制
+  + [ ] 引入快同步机制
+
++ GoldenDB数据备份如何实现全局一致状性
+  + [X] 支持同步备份全局状态信息
+  + [ ] 支持全量备份和增量备份
+  + [ ] 支持任务可视
+  + [ ] 支持备份策略灵活可配
+
++ 以下哪条命令可以查看端口是否占用 (*mark_0010*)
+  + [ ] `df -h` 
+  + [ ] `free -h`
+  + [X] `lsof -i:80`
+  + [ ] `pkill -9 -uzxdb1`
+
++ 一键安装标准安装的ini配置文件
+  + [X] install_senior.ini
+  + [ ] install_fast.ini
+  + [ ] install_advance.ini
+  + [ ] install_triple.ini
+
++ 以下关于一键安装说法正确的是
+  + [ ] C模块组件均支持容器化安装
+  + [ ] 一键安装时可选择同步创建MPP集群
+  + [ ] License未更新为企业版，仍可以一键安装多分片集群
+  + [X] 若一键安装互信步骤未完成，则无法登录insight界面使用Golden产品服务
+
++ 修改哪个文件回到特定步骤开始执行
+  + [ ] install.txt
+  + [ ] install_fast.ini
+  + [X] install_step_000000.txt
+  + [ ] install_senior.ini
+
++ 混合部署需要提前执行的命令
+  + [ ] shsetup.sh -u
+  + [ ] shsetup.sh -c
+  + [ ] shsetup.sh -a
+  + [ ] shsetup.sh -m
+
++ 下列选项, 对于表分布规则的描述正确的是 (*mark_0015*)
+  + [ ] GoldenDB仅支持以下分片规则: hash, range, list, duplicate
+  + [ ] GoldenDB支持横向分片，**不**支持纵向分区
+  + [X] GoldenDB采用 **一致性hash算法**
+  + [ ] GoldenDB分片规则只能基于一个表字段
+
++ 下列选项**不**属于多级分区表优点的是
+  + [ ] 精确控制数据分布形态
+  + [X] 操作简单
+  + [ ] 提升批处理访问性能
+  + [ ] 数据物理隔离
+
++ 分片路由功能是下列哪个组件实现的
+  + [ ] 管理节点
+  + [ ] 数据节点
+  + [X] 计算节点
+  + [ ] GTM节点
+
++ 关于GoldenDB分布式数据库备份说法**错误**的是
+  + [ ] 支持实时和定时备份
+  + [ ] 支持备份指定机房
+  + [ ] 选择备份节点后，系统无法自动选择备份其他节点
+  + [X] 定时备份任务调整后，当天的备份计划不生效
+  
++ **不**属于GoldenDB分布式数据库租户扩缩容的是
+  + [ ] CN节点扩缩容
+  + [X] 管理节点扩缩容
+  + [ ] DN节点扩缩容
+  + [ ] GTM节点扩缩容
+
++ 某集群有一个分片，
+  该分片有3个Team，
+  每个Team包含3个DB，
+  主DB在Team2中，该分片水位配置为高水位3、低水位2、主数据节点数
+  Team内DN响应数设置为2.
+  此时，Team1中有2个DB异常，Team2中有1个DB异常，Team3中无DB异常，
+  此时，该分片处于 (*mark_0020*)
+  + [ ] 高于高水位
+  + [ ] 高低水位之间
+  + [ ] 低于低水位
+  + [ ] 以上都不是
+
++ 分布式数据库具有哪些优势
+  + [X] 低成本
+  + [X] 灵活、扩展性好
+  + [X] 系统的可用性强
+  + [X] 系统的可靠性强
+
++ 并发操作带来的不一致性包括
+  + [ ] 重复性
+  + [X] 丢失更新
+  + [X] 不可重复读
+  + [X] 脏读
+
++ Golden的下列说法是正确的
+  + [X] 多数据节点方案
+  + [ ] 分布式存储方案
+  + [ ] 默认隔离级别ReadUncommited
+  + [X] 默认隔离级别ReadCommited
+
++ 目前一键安装常用的ini配置文件
+  + [X] install_senior.ini
+  + [X] install_fast.ini
+  + [X] install_advance.ini
+  + [ ] install_triple.ini
+
++ 一键安装环境必须进行环境清理的是 (*mark_25*)
+  + [X] 端口占用情况
+  + [X] 用户名使用情况
+  + [ ] 目录使用情况
+  + [ ] /etc/rc.local中开机启动项
+
++ 一键安装install_senior.ini配置文件中的install_tenancy配置项的含义
+  + [X] 0 代表正常安装
+  + [X] 1 代表只安装管理节点、GTM节点 和 LDS节点，(不安装DB，proxy，不组建集群，不配置互信)
+  + [ ] 2 代表只安装管理节点，(不安装DB, proxy, LDS, GTM, 不组建集群, 不配置互信)
+  + [ ] 3 代表安装ZK
+
++ 一键安装install_senior.ini配置文件中的install_type配置项的含义
+  + [X] 0 代表管理节点
+  + [ ] 1 代表只安装管理节点、GTM节点和LDS节点，(不安装DB, proxy, 不组建集群, 不配置互信)
+  + [X] 2 代表ZK高可用
+  + [ ] 3 代表只安装管理节点，(不安装DB, proxy, LDS, GTM, 不组建集群, 不配置互信)
+
++ 以下哪些组件，在通用重分布(非hash桶重分布)中会用到
+  + [ ] CM
+  + [ ] DBAgent
+  + [ ] MDS
+  + [ ] insight
+
++ GoldenDB目前支持的分片规则有哪些
+  + [X] HASH分片
+  + [X] RANGE分片
+  + [X] LIST分片和复制表
+  + [X] 多级分片
+
++ GoldenDB目前支持的重分布任务类型有哪些 (*mark_0030*)
+  + [X] 通用方式重方式
+  + [ ] list重分布
+  + [X] range重分布
+  + [X] hash桶迁移重分布
+
++ 哪些重分布流程可以不创建临时表
+  + [ ] 通用方式
+  + [ ] range重分布
+  + [ ] hash桶迁移重分布
+  + [ ] 都不需要
+
++ GoldenDB分布式数据库管理节点有几个操作系统用户
+  + [ ] xxmanager用户
+  + [ ] insight用户
+  + [ ] xxgtmX用户
+  + [ ] xxomm用户
+
++ 关于GoldenDB分布式数据库租户的服务端口说法**错误**的是
+  + [ ] 一个CN节点可以绑定多个服务端口
+  + [ ] 可以通过直接解绑服务端口，停止CN节点对外提供服务
+  + [ ] 服务端口号可以自定义配置
+  + [ ] 一个端口的读写分离策略支持本地同域异地同时设置
+
++ 新增租户包括以下哪些动作
+  + [ ] 计算节点配置
+  + [ ] 数据节点配置
+  + [ ] GTM配置
+  + [ ] loadserver配置
+
++ 关于高低水位配置，下列说法正确的是 (*mark_0035*)
+  + [ ] 对分片水位进行配置，配置的高水位必须大于低水位
+  + [ ] 当有效team数量在高低水位之间是，系统告警
+  + [ ] 当有效team数量低于低水位时，系统告警，此时分片为"只读"状态，不支持写业务
+  + [ ] Team内只要有一个DN响应时，则认为该Team同步关系正常
+
++ 分布式数据库具有物理分不行以及逻辑整体性的特点
+  + **正确**
+  + 错误
+
++ GoldenDB是国内首家在大型银行核心业务系统投产的国产数据库
+  + **正确**
+  + 错误
+
++ 并发情况下的一致性靠原子性保证
+  + **正确**
+  + 错误
+
++ GoldenDB分布式部署模式可以应对不同场景
+  + **正确**
+  + 错误
+
++ 安装管理节点机器可用内存可以小于1G (*mark_0040*)
+  + 正确
+  + **错误**
+
++ 安装过程中的日志可以查看log目录下onekey_install.log/error.log，以及install_log目录下组件详细安装日志等
+  + **正确**
+  + 错误
+
++ 安装涉及的nodes必须安装insightAgent
+  + **正确**
+  + 错误
+
++ 机器未配置yum源，且缺少一键安装需要的系统包，也可以安装成功
+  + 正确
+  + **错误**
+
++ 现有如下表:
+  create table t1 (id int primary key, name varchar(10), gdb int) distributed by hash(gdb)(g1, g2, g3, g4)。
+  请问 select * from t1 where gdb in (1,2) 语句是否会群发所有分片
+  + 正确
+  + **错误**
+
++ RANGE分片适用于含有一系列限定性值的场景 (*mark_0045*)
+  + **正确**
+  + 错误
+
++ GoldenDB重分布任务执行过程只能停机运行，否则无法保证数据的一致性
+  + 正确
+  + **错误**
+
++ GoldenDB分布式数据库的租户内任意Team都可以直接删除
+  + 正确
+  + **错误**
+
++ GoldenDB分布式数据库的租户内组件删除后，对应的数据一并会被删除
+  + **正确**
+  + 错误
+
++ CN节点扩容，只能选择全新安装的方式新增CN节点
+  + 正确
+  + **错误**
+
++ GoldenDB数据算法管理，支持客户自定义算法 (*mark_0050*)
+  + **正确**
+  + 错误
+
+#### GDCA认证考试 2024-01-19 A
+
+ref: [百度文库:goldendb gdca考试题库](https://wenku.baidu.com/view/658eff87b868a98271fe910ef12d2af90342a851.html?fr=aladdin664466&ind=4&word=goldendb&hitsid=1&target=%E5%B8%AE%E6%88%91%E5%86%99%E4%B8%80%E7%AF%87%E2%80%9Cgoldendb%E2%80%9D&aigcsid=0&qtype=0&lcid=4&queryKey=goldendb&verifyType=&_wkts_=1777639949679&bdQuery=goldendb&chatType=chat)
+
++ 关于GoldenDB的特点，以下哪项描述是**错误**的
+  + [ ] 高性能的数据处理能力
+  + [ ] 易于使用的图形用户界面
+  + [ ] 不支持跨平台适用
+  + [ ] 具有强大的数据安全保障机制
+
++ GDCA考试的主要目的
+  + [ ] 评估考生对数据库技术的掌握成都
+  + [ ] 测试考生的编程能力
+  + [ ] 检测考生的团队协作能力
+  + [ ] 衡量考生对网络技术的了解程度
+
++ 在GoldenDB中，要实现数据的完整性，以下哪种方法是**错误**的
+  + [ ] 使用主键约束
+  + [ ] 使用外键约束
+  + [ ] 使用唯一性约束
+  + [ ] 不对数据进行任何约束
+
++ GDCA认证考试主要考察哪些方面的知识
+  + [ ] 数据库设计和实现
+  + [ ] 网络配置和管理
+  + [ ] 操作系统管理和维护
+  + [ ] 信息安全和风险控制
+
++ 关于GoldenDB的索引技术，以下哪种说法是**错误**的 (*mark_0005*)
+  + [ ] GoldenDB支持多种索引类型
+  + [ ] 使用索引可以加快数据检索速度
+  + [X] 索引的建立和维护对系统性能没有影响
+  + [ ] 合理使用索引可以有效提供数据库查询效率
+
++ GDCA认证的有效期为多少
+  + [ ] 1 年
+  + [ ] 2 年
+  + [ ] 3 年
+  + [ ] 永久有效
+
++ 关于GoldenDB的存储过程，以下哪种说法是**错误**的
+  + [ ] 存储过程是一组为了完成特定功能的SQL语句集合
+  + [ ] 存储过程可以接受参数并返回结果值
+  + [X] 存储过程只能被创建它的用户所访问和使用
+  + [ ] 存储过程可以提高数据库操作的效率和安全性
+
++ GDCA考试采用哪种计分制度
+  + [ ] 分数累加制
+  + [X] 及格线判定制
+  + [ ] 通过率判定制
+  + [ ] 等级判定制
+
++ 关于GoldenDB的安全性，以下哪种说法是**错误**的
+  + [ ] GoldenDB支持多种身份验证方式
+  + [ ] GoldenDB提供了数据加密功能来包含数据安全
+  + [ ] GoldenDB没有提供防止SQL注入攻击的机制
+  + [ ] GoldenDB支持行级安全性来控制数据访问权限
+
++ GDCA认证考试对于考生有何意义
+  + [ ] 提高个人业务技能和知识水平
+  + [ ] 获得一份高薪的工作岗位
+  + [ ] 提供自己在行业内的知名度
+  + [ ] 以上都是
+
+#### GDCA认证考试 2024-01-19 B
+
++ 通信基础知识
+
+  + 解释OSI参考模型的7层结构，并列举每一层的功能
+
+  + 什么是TCP/IP协议族？简述TCP/IP协议族的4个层次
+
+  + IP地址的分类有哪些？各分类的特点是社么
+
++ 数据通信和网络技术
+
+  + 什么是数据通信协议？列举常用是的数据通信协议并简述其功能
+
+  + 什么是网络拓扑结构？列举常见的网络拓扑结构并简述其特点
+
+  + 什么是网络地址转换(NAT)，简述NAT的作用及实现原理
+
+  + 解释子网掩码的作用并举例说明如何适用子网掩码分隔网络地址
+
++ 无线网络技术
+
+  + 什么是WALN？简述WLAN的工作原理
+
+  + 什么是Wi-Fi？列举常见的Wi-Fi频段及其传输速率
+
+  + 问什么在无线局域网中使用频率分配技术？简述频率分配技术的原理及其优势
+
++ 计算机网络安全
+
+  + 什么是防火墙？简述防火墙的工作原理及其主要功能
+
+  + 什么是VPN？简述VPN的作用及其实现原理
+
+  + 列举并简述常见的网络攻击手段，如ARP欺骗、DDos攻击等
+
+  + 什么是入侵检测系统(IDS)？简述其工作原理及其主要分类
+
++ 网络管理与维护
+
+  + 什么是SNMP？简述SNMP的作用及其工作原理
+
+  + 什么是远程管理协议(RMON)？简述RMON的工作原理及其应用场景
+
+  + 解释网络故障排除的基本步骤并列举常见的网络故障类型
+
++ 广域网与异地备份技术
+
+  + 什么是广域网(WAN)？简述WAN的特点及其应用场景
+
+  + 什么是虚拟专用网(VPN)？简述VPN的作用及其实现方式
+
+  + 什么是异地备份技术？列举常见的异地备份技术及其优势
+
++ 网络设备与服务器技术
+
+  + 什么是路由器？简述路由器的功能及其工作原理
+
+  + 什么是交换机？简述交换机的功能及其工作原理
+
+  + 什么是负载均衡技术？简述负载均衡技术的原理及其应用场景
+
++ 云计算与大数据技术
+
+  + 什么是云计算？列举云计算的优势及其应用场景
+
+  + 什么是大数据？简述大数据的特点及其应用领域
+
+  + 什么是云数据库？简述云数据的特点及其优势
 
 # 云数据库
 
@@ -2527,6 +7248,8 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
       |            | 附带屏幕输出                              | 不附带屏幕输出               |
       | 02         | `[root@ThinkPadT14P-23 Workspace]# rpm --upgrade` | `rpm --upgrade` |
       |            | 屏幕输出: "rpm: no packages given for install "     |                |
+
++ [quote] 引文
 
 ## 操作系统
 
@@ -2642,7 +7365,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
       + 升级
         + [operating]
 
-          ```cmd
+          ```sh
           [root@ThinkPadT14P-23 Workspace]# dnf update
           Last metadata expiration check: 0:18:27 ago on Wed 22 Apr 2026 07:01:39 PM CST.
           Dependencies resolved.
@@ -2724,7 +7447,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
           + [operating]
 
-            ```cmd
+            ```sh
             [root@ThinkPadT14P-23 Workspace]# rpm -qa | grep mysql
             [root@ThinkPadT14P-23 Workspace]# 
             ```
@@ -2733,7 +7456,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
           + [operating]
 
-            ```cmd
+            ```sh
             [root@ThinkPadT14P-23 Workspace]# dnf list installed | grep mysql
             [root@ThinkPadT14P-23 Workspace]#
             ```
@@ -2744,7 +7467,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
           + [operating]
 
-            ```cmd
+            ```sh
             [root@ThinkPadT14P-23 Workspace]# ll /home/edgar/Downloads/
             total 20
             -rw-r--r-- 1 root root    15292 Apr 22 22:02 mysql84-community-release-el8-3.noarch.rpm
@@ -2813,7 +7536,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
             + [operating]
 
-              ```cmd
+              ```sh
               [root@ThinkPadT14P-23 Workspace]# 
               
               Last metadata expiration check: 0:15:25 ago on Wed 22 Apr 2026 10:11:03 PM CST.
@@ -2851,7 +7574,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
           + ICU-Data Package
             + [operating]
 
-              ```cmd
+              ```sh
               [root@ThinkPadT14P-23 Workspace]# dnf install /home/edgar/Downloads/mysql-community-icu-data-files-8.4.9-1.el8.x86_64.rpm
               Last metadata expiration check: 0:17:18 ago on Wed 22 Apr 2026 10:11:03 PM CST.
               Dependencies resolved.
@@ -2890,7 +7613,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
             + [operating]
 
-              ```cmd
+              ```sh
               [root@ThinkPadT14P-23 Workspace]# dnf install /home/edgar/Downloads/mysql-community-client-plugins-8.4.9-1.el8.x86_64.rpm
               Last metadata expiration check: 0:29:49 ago on Wed 22 Apr 2026 10:11:03 PM CST.
               Dependencies resolved.
@@ -2991,7 +7714,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
             + [operating]
 
-              ```cmd
+              ```sh
               [root@ThinkPadT14P-23 Workspace]# dnf install /home/edgar/Downloads/mysql-community-server-8.4.9-1.el8.x86_64.rpm
               Last metadata expiration check: 0:41:19 ago on Wed 22 Apr 2026 10:11:03 PM CST.
               Dependencies resolved.
@@ -3095,19 +7818,18 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
               
               C:\Workspace>
               ```
-          
+
           + ![](./images/backup-small.jpg)备份点
 
             + MySql软件安装完成
-
 
         + 初次运行
 
           + 启动服务
 
             + [operating]
-  
-              ```cmd
+
+              ```sh
               [root@ThinkPadT14P-23 Workspace]# systemctl status mysqld
               ● mysqld.service - MySQL Server
                  Loaded: loaded (/usr/lib/systemd/system/mysqld.service; enabled; vendor preset: disabled)
@@ -3138,7 +7860,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
             + [operating]
 
-              ```cmd
+              ```sh
               [root@ThinkPadT14P-23 Workspace]# grep 'temporary password' /var/log/mysqld.log
               2026-04-22T15:10:22.894790Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: HrEdKjq1_erP
               [root@ThinkPadT14P-23 Workspace]# mysql -h localhost -P 3306 -u root -p
@@ -3163,7 +7885,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
             + [operating]
 
-              ```cmd
+              ```sh
               [root@ThinkPadT14P-23 Workspace]# mysql -u root -p
               ...
               mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'LiHaobo#1119';
@@ -3177,7 +7899,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
             + [operating]
 
-              ```cmd
+              ```sh
               [root@ThinkPadT14P-23 Workspace]# mysql -h localhost -P 3306 -u root -p
               Enter password:
               ...
@@ -3191,12 +7913,11 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
               [root@ThinkPadT14P-23 Workspace]#
               ```
 
-
         + ~~设置为开机启动~~
 
           + [operating]
 
-            ```cmd
+            ```sh
             [root@ThinkPadT14P-23 Workspace]# systemctl enable mysqld
             [root@ThinkPadT14P-23 Workspace]#
             ```
@@ -3221,7 +7942,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
         + [operating]
 
-          ```cmd
+          ```sh
           [root@ThinkPadT14P-23 Workspace]# dnf update
           Last metadata expiration check: 0:28:13 ago on Thu 23 Apr 2026 12:32:06 AM CST.
           Dependencies resolved.
@@ -3394,7 +8115,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
               + [operating]
 
-                ```cmd
+                ```sql
                 mysql> select database();
                 +------------+
                 | database() |
@@ -3565,7 +8286,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
           + [operating]
 
-            ```cmd
+            ```sh
             [root@ThinkPadT14P-23 Workspace]# dnf update -y
             Last metadata expiration check: 18:09:29 ago on Sat 25 Apr 2026 11:04:11 PM CST.
             Dependencies resolved.
@@ -3979,7 +8700,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
           + [operating]
 
-            ```cmd
+            ```sh
             [root@ThinkPadT14P-23 Workspace]# gcc -v
             Using built-in specs.
             COLLECT_GCC=gcc
@@ -4015,14 +8736,14 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
           + [code]
 
-            ```cmd
+            ```sh
             cd /home/edgar
             tar -xf Downloads/Python-3.13.13.tar.xz -C SoftwarePackages/
             ```
 
           + [operating]
 
-            ```cmd
+            ```sh
             [root@ThinkPadT14P-23 Workspace]# cd /home/edgar/SoftwarePackages/
             [root@ThinkPadT14P-23 SoftwarePackages]# cd Python-3.13.13/
             [root@ThinkPadT14P-23 Python-3.13.13]# ./configure –enable-optimizations
@@ -4804,21 +9525,21 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
           + [operating]
 
-            ```cmd
+            ```sh
             [root@ThinkPadT14P-23 Python-3.13.13]# nproc
             20
             ```
 
           + [code]
 
-            ```cmd
+            ```sh
             make -j $(nproc)
             make altinstall
             ```
 
           + [operating]
 
-            ```cmd
+            ```sh
             [root@ThinkPadT14P-23 Python-3.13.13]# ln -sf /usr/local/bin/python3.13 /usr/bin/python3
             [root@ThinkPadT14P-23 Python-3.13.13]# ln -sf /usr/local/bin/python3.13 /usr/bin/python
             [root@ThinkPadT14P-23 Python-3.13.13]# ln -sf /usr/local/bin/pip3.13 /usr/bin/pip3
@@ -4871,7 +9592,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
         + [operating]
 
-          ```cmd
+          ```sql
           mysql> CREATE USER 'dbsc7admin'@'%' IDENTIFIED BY '!QAZ2wsx';
           Query OK, 0 rows affected (0.03 sec)
           
@@ -4893,7 +9614,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
         + [operating]
 
-          ```cmd
+          ```sql
           mysql> CREATE USER 'douma'@'%' IDENTIFIED BY '!QAZ2wsx';
           Query OK, 0 rows affected (0.02 sec)
           
@@ -4923,7 +9644,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
         + [operating]
 
-          ```cmd
+          ```sh
           [edgar@ThinkPadT14P-23 Downloads]$ wget https://download.java.net/java/GA/jdk25.0.2/b1e0dfa218384cb9959bdcb897162d4e/10/GPL/openjdk-25.0.2_linux-x64_bin.tar.gz
           --2026-04-27 19:35:28--  https://download.java.net/java/GA/jdk25.0.2/b1e0dfa218384cb9959bdcb897162d4e/10/GPL/openjdk-25.0.2_linux-x64_bin.tar.gz
           Resolving download.java.net (download.java.net)... 2.20.168.115
@@ -4974,6 +9695,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
           
           [edgar@ThinkPadT14P-23 Downloads]$
           ```
+
     + 20260429
       + 安装 at 命令
         + [code]
@@ -5060,7 +9782,196 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
           [root@ThinkPadT14P-23 Workspace]#
           ```
 
+    + 20260501
+      + 安装 lsof 命令
+        + [operating]
+
+          ```sh
+          [root@ThinkPadT14P-23 Workspace]# dnf install lsof
+          Last metadata expiration check: 23:25:33 ago on Thu 30 Apr 2026 06:31:26 PM CST.
+          Dependencies resolved.
+          ================================================================================================================================================================
+           Package                            Architecture                         Version                                     Repository                            Size
+          ================================================================================================================================================================
+          Installing:
+           lsof                               x86_64                               4.93.2-1.el8                                baseos                               252 k
+          
+          Transaction Summary
+          ================================================================================================================================================================
+          Install  1 Package
+          
+          Total download size: 252 k
+          Installed size: 623 k
+          Is this ok [y/N]: y
+          Downloading Packages:
+          lsof-4.93.2-1.el8.x86_64.rpm                                                                                                    866 kB/s | 252 kB     00:00
+          ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+          Total                                                                                                                           229 kB/s | 252 kB     00:01
+          Running transaction check
+          Transaction check succeeded.
+          Running transaction test
+          Transaction test succeeded.
+          Running transaction
+            Preparing        :                                                                                                                                        1/1
+            Installing       : lsof-4.93.2-1.el8.x86_64                                                                                                               1/1
+            Running scriptlet: lsof-4.93.2-1.el8.x86_64                                                                                                               1/1
+            Verifying        : lsof-4.93.2-1.el8.x86_64                                                                                                               1/1
+          
+          Installed:
+            lsof-4.93.2-1.el8.x86_64
+          
+          Complete!
+          [root@ThinkPadT14P-23 Workspace]#
+          ```
+
+      + 备份WSL
+        + [operating]
+
+          ```cmd
+          C:\Workspace\workspaces\GitWrkspces\github\ComputerKnowledge>wsl --export AlmaLinux8           C:\Workspace\VirtualMachine\AlmaLinux8_260502_0006.tar
+          Export in progress, this may take a few minutes. (3955 MB)
+          
+          The operation completed successfully.
+          
+          C:\Workspace\workspaces\GitWrkspces\github\ComputerKnowledge>
+          ```
+
+        + ![](./images/backup-small.jpg)备份点
+
+          + 常规备份
+
+    + 20260509
+      + MySql练习
+        + 创建练习表 douma.dept
+
+          + [code]
+
+            ```sql
+            USE douma;
+            CREATE TABLE IF NOT EXISTS dept (
+              deptno SMALLINT UNSIGNED PRIMARY KEY,
+              dname  VARCHAR(14) NOT NULL,
+              loc    VARCHAR(13)
+            );
+            ```
+
+          + [code]
+
+            ```sql
+            USE douma;
+            INSERT INTO dept VALUES (10, 'ACCOUNTING', 'NEW YOURK');
+            INSERT INTO dept VALUES (20, 'RESEARCH',   'DALLAS');
+            INSERT INTO dept VALUES (30, 'SALES',      'CHICAGO');
+            INSERT INTO dept VALUES (40, 'OPERATIONS', 'BOSTON');
+            ```
+
+        + 创建练习表 douma.emp
+
+          + [code]
+
+            ```sql
+            USE douma;
+            CREATE TABLE IF NOT EXISTS emp (
+              empno    INT UNSIGNED PRIMARY KEY,
+              ename    VARCHAR(10) NOT NULL,
+              job      VARCHAR(9),
+              mgr      INT UNSIGNED,
+              hiredate DATE,
+              sal      DECIMAL(7,2),
+              comm     DECIMAL(7,2),
+              deptno   SMALLINT UNSIGNED,
+              CONSTRAINT fk_mgr FOREIGN KEY (mgr) REFERENCES emp(empno),
+              CONSTRAINT fk_deptno FOREIGN KEY (deptno) REFERENCES dept(deptno) 
+            );
+            ```
+
+          + [code]
+
+            ```sql
+            USE douma;
+            INSERT INTO emp VALUES (7839, 'King', 'PRESIDENT', NULL, '1981-11-17', 5000.00, null, 10);
+            INSERT INTO emp VALUES (7566, 'Jones', 'MANAGER', 7839, '1981-04-02', 2975.00, null, 20);
+            INSERT INTO emp VALUES (7698, 'Blake', 'MANAGER', 7839, '1981-05-01', 2850.00, null, 30);
+            INSERT INTO emp VALUES (7782, 'Clark', 'MANAGER', 7839, '1981-06-09', 2450.00, null, 10);
+            INSERT INTO emp VALUES (7902, 'Ford', 'ANALYST', 7566, '1981-12-03', 3000.00, null, 20);
+            INSERT INTO emp VALUES (7788, 'Scott', 'ANALYST', 7566, '1987-04-19', 3000.00, null, 20);
+            INSERT INTO emp VALUES (7369, 'Smith', 'CLERK', 7902, '1980-12-17', 800.00, null, 20);
+            INSERT INTO emp VALUES (7499, 'Allen', 'SALESMAN', 7698, '1981-02-20', 1600.00, 300.00, 30);
+            INSERT INTO emp VALUES (7521, 'Ward', 'SALESMAN', 7698, '1981-02-22', 1250.00, 500, 30);
+            INSERT INTO emp VALUES (7654, 'Martin', 'SALESMAN', 7698, '1981-09-28', 1250.00, 1400.00, 30);
+            INSERT INTO emp VALUES (7844, 'Turner', 'SALESMAN', 7698, '1981-09-08', 1500, 0.00, 30);
+            INSERT INTO emp VALUES (7876, 'Adams', 'CLERK', 7788, '1987-05-23', 1100.00, null, 20);
+            INSERT INTO emp VALUES (7900, 'James', 'CLERK', 7698, '1981-12-03', 950.00, null, 30);
+            INSERT INTO emp VALUES (7934, 'Miller', 'CLERK', 7782, '1982-01-23', 1300.00, null, 10);
+            ```
+
+        + 创建练习表 douma.salgrade
+
+          + [code]
+
+            ```sql
+            USE douma;
+            CREATE TABLE IF NOT EXISTS salgrade (
+              grade SMALLINT UNSIGNED,
+              losal INT UNSIGNED,
+              hisal INT UNSIGNED
+            );
+            ```
+
+          + [code]
+
+            ```sql
+            USE douma;
+            INSERT INTO salgrade VALUES (1,  700, 1200);
+            INSERT INTO salgrade VALUES (2, 1201, 1400);
+            INSERT INTO salgrade VALUES (3, 1401, 2000);
+            INSERT INTO salgrade VALUES (4, 2001, 3000);
+            INSERT INTO salgrade VALUES (5, 3001, 9999);
+            ```
+
+      + ~~python环境配置~~
+
+        + [code]
+
+          ```sh
+          cd
+          mkdir -p Workspace/PythonWrkspces/Exercise01/
+          python -m venv ./PythonGameExercise
+          cd PythonGameExercise/
+          pip install pygame
+          pip list
+          cd FireworkShow/
+          cp /mnt/c/Workspace/workspaces/PythonWrkspces/Exercises/PythonGameExercises/FireworkShow/main.py ./
+          python main.py  
+          ```
+
+        + [opreating]
+
+          ```python
+          [edgar@ThinkPadT14P-23 bin]$ cd ~/Workspace/PythonWrkspces/Exercise01/PythonGameExercise/
+          [edgar@ThinkPadT14P-23 bin]$ source bin/activate
+          (PythonGameExercise) [edgar@ThinkPadT14P-23 bin]$ deactivate
+          [edgar@ThinkPadT14P-23 bin]$
+          ```
+
 ## MySQL的系统管理
+
+### 客户端连接
++ [table]
+
+  | user       |  host     | password     | Notes                         |
+  | :--------- | :-------- | :----------- | :---------------------------- |
+  | admin      | %         | LiHaobo#1119 | `mysql -uroot -pLiHaobo#1119` |
+  | dbsc7admin | %         | !QAZ2wsx     |                               |
+  | douma      | %         | !QAZ2wsx     |                               |
+  | douma2     | %         | !QAZ2wsx     |                               |
+  | root       | localhost | LiHaobo#1119 | `mysql -uroot -pLiHaobo#1119` |
+
+### 自定义数据库
+
++ dbsc7
+
++ douma
 
 ### 系统表
 
@@ -5068,7 +9979,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
   + [operating]
 
-    ```cmd
+    ```sql
     mysql> USE mysql;
     mysql> SHOW TABLES;
     +------------------------------------------------------+
@@ -5127,7 +10038,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 ### 数据表
 
 + "advisor" 师生指导
-  + **s_ID** 
+  + **s_ID**
     + 学生ID
     + `--> student.ID`
   + i_ID 
@@ -5136,44 +10047,44 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 
 + "classroom" 教室 (**实体集**/**Entity-Set**)
 
-  + **building**   
-    + 建筑物名称 
-  + **room_number** 
+  + **building**
+    + 建筑物名称
+  + **room_number**
     + 房间编号
-  + capacity 
-    + 教室容纳人数   
+  + capacity
+    + 教室容纳人数
 
 + "course" (**实体集**/**Entity-Set**)
 
   + **course_id** 课程
     + 课程编号
-  + title     
+  + title
     + 课程名称
-  + dept_name 
+  + dept_name
     + 主讲院系名称
     + `--> department.dept_name`
-  + credits   
+  + credits
 
 + "department" 院系
 
   + **dept_name**
     + 院系名称
     + `<-- course.dept_name`
-  + building 
+  + building
     + 院系主楼
-  + budget   
+  + budget
     + 预算
 
 + "instructor" 导师/教师 (**实体集**/**Entity-Set**)
 
   + **ID**
-    + 导师ID       
-  + name    
-    + 导师姓名 
+    + 导师ID
+  + name
+    + 导师姓名
   + dept_name
     + 所属院系
     + `--> department.dept_name`
-  + salary   
+  + salary
     + 薪水
 
 + "prereq" 前提/前置课程
@@ -5191,12 +10102,12 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
   + **course_id**
     + 课程ID
     + `--> course.course_id`
-  + **sec_id**   
-  + **semester** 
-  + **year**        
+  + **sec_id**
+  + **semester**
+  + **year**
   + building 
     + 授课主楼
-    + `classroom.building`   
+    + `classroom.building`
   + room_number 
     + 授课教室
     + `classroom.room_number`
@@ -5206,50 +10117,50 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 + "student" (**实体集**/**Entity-Set**)
 
   + **ID**
-    + 学生ID       
-  + name    
-    + 学生姓名 
+    + 学生ID
+  + name
+    + 学生姓名
   + dept_name
     + 所属院系
     + `--> department.dept_name`
-  + tot_cred 
-    + 累计学分s
+  + tot_cred
+    + 累计学分
 
 + "takes"
 
-  + **ID**       
+  + **ID**
   + **course_id**
-  + **sec_id**   
-  + **semester** 
-  + **year**     
-  + grade    
+  + **sec_id**
+  + **semester**
+  + **year**
+  + grade
 
 + "teaches" 排课计划
 
   + **ID**  
     + 
-    + `--> instructor.ID`     
+    + `--> instructor.ID`
   + **course_id**
     + 课程ID
     + `--> section.course_id`
-  + **sec_id**   
+  + **sec_id**
     + 
     + `--> section.sec_id`
-  + **semester** 
+  + **semester**
     + 
     + `--> section.semester`
-  + **year**     
+  + **year**
     + 
     + `--> section.year`
 
 + "time_slot" 课时安排
 
   + **time_slot_id**
-  + **day**         
-  + **start_hr**    
-  + **start_min**   
-  + end_hr      
-  + end_min     
+  + **day**
+  + **start_hr**
+  + **start_min**
+  + end_hr
+  + end_min
 
 ### 数据库用图
 
@@ -5334,7 +10245,7 @@ ref [百度文库:GDCA认证考试 / 2024-06-05](https://wenku.baidu.com/view/49
 #### [汉松]()
 
 ##### [Database / 分布式]()
-    
+
 + [分布式系统：Lamport 逻辑时钟](https://zhuanlan.zhihu.com/p/56146800)
 
 + [分布式系统：向量时钟](https://zhuanlan.zhihu.com/p/56886156)
