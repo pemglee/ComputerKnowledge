@@ -81,13 +81,11 @@ markmap:
 
 + [table]
 
-  
-
 ## 常用命令 
 
 ## Kali Tools
 
-# 附录
+# Linux-Network学习笔记 附录
 
 ## 参考
 
@@ -274,8 +272,6 @@ markmap:
 
     + [operating]
 
-      
-
 + Masscan
 
   + 类型: 网络扫描
@@ -319,7 +315,6 @@ markmap:
       ┌──(edgar㉿ThinkPadT14P-23)-[/mnt/c/Workspace]
       └─$
       ```
- 
 
 ## 操作
 
@@ -708,7 +703,7 @@ markmap:
           input: `<Ok>`
 
         + [operating]
-  
+
           ```sh
           ┌─────────────────────────────┤ Configuring Kerberos Authentication ├─────────────────────────────┐
           │ Enter the hostnames of Kerberos servers in the LOCALDOMAIN Kerberos realm separated by spaces.  │
@@ -740,7 +735,7 @@ markmap:
           ```
 
           input: `<Ok>`
-  
+
         + [operating]
 
           ```sh
@@ -2050,4 +2045,319 @@ markmap:
 
       ┌──(edgar㉿ThinkPadT14P-23)-[~/workspaces]
       └─$ rm -rf pycharm-2026.1.1
+      ```
+
++ op on 20260602
+
+  + 安装蓝牙
+
+    + [code]
+
+      ```sh
+      apt install bluetooth
+      ```
+
+  + 添加更新源
+
+    + [operating]
+
+      ```sh
+      mkdir -p /home/edgar/workspaces/ToolsWrkspces/backup
+      cd /home/edgar/workspaces/ToolsWrkspces/backup
+      
+      cp /etc/apt/sources.list ./sources.list.bk260602
+      cp -r /etc/apt/sources.list.d ./sources.list.d.bk260602
+      
+      vim /etc/apt/sources.list    # added kali-rolling into deb-part
+      ```
+
+  + update
+    + [code]
+
+      ```sh
+      sudo apt update
+      sudo apt full-upgrade -y
+      sudo apt autoremove
+      ```
+
+    + [operating]
+
+      ```sh
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$ sudo apt upgrade -y
+      Not upgrading:
+        libgnuradio-qtgui3.10.12  node-ansi-regex  node-ci-info  node-jest-debbundle  node-jest-worker  node-strip-ansi
+      
+      Summary:
+        Upgrading: 0, Installing: 0, Removing: 0, Not Upgrading: 6
+      
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$ sudo apt --fix-broken install libgnuradio-qtgui3.10.12
+      Upgrading:
+        libgnuradio-qtgui3.10.12
+      
+      Installing dependencies:
+        libqwt-qt5-6.3
+      
+      REMOVING:
+        libqwt-qt5-6  python3-pyqt5.qwt
+      
+      Summary:
+        Upgrading: 1, Installing: 1, Removing: 2, Not Upgrading: 5
+        Download size: 1,002 kB
+        Freed space: 3,305 kB
+      
+      Continue? [Y/n]
+      Get:1 http://http.kali.org/kali kali-rolling/main amd64 libgnuradio-qtgui3.10.12 amd64 3.10.12.0-6+b2 [466 kB]
+      Get:2 http://mirrors.qlu.edu.cn/kali kali-rolling/main amd64 libqwt-qt5-6.3 amd64 6.3.0-3 [537 kB]
+      Fetched 1,002 kB in 3s (394 kB/s)
+      (Reading database… 886908 files and directories currently installed.)
+      Removing python3-pyqt5.qwt (1.02.02-2+b10)…
+      (Reading database… 886829 files and directories currently installed.)
+      Preparing to unpack …/libgnuradio-qtgui3.10.12_3.10.12.0-6+b2_amd64.deb…
+      Unpacking libgnuradio-qtgui3.10.12:amd64 (3.10.12.0-6+b2) over (3.10.12.0-5.1+b1)…
+      (Reading database… 886828 files and directories currently installed.)
+      Removing libqwt-qt5-6 (6.1.4-2+b1)…
+      Selecting previously unselected package libqwt-qt5-6.3:amd64.
+      (Reading database… 886821 files and directories currently installed.)
+      Preparing to unpack …/libqwt-qt5-6.3_6.3.0-3_amd64.deb…
+      Unpacking libqwt-qt5-6.3:amd64 (6.3.0-3)…
+      Setting up libqwt-qt5-6.3:amd64 (6.3.0-3)…
+      Setting up libgnuradio-qtgui3.10.12:amd64 (3.10.12.0-6+b2)…
+      Processing triggers for libc-bin (2.42-16)…
+      Scanning processes...
+      
+      No services need to be restarted.
+      
+      No containers need to be restarted.
+      
+      No user sessions are running outdated binaries.
+      
+      No VM guests are running outdated hypervisor (qemu) binaries on this host.
+      
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$ sudo apt --fix-broken install node-ansi-regex node-ci-info node-jest-debbundle node-jest-worker node-strip-ansi
+      Upgrading:
+        node-ansi-regex  node-ci-info  node-jest-debbundle  node-jest-worker  node-strip-ansi
+      
+      Installing dependencies:
+        node-import-local
+      
+      Summary:
+        Upgrading: 5, Installing: 1, Removing: 0, Not Upgrading: 0
+        Download size: 266 kB
+        Freed space: 14.3 kB
+      
+      Continue? [Y/n] Y
+      Get:2 http://http.kali.org/kali kali-rolling/main amd64 node-strip-ansi all 7.2.0+~cs7.0.1-1 [5,636 B]
+      Get:5 http://http.kali.org/kali kali-rolling/main amd64 node-ci-info all 4.4.0+~cs8.2.0-3 [15.1 kB]
+      Get:1 http://http.kali.org/kali kali-rolling/main amd64 node-jest-worker all 29.6.2~ds6+~cs73.45.28-1 [112 kB]
+      Get:3 http://http.kali.org/kali kali-rolling/main amd64 node-jest-debbundle all 29.6.2~ds6+~cs73.45.28-1 [114 kB]
+      Get:4 http://http.kali.org/kali kali-rolling/main amd64 node-ansi-regex all 6.2.2+~cs4.0.2-1 [7,648 B]
+      Get:6 http://http.kali.org/kali kali-rolling/main amd64 node-import-local all 3.2.0+~cs2.0.3-3 [11.9 kB]
+      Fetched 266 kB in 3s (98.9 kB/s)
+      (Reading database… 886827 files and directories currently installed.)
+      Preparing to unpack …/0-node-jest-worker_29.6.2~ds6+~cs73.45.28-1_all.deb…
+      Unpacking node-jest-worker (29.6.2~ds6+~cs73.45.28-1) over (29.6.2~ds1+~cs73.45.28-11)…
+      dpkg: considering deconfiguration of node-jest-debbundle, which would be broken by installation of node-ansi-regex…
+      dpkg: yes, will deconfigure node-jest-debbundle (broken by node-ansi-regex)
+      Preparing to unpack …/1-node-ansi-regex_6.2.2+~cs4.0.2-1_all.deb…
+      De-configuring node-jest-debbundle (29.6.2~ds1+~cs73.45.28-11), to allow installation of node-ansi-regex (6.2.2+~cs4.0.2-1)…
+      Unpacking node-ansi-regex (6.2.2+~cs4.0.2-1) over (6.2.2-2)…
+      Replacing files in old package node-jest-debbundle (29.6.2~ds1+~cs73.45.28-11)…
+      dpkg: considering deconfiguration of node-strip-ansi, which would be broken by installation of node-jest-debbundle…
+      dpkg: yes, will deconfigure node-strip-ansi (broken by node-jest-debbundle)
+      Preparing to unpack …/2-node-jest-debbundle_29.6.2~ds6+~cs73.45.28-1_all.deb…
+      De-configuring node-strip-ansi (7.1.2-1), to allow installation of node-jest-debbundle (29.6.2~ds6+~cs73.45.28-1)…
+      Unpacking node-jest-debbundle (29.6.2~ds6+~cs73.45.28-1) over (29.6.2~ds1+~cs73.45.28-11)…
+      Preparing to unpack …/3-node-strip-ansi_7.2.0+~cs7.0.1-1_all.deb…
+      Unpacking node-strip-ansi (7.2.0+~cs7.0.1-1) over (7.1.2-1)…
+      Preparing to unpack …/4-node-ci-info_4.4.0+~cs8.2.0-3_all.deb…
+      Unpacking node-ci-info (4.4.0+~cs8.2.0-3) over (4.0.0+~cs1.1.0-1)…
+      Selecting previously unselected package node-import-local.
+      Preparing to unpack …/5-node-import-local_3.2.0+~cs2.0.3-3_all.deb…
+      Unpacking node-import-local (3.2.0+~cs2.0.3-3)…
+      Setting up node-ansi-regex (6.2.2+~cs4.0.2-1)…
+      Setting up node-ci-info (4.4.0+~cs8.2.0-3)…
+      Setting up node-strip-ansi (7.2.0+~cs7.0.1-1)…
+      Setting up node-import-local (3.2.0+~cs2.0.3-3)…
+      Setting up node-jest-worker (29.6.2~ds6+~cs73.45.28-1)…
+      Setting up node-jest-debbundle (29.6.2~ds6+~cs73.45.28-1)…
+      Scanning processes...
+      
+      No services need to be restarted.
+      
+      No containers need to be restarted.
+      
+      No user sessions are running outdated binaries.
+      
+      No VM guests are running outdated hypervisor (qemu) binaries on this host.
+      
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$ sudo apt upgrade -y
+      Summary:
+        Upgrading: 0, Installing: 0, Removing: 0, Not Upgrading: 0
+      
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$      
+      ```
+
++ op on 20260610
+
+  + update
+
+    + [code]
+
+      ```sh
+      sudo apt upgrade
+      ```
+
+      + Restart Service
+
+        ```sh
+        ┌────┤ Daemons using outdated libraries ├─────┐
+        │                                             │
+        │                                             │
+        │ Which services should be restarted?         │
+        │                                             │
+        │  [*] dbus.service                           │
+        │  [*] docker.service                         │
+        │  [*] rtkit-daemon.service                   │
+        │                                             │
+        │                                             │
+        │          <Ok>              <Cancel>         │
+        │                                             │
+        └─────────────────────────────────────────────┘
+        ```
+
+      + summary
+
+        ```sh
+        Upgrading:
+          alsa-utils                            kali-tools-gpu                    libnode-dev               python3-asyncssh
+          android-udev-rules                    kali-tools-hardware               libnode137                python3-cairocffi
+          arpwatch                              kali-tools-identify               libnsl2                   python3-discovery
+          bloodhound                            kali-tools-information-gathering  libnss3                   python3-distributed
+          btop                                  kali-tools-passwords              libopenal-data            python3-elastic-transport
+          dbus                                  kali-tools-post-exploitation      libopenal1                python3-fakeredis
+          dbus-bin                              kali-tools-protect                libopenjph0.27            python3-googleapi
+          dbus-daemon                           kali-tools-recover                libpcsclite1              python3-joserfc
+          dbus-session-bus-common               kali-tools-reporting              libpicohttpparser1        python3-ldb
+          dbus-system-bus-common                kali-tools-respond                libpolkit-agent-1-0       python3-louis
+          dbus-user-session                     kali-tools-reverse-engineering    libpolkit-gobject-1-0     python3-markdown-it
+          dbus-x11                              kali-tools-rfid                   libqt6multimedia6         python3-matplotlib
+          docker-cli                            kali-tools-sdr                    libqt6positioning6        python3-mdit-py-plugins
+          docker.io                             kali-tools-sniffing-spoofing      libqt6waylandcompositor6  python3-myst-parser
+          exim4-base                            kali-tools-social-engineering     libqt6webengine6-data     python3-opentelemetry-api
+          exim4-config                          kali-tools-top10                  libqt6webenginecore6      python3-opentelemetry-exporter-prometheus
+          exim4-daemon-light                    kali-tools-voip                   libqt6webenginecore6-bin  python3-opentelemetry-sdk
+          exploitdb                             kali-tools-vulnerability          libqt6webenginewidgets6   python3-opentelemetry-semantic-conventions
+          finalrecon                            kali-tools-web                    librist4                  python3-pathable
+          ghidra                                kali-tools-windows-resources      libskia146                python3-platformdirs
+          gir1.2-ayatanaappindicator3-0.1       kali-tools-wireless               libslirp0                 python3-pyelftools
+          gir1.2-polkit-1.0                     ldeep                             libsmbclient0             python3-pygame
+          gnome-backgrounds                     legba                             libspeexdsp1              python3-pymysql
+          golang-1.26-doc                       libada-url0-3                     libtalloc2                python3-python-multipart
+          golang-1.26-go                        libadns1t64                       libtdb1                   python3-rich
+          golang-1.26-src                       libayatana-appindicator3-1        libtevent0t64             python3-rich-argparse
+          golang-github-klauspost-compress-dev  libayatana-ido3-0.4-0             libuv1-dev                python3-samba
+          golang-golang-x-crypto-dev            libayatana-indicator3-7           libuv1t64                 python3-slowapi
+          golang-uber-goleak-dev                libbsd0                           libwbclient0              python3-sphinx
+          goshs                                 libcaca0                          libwtmpdb0                python3-starlette
+          gvfs                                  libccid                           libxfce4windowing-0-0     python3-talloc
+          gvfs-backends                         libdbus-1-3                       libxfce4windowing-common  python3-tdb
+          gvfs-common                           libdbus-1-dev                     libyara10                 python3-unicrypto
+          gvfs-daemons                          libdebconfclient0                 linkedin2username         python3-virtualenv
+          gvfs-fuse                             libdeflate0                       metasploit-framework      python3-zope.interface
+          gvfs-libs                             libdotconf0                       mssqlpwner                python3-zopfli
+          imagemagick                           libfluidsynth3                    node-llhttp               qt6-translations-l10n
+          imagemagick-7-common                  libgif7                           node-npm-run-path         qt6-wayland
+          imagemagick-7.q16                     libgit2-1.9                       node-read                 rpcsvc-proto
+          kali-defaults                         libgpgmepp7                       node-unique-filename      ruby-http
+          kali-defaults-desktop                 libgraphite2-3                    nodejs                    ruby-http-cookie
+          kali-desktop-core                     libgweather-4-0t64                npm                       ruby-oj
+          kali-desktop-xfce                     libgweather-4-common              onboard                   samba
+          kali-linux-core                       libhashkit2t64                    onboard-common            samba-common
+          kali-linux-default                    libhttp-daemon-perl               onboard-data              samba-common-bin
+          kali-linux-everything                 libhydrasdr1                      openssh-client            samba-libs
+          kali-linux-headless                   libinput-bin                      openssh-client-gssapi     sharphound
+          kali-linux-large                      libinput10                        openssh-server            smbclient
+          kali-linux-wsl                        libjq1                            openssh-sftp-server       sphinx-common
+          kali-menu                             libjs-sphinxdoc                   orca                      ssldump
+          kali-system-cli                       libksba8                          pci.ids                   sslsniff
+          kali-system-core                      liblcms2-2                        pcscd                     sslsplit
+          kali-system-gui                       libldb2                           peass                     sudo
+          kali-tools-802-11                     liblouis-data                     penelope                  tasksel
+          kali-tools-bluetooth                  liblouis20                        pgcli                     tasksel-data
+          kali-tools-crypto-stego               libmagickcore-7.q16-10            pipx                      tdb-tools
+          kali-tools-database                   libmagickcore-7.q16-10-extra      pkexec                    tripwire
+          kali-tools-detect                     libmagickwand-7.q16-10            polkitd                   yara
+          kali-tools-exploitation               libmd0                            proxytunnel
+          kali-tools-forensics                  libmd4c0                          python-asyncssh-doc
+          kali-tools-fuzzing                    libmemcached11t64                 python-matplotlib-data
+        
+        Installing dependencies:
+          libllhttp9.4  node-resolve-import
+        
+        Summary:
+          Upgrading: 241, Installing: 2, Removing: 0, Not Upgrading: 0
+          Download size: 1,321 MB
+          Space needed: 28.6 MB / 963 GB available
+        ```
+
+  + 清理
+    + [operating]
+
+      ```sh
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$ sudo apt autoremove
+      REMOVING:
+        libllhttp9.3
+      
+      Summary:
+        Upgrading: 0, Installing: 0, Removing: 1, Not Upgrading: 0
+        Freed space: 94.2 kB
+      
+      Continue? [Y/n] y
+      (Reading database… 888259 files and directories currently installed.)
+      Removing libllhttp9.3 (9.3.3~really9.3.0+~cs12.11.8-4)…
+      Processing triggers for libc-bin (2.42-16)…
+      
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$
+      ```
+  + 安装 sublime_text
+
+    + [operating]
+
+      ```sh
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$cd Downloads
+
+      ┌──(edgar㉿ThinkPadT14P-23)-[~/Downloads]
+      └─$ sudo dpkg -i /home/edgar/Downloads/sublime-text_build-4200_amd64.deb
+      [sudo] password for edgar:
+      Selecting previously unselected package sublime-text.
+      (Reading database… 888254 files and directories currently installed.)
+      Preparing to unpack …/sublime-text_build-4200_amd64.deb…
+      Unpacking sublime-text (4200)…
+      Setting up sublime-text (4200)…
+      Processing triggers for kali-menu (2026.2.6)…
+      Processing triggers for mailcap (3.76)…
+      Processing triggers for desktop-file-utils (0.28-1)…
+      Processing triggers for hicolor-icon-theme (0.18-2)…
+      
+      ┌──(edgar㉿ThinkPadT14P-23)-[~/Downloads]
+      └─$
+      ```
+
+    + [operating]
+
+      ```sh
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$ cd workspaces/
+      
+      ┌──(edgar㉿ThinkPadT14P-23)-[~/workspaces]
+      └─$ ln -s /opt/sublime_text/sublime_text sublime
+      
       ```

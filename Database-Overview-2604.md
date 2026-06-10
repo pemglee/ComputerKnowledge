@@ -86,7 +86,7 @@ markmap:
 
 + 数据库定义语言 -- data-definition language, DDL
   + 数据存储和定义 -- data storage and definition
-    + 域约束 -- domain constratint, 如 字段数据类型 等
+    + 域约束 -- domain constraint, 如 字段数据类型 等
     + 引用完整性 -- referential integrity  
     + 授权 -- authorization
       + 读权限 -- read authorization
@@ -233,6 +233,15 @@ markmap:
       + `DROP`
       + `ALTER`
       + `TRUNCATE`
+        + 示例
+          + [operating]
+
+            ```sql
+            mysql> TRUNCATE TABLE t_course;
+            Query OK, 0 rows affected (0.06 sec)
+            
+            mysql>
+            ```
 
   + DML
     + `INSERT`
@@ -283,7 +292,7 @@ markmap:
   + 图示
 
     + [diagram]
-      ![DBMS Struct](./images2/DB-structor.drawio.svg)
+      ![DBMS Struct](./images2/DB-structor.svg)
   
 + DBAS (Database Application System) 数据库应用程序/系统
 + DBA (Database Administrator) 数据库管理员
@@ -339,11 +348,12 @@ markmap:
 
   + 主码 primary key / 主码约束 primary key constraint
     数据库设计者选出的候选码  
-    
+
   + 外码 foreign key / 外码约束 foreign key constraint / 被引用关系 referenced relation
     + 引用完整性 referential integrity constraint
 
 ##### 1NF - 第一范式
+
 + 定义: 所有域都是原子性的，即数据库表的每一列都是不可分割的原子数据项
 + 示例
   + 错误
@@ -365,6 +375,7 @@ markmap:
       | 002       | Auth  | 200   | 102 | C++ Programming | 2021/08/21 |  |
 
 ##### 2NF - 第二范式
+
 + 定义: 在1NF的基础上，非码属性必须完全依赖于候选码（在1NF基础上消除非主属性对主码的部分函依赖）
 + 要求: 数据库表中的每个实例或记录必须可以被唯一地区分。选取一个能区分每个实体的**属性**或*属性组**，作为实体的唯一标识
 + 示例
@@ -375,6 +386,7 @@ markmap:
   + 操作(更新、插入、删除)异常
 
 ##### 3NF - 第三范式
+
 + 定义: 在2NF基础上，任何非主属性不依赖于其它非主属性（在2NF基础上消除传递依赖）
 + 要求: 一个关系中不包含已在其它关系已包含的非主关键字信息。
 + 示例
@@ -382,6 +394,7 @@ markmap:
   + 纠正
 
 ##### BCNF
+
 Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
 + 定义: 在3NF基础上，任何主属性不能对主键子集依赖（在3NF基础上消除主属性对主码子集的依赖）
@@ -391,12 +404,14 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
   + 纠正
 
 ##### 4NF - 第四范式
+
 + 定义
 + 示例
   + 错误
   + 纠正
 
 ##### 5NF - 第五范式
+
 + 定义
 + 示例
   + 错误
@@ -450,10 +465,8 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
         + 每个客户端在线程池中，都有一个线程为之服务
         + 多路复用技术使用的是 [select]() (vs. epoll)
 
-
     + [diagram]
       ![MySql Work Flow](./images/MySql-Workflow.png)
-
 
 + 连接层/连接器
   + 说明
@@ -1358,7 +1371,6 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
     + 说明
       查询只需访问索引，无需访问数据行
 
-
 ## 数据库操作
 
 ### 数据类型
@@ -1853,6 +1865,43 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
         );
         ```
 
+      + [code]
+
+        ```sql
+        CREATE TABLE 数据表名 AS SELECT语句
+        ```
+
+  + 视图
+    + [code]
+
+      ```sql
+      CREATE VIEW 视图名 ...
+      ```
+
+  + 虚拟临时表 vs. 视图
+    + 虚拟临时表是一张真正的数据表，有物理文件，全局可见
+    + 虚拟临时表的物理存储一般是文件，**静态/语句更新**
+    + 虚拟临时表可以增删改查
+    + 视图全局可见
+    + 视图一般存储在内存中，**动态更新**
+    + 视图只能进行查询
+
+  + 物理临时表
+
+    + 创建语句
+
+      + [operating]
+
+        ```sql
+        CREATE TEMPORATY TABLE ... (...)
+        ```
+
+    + 说明
+
+      + 物理临时表类似虚拟临时表，但只对当前会话可见
+      + 无物理文件
+      + 会话关闭后，自动删除
+
 + Alter -- 修改
 
   + 数据库
@@ -1918,7 +1967,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> CREATE USER 'admin'@'%' IDENTIFIED BY 'LiHaobo#1119';
         Query OK, 0 rows affected (0.01 sec)
         
@@ -1929,7 +1978,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> CREATE USER 'douma'@'%' IDENTIFIED BY '!QAZ2wsx';
         Query OK, 0 rows affected (0.00 sec)
         
@@ -1940,7 +1989,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> CREATE USER 'dbsc7admin'@'%' IDENTIFIED BY '!QAZ2wsx';
         Query OK, 0 rows affected (0.03 sec)
 
@@ -1953,7 +2002,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> SELECT * FROM mysql.user WHERE user like 'admin%'\G;
         *************************** 1. row ***************************
                             Host: %
@@ -2019,7 +2068,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> SELECT * FROM mysql.user WHERE user like 'douma%'\G;
         *************************** 1. row ***************************
                             Host: %
@@ -2085,7 +2134,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> SELECT user, host, Select_priv, Insert_priv, Update_priv, Delete_priv FROM mysql.user;
         +------------------+-----------+-------------+-------------+-------------+-------------+
         | user             | host      | Select_priv | Insert_priv | Update_priv | Delete_priv |
@@ -2110,7 +2159,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
         + [operating]
 
-          ```cmd
+          ```sql
           mysql> SELECT * FROM mysql.user WHERE user = 'douma'\G;
           *************************** 1. row ***************************
                               Host: %
@@ -2174,7 +2223,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
         + [operating]
 
-          ```cmd
+          ```sql
           mysql> SELECT * FROM mysql.db WHERE user = 'douma'\G;
           *************************** 1. row ***************************
                            Host: %
@@ -2213,7 +2262,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' WITH GRANT OPTION;
         Query OK, 0 rows affected (0.01 sec)
         
@@ -2282,7 +2331,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> GRANT ALL PRIVILEGES ON douma.* TO 'douma'@'%' WITH GRANT OPTION;
         Query OK, 0 rows affected (0.02 sec)
         
@@ -2293,7 +2342,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
         + [operating]
 
-          ```cmd
+          ```sql
           mysql> CREATE TABLE t1(id INT, a INT);
           Query OK, 0 rows affected (0.05 sec)
           
@@ -2305,7 +2354,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> CREATE USER 'douma2'@'%' IDENTIFIED BY '!QAZ2wsx';
         Query OK, 0 rows affected (0.02 sec)
         
@@ -2317,7 +2366,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> GRANT SELECT(c), INSERT(c,d) ON douma.t2 TO 'douma2'@'%' WITH GRANT OPTION;
         Query OK, 0 rows affected (0.02 sec)
         
@@ -2326,7 +2375,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         [edgar@ThinkPadT14P-23 Workspace]$ mysql -u douma2 -p
         Enter password:
         Welcome to the MySQL monitor.  Commands end with ; or \g.
@@ -2373,7 +2422,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
 
-        ```cmd
+        ```sql
         mysql> GRANT ALL PRIVILEGES ON dbsc7.* TO 'dbsc7admin'@'%' WITH GRANT OPTION;
         Query OK, 0 rows affected (0.01 sec)
 
@@ -2398,7 +2447,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
       + [operating]
   
-        ```cmd
+        ```sql
         mysql> REVOKE ALL PRIVILEGES ON dbsc7.* FROM 'dbsc7admin'@'localhost';
         Query OK, 0 rows affected (0.01 sec)
         
@@ -2409,7 +2458,7 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 
   + [operating]
 
-    ```cmd
+    ```sql
     mysql> select database();
     +------------+
     | database() |
@@ -3663,10 +3712,389 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
       mysql>
       ```
 
-+ Update -- 更新
-+ Insert -- 插入
-+ Delete -- 删除
+  + 示例 for 变量
+
+    + [operating]
+
+      ```sql
+      mysql> USE douma;
+      Reading table information for completion of table and column names
+      You can turn off this feature to get a quicker startup with -A
+      
+      Database changed
+      mysql> SET @avg_sal = 0;
+      Query OK, 0 rows affected (0.00 sec)
+      
+      mysql> SELECT AVG(sal) INTO @avg_sal FROM emp;
+      Query OK, 1 row affected (0.02 sec)
+      
+      mysql> SELECT @avg_sal;
+      +----------------+
+      | @avg_sal       |
+      +----------------+
+      | 2020.312500000 |
+      +----------------+
+      1 row in set (0.01 sec)
+      
+      mysql>
+      ```
+
+      + MySQL中，UPDATE 和 DELETE 语句不允许使用子查询，可以使用变量予以解决
+        + [code]
+
+          ```sql
+          SET @avg_sal = 0;
+          SELECT AVG(sal) INTO @avg_sal FROM emp;
+          UPDATE emp SET sal = sal * 1.2 WHERE sal < @avg_sal;
+          ```
+
+  + 分页查询
+
+    + 示例
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT * FROM emp ORDER BY empno;
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno |
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |
+        |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |
+        |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+        |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |
+        |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+        |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |
+        |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |
+        |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |
+        |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |
+        |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+        |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |
+        |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |
+        |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |
+        |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |
+        |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |
+        |  8889 | Liao   | CLERK     | 7902 | 1981-12-17 | 1300.00 |    NULL |     20 |
+        +-------+--------+-----------+------+------------+---------+---------+--------+
+        16 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM emp ORDER BY empno LIMIT 0,3;
+        +-------+-------+----------+------+------------+---------+--------+--------+
+        | empno | ename | job      | mgr  | hiredate   | sal     | comm   | deptno |
+        +-------+-------+----------+------+------------+---------+--------+--------+
+        |  7369 | Smith | CLERK    | 7902 | 1980-12-17 |  800.00 |   NULL |     20 |
+        |  7499 | Allen | SALESMAN | 7698 | 1981-02-20 | 1600.00 | 300.00 |     30 |
+        |  7521 | Ward  | SALESMAN | 7698 | 1981-02-22 | 1250.00 | 500.00 |     30 |
+        +-------+-------+----------+------+------------+---------+--------+--------+
+        3 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM emp ORDER BY empno LIMIT 3,3;
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        | empno | ename  | job      | mgr  | hiredate   | sal     | comm    | deptno |
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        |  7566 | Jones  | MANAGER  | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |
+        |  7654 | Martin | SALESMAN | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+        |  7698 | Blake  | MANAGER  | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |
+        +-------+--------+----------+------+------------+---------+---------+--------+
+        3 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        说明 1，非主键，使用LIMIT，可以直接查询最大/最小，避免 MAX/MIN 在子查询中，提高效率。（注意执行时间）
+        说明 2，使用Limit，随着分页增加，效率降低
+
+        ```sql
+        mysql> SELECT * FROM emp ORDER BY sal DESC LIMIT 1;
+        +-------+-------+-----------+------+------------+---------+------+--------+
+        | empno | ename | job       | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+-------+-----------+------+------------+---------+------+--------+
+        |  7839 | King  | PRESIDENT | NULL | 1981-11-17 | 5000.00 | NULL |     10 |
+        +-------+-------+-----------+------+------------+---------+------+--------+
+        1 row in set (0.00 sec)
+        
+        mysql> SELECT * FROM emp e WHERE e.sal = (SELECT MAX(sal) FROM emp);
+        +-------+-------+-----------+------+------------+---------+------+--------+
+        | empno | ename | job       | mgr  | hiredate   | sal     | comm | deptno |
+        +-------+-------+-----------+------+------------+---------+------+--------+
+        |  7839 | King  | PRESIDENT | NULL | 1981-11-17 | 5000.00 | NULL |     10 |
+        +-------+-------+-----------+------+------------+---------+------+--------+
+        1 row in set (0.01 sec)
+        
+        mysql>
+        ```
+
+    + 使用主键偏移替代LIMIT
+
+      + [operating]
+
+        说明， 
+          使用Limit，随着页数增加，效率降低。（注意执行时间）
+          使用主键，因为主键索引，效率显著提升 
+
+        ```sql
+        mysql> SELECT * FROM t_user ORDER BY email ASC LIMIT 0,10;
+        +--------+------------+----------+
+        | id     | email      | password |
+        +--------+------------+----------+
+        |      1 | 1@163      | 1        |
+        |     21 | 1@163      | 1        |
+        |     11 | 1@163      | 1        |
+        |     20 | 10@163     | 10       |
+        |     30 | 10@163     | 10       |
+        |     10 | 10@163     | 10       |
+        |    120 | 100@163    | 100      |
+        |   1020 | 1000@163   | 1000     |
+        |  10020 | 10000@163  | 10000    |
+        | 100020 | 100000@163 | 100000   |
+        +--------+------------+----------+
+        10 rows in set (0.26 sec)
+        
+        mysql> SELECT * FROM t_user ORDER BY email ASC LIMIT 100,10;
+        +---------+-------------+----------+
+        | id      | email       | password |
+        +---------+-------------+----------+
+        | 1000102 | 1000082@163 | 1000082  |
+        | 1000103 | 1000083@163 | 1000083  |
+        | 1000104 | 1000084@163 | 1000084  |
+        | 1000105 | 1000085@163 | 1000085  |
+        | 1000106 | 1000086@163 | 1000086  |
+        | 1000107 | 1000087@163 | 1000087  |
+        | 1000108 | 1000088@163 | 1000088  |
+        | 1000109 | 1000089@163 | 1000089  |
+        |  100029 | 100009@163  | 100009   |
+        | 1000110 | 1000090@163 | 1000090  |
+        +---------+-------------+----------+
+        10 rows in set (0.22 sec)
+        
+        mysql> SELECT * FROM t_user ORDER BY email ASC LIMIT 1000,10;
+        +---------+-------------+----------+
+        | id      | email       | password |
+        +---------+-------------+----------+
+        | 1000913 | 1000893@163 | 1000893  |
+        | 1000914 | 1000894@163 | 1000894  |
+        | 1000915 | 1000895@163 | 1000895  |
+        | 1000916 | 1000896@163 | 1000896  |
+        | 1000917 | 1000897@163 | 1000897  |
+        | 1000918 | 1000898@163 | 1000898  |
+        | 1000919 | 1000899@163 | 1000899  |
+        |   10029 | 10009@163   | 10009    |
+        |  100110 | 100090@163  | 100090   |
+        | 1000920 | 1000900@163 | 1000900  |
+        +---------+-------------+----------+
+        10 rows in set (0.30 sec)
+        
+        mysql> SELECT * FROM t_user ORDER BY email ASC LIMIT 10000,10;
+        +---------+-------------+----------+
+        | id      | email       | password |
+        +---------+-------------+----------+
+        | 1009014 | 1008994@163 | 1008994  |
+        | 1009015 | 1008995@163 | 1008995  |
+        | 1009016 | 1008996@163 | 1008996  |
+        | 1009017 | 1008997@163 | 1008997  |
+        | 1009018 | 1008998@163 | 1008998  |
+        | 1009019 | 1008999@163 | 1008999  |
+        |    1029 | 1009@163    | 1009     |
+        |   10110 | 10090@163   | 10090    |
+        |  100920 | 100900@163  | 100900   |
+        | 1009020 | 1009000@163 | 1009000  |
+        +---------+-------------+----------+
+        10 rows in set (0.44 sec)
+        
+        mysql> SELECT * FROM t_user ORDER BY email ASC LIMIT 100000,10;
+        +---------+-------------+----------+
+        | id      | email       | password |
+        +---------+-------------+----------+
+        | 1090015 | 1089995@163 | 1089995  |
+        | 1090016 | 1089996@163 | 1089996  |
+        | 1090017 | 1089997@163 | 1089997  |
+        | 1090018 | 1089998@163 | 1089998  |
+        | 1090019 | 1089999@163 | 1089999  |
+        |     129 | 109@163     | 109      |
+        |    1110 | 1090@163    | 1090     |
+        |   10920 | 10900@163   | 10900    |
+        |  109020 | 109000@163  | 109000   |
+        | 1090020 | 1090000@163 | 1090000  |
+        +---------+-------------+----------+
+        10 rows in set (0.52 sec)
+        
+        mysql> SELECT * FROM t_user ORDER BY email ASC LIMIT 1000000,10;
+        +---------+-------------+----------+
+        | id      | email       | password |
+        +---------+-------------+----------+
+        | 1900016 | 1899996@163 | 1899996  |
+        | 1900017 | 1899997@163 | 1899997  |
+        | 1900018 | 1899998@163 | 1899998  |
+        | 1900019 | 1899999@163 | 1899999  |
+        |      39 | 19@163      | 19       |
+        |     210 | 190@163     | 190      |
+        |    1920 | 1900@163    | 1900     |
+        |   19020 | 19000@163   | 19000    |
+        |  190020 | 190000@163  | 190000   |
+        | 1900020 | 1900000@163 | 1900000  |
+        +---------+-------------+----------+
+        10 rows in set (0.60 sec)
+        
+        mysql> SELECT * FROM t_user ORDER BY email ASC LIMIT 2000000,10;
+        +---------+------------+----------+
+        | id      | email      | password |
+        +---------+------------+----------+
+        | 1000001 | 999981@163 | 999981   |
+        | 1000002 | 999982@163 | 999982   |
+        | 1000003 | 999983@163 | 999983   |
+        | 1000004 | 999984@163 | 999984   |
+        | 1000005 | 999985@163 | 999985   |
+        | 1000006 | 999986@163 | 999986   |
+        | 1000007 | 999987@163 | 999987   |
+        | 1000008 | 999988@163 | 999988   |
+        | 1000009 | 999989@163 | 999989   |
+        |  100019 | 99999@163  | 99999    |
+        +---------+------------+----------+
+        10 rows in set (0.64 sec)
+        
+        mysql>
+        ```
+
+      + [operating]
+
+        ```sql
+        mysql> SELECT * FROM t_user WHERE id > 0 ORDER BY id ASC LIMIT 0,10;
+        +----+--------+----------+
+        | id | email  | password |
+        +----+--------+----------+
+        |  1 | 1@163  | 1        |
+        |  2 | 2@163  | 2        |
+        |  3 | 3@163  | 3        |
+        |  4 | 4@163  | 4        |
+        |  5 | 5@163  | 5        |
+        |  6 | 6@163  | 6        |
+        |  7 | 7@163  | 7        |
+        |  8 | 8@163  | 8        |
+        |  9 | 9@163  | 9        |
+        | 10 | 10@163 | 10       |
+        +----+--------+----------+
+        10 rows in set (0.01 sec)
+        
+        mysql> SELECT * FROM t_user WHERE id > 100 ORDER BY id ASC LIMIT 0,10;
+        +-----+--------+----------+
+        | id  | email  | password |
+        +-----+--------+----------+
+        | 101 | 81@163 | 81       |
+        | 102 | 82@163 | 82       |
+        | 103 | 83@163 | 83       |
+        | 104 | 84@163 | 84       |
+        | 105 | 85@163 | 85       |
+        | 106 | 86@163 | 86       |
+        | 107 | 87@163 | 87       |
+        | 108 | 88@163 | 88       |
+        | 109 | 89@163 | 89       |
+        | 110 | 90@163 | 90       |
+        +-----+--------+----------+
+        10 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM t_user WHERE id > 1000 ORDER BY id ASC LIMIT 0,10;
+        +------+---------+----------+
+        | id   | email   | password |
+        +------+---------+----------+
+        | 1001 | 981@163 | 981      |
+        | 1002 | 982@163 | 982      |
+        | 1003 | 983@163 | 983      |
+        | 1004 | 984@163 | 984      |
+        | 1005 | 985@163 | 985      |
+        | 1006 | 986@163 | 986      |
+        | 1007 | 987@163 | 987      |
+        | 1008 | 988@163 | 988      |
+        | 1009 | 989@163 | 989      |
+        | 1010 | 990@163 | 990      |
+        +------+---------+----------+
+        10 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM t_user WHERE id > 10000 ORDER BY id ASC LIMIT 0,10;
+        +-------+----------+----------+
+        | id    | email    | password |
+        +-------+----------+----------+
+        | 10001 | 9981@163 | 9981     |
+        | 10002 | 9982@163 | 9982     |
+        | 10003 | 9983@163 | 9983     |
+        | 10004 | 9984@163 | 9984     |
+        | 10005 | 9985@163 | 9985     |
+        | 10006 | 9986@163 | 9986     |
+        | 10007 | 9987@163 | 9987     |
+        | 10008 | 9988@163 | 9988     |
+        | 10009 | 9989@163 | 9989     |
+        | 10010 | 9990@163 | 9990     |
+        +-------+----------+----------+
+        10 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM t_user WHERE id > 100000 ORDER BY id ASC LIMIT 0,10;
+        +--------+-----------+----------+
+        | id     | email     | password |
+        +--------+-----------+----------+
+        | 100001 | 99981@163 | 99981    |
+        | 100002 | 99982@163 | 99982    |
+        | 100003 | 99983@163 | 99983    |
+        | 100004 | 99984@163 | 99984    |
+        | 100005 | 99985@163 | 99985    |
+        | 100006 | 99986@163 | 99986    |
+        | 100007 | 99987@163 | 99987    |
+        | 100008 | 99988@163 | 99988    |
+        | 100009 | 99989@163 | 99989    |
+        | 100010 | 99990@163 | 99990    |
+        +--------+-----------+----------+
+        10 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM t_user WHERE id > 1000000 ORDER BY id ASC LIMIT 0,10;
+        +---------+------------+----------+
+        | id      | email      | password |
+        +---------+------------+----------+
+        | 1000001 | 999981@163 | 999981   |
+        | 1000002 | 999982@163 | 999982   |
+        | 1000003 | 999983@163 | 999983   |
+        | 1000004 | 999984@163 | 999984   |
+        | 1000005 | 999985@163 | 999985   |
+        | 1000006 | 999986@163 | 999986   |
+        | 1000007 | 999987@163 | 999987   |
+        | 1000008 | 999988@163 | 999988   |
+        | 1000009 | 999989@163 | 999989   |
+        | 1000010 | 999990@163 | 999990   |
+        +---------+------------+----------+
+        10 rows in set (0.00 sec)
+        
+        mysql> SELECT * FROM t_user WHERE id > 2000000 ORDER BY id ASC LIMIT 0,10;
+        +---------+-------------+----------+
+        | id      | email       | password |
+        +---------+-------------+----------+
+        | 2000001 | 1999981@163 | 1999981  |
+        | 2000002 | 1999982@163 | 1999982  |
+        | 2000003 | 1999983@163 | 1999983  |
+        | 2000004 | 1999984@163 | 1999984  |
+        | 2000005 | 1999985@163 | 1999985  |
+        | 2000006 | 1999986@163 | 1999986  |
+        | 2000007 | 1999987@163 | 1999987  |
+        | 2000008 | 1999988@163 | 1999988  |
+        | 2000009 | 1999989@163 | 1999989  |
+        | 2000010 | 1999990@163 | 1999990  |
+        +---------+-------------+----------+
+        10 rows in set (0.00 sec)
+        
+        mysql>
+        ```
+
++ Update ... SET ... WHERE ...  -- 更新
+
++ Insert Into ... -- 插入
+  + Insert Into ... Value(s) ...
+    + values, 一个语句可以插入多条记录
+      + 用 "," 分隔诸行
+  + Insert Into ... SELECT语句
+
++ Delete From ... WHERE ... -- 删除
+
 + Truncate -- 截断/删节
+
++ Delete vs. Truncate
 
 ### 函数 与 计算
 
@@ -5360,6 +5788,248 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 + 说明
   针对范围进行计算
 
++ 函数
+  + ROW_NUMBER
+  + RANK
+  + DENSE_RANK
+  + FIRST_VALUE, 返回每个窗口的首个值
+  + NTH_VALUE, 返回每个窗口的第n个值
+  + LEAD, 返回每个窗口的下一行
+  + LAG, 返回每个窗口的下一行
+  + AVG
+  + PERCENT_RANK
+  + CUME_DIST
+  + NTILE
+  + PERCENTILE_CONT
+  + PERCENTILE_DISC
+
++ OVER
+
++ 窗口
+  + ORDER BY
+  + PARTITION BY
+
++ 示例
+
+  + [operating]
+
+    ```sql
+    mysql> SELECT * FROM baby_names;
+    +--------+----------+--------+
+    | Gender | Name     | Total  |
+    +--------+----------+--------+
+    | Girl   | Ava      | 95     |
+    | Girl   | Emma     | 106    |
+    | Boy    | Ethan    | 115    |
+    | Girl   | Isabella | 100    |
+    | Boy    | Jacob    | 101    |
+    | Boy    | Liam     | 84     |
+    | Boy    | Logan    | 73     |
+    | Boy    | Noah     | 120    |
+    | Girl   | Olivia   | 100    |
+    | Girl   | Sophia   | 88     |
+    +--------+----------+--------+
+    
+    mysql> SELECT * FROM baby_name ORDER BY Total DESC
+    +--------+----------+--------+
+    | Gender | Name     | Total  |
+    +--------+----------+--------+
+    | Boy    | Noah     | 120    |
+    | Boy    | Ethan    | 115    |
+    | Girl   | Emma     | 106    |
+    | Boy    | Jacob    | 101    |
+    | Girl   | Isabella | 100    |
+    | Girl   | Olivia   | 100    |
+    | Girl   | Ava      | 95     |
+    | Girl   | Sophia   | 88     |
+    | Boy    | Liam     | 84     |
+    | Boy    | Logan    | 73     |
+    +--------+----------+--------+
+
+    mysql> SELECT Gender, Name, Total,
+        -> ROW_NUMBER() OVER(ORDER BY Total DESC) AS Popularity
+        -> FROM baby_names;
+    +--------+----------+--------+------------+
+    | Gender | Name     | Total  | Popularity |
+    +--------+----------+--------+------------+
+    | Boy    | Noah     | 120    | 1          |
+    | Boy    | Ethan    | 115    | 2          |
+    | Girl   | Emma     | 106    | 3          |
+    | Boy    | Jacob    | 101    | 4          |
+    | Girl   | Isabella | 100    | 5          |
+    | Girl   | Olivia   | 100    | 6          |
+    | Girl   | Ava      | 95     | 7          |
+    | Girl   | Sophia   | 88     | 8          |
+    | Boy    | Liam     | 84     | 9          |
+    | Boy    | Logan    | 73     | 10         |
+    +--------+----------+--------+------------+
+
+    mysql> SELECT Gender, Name, Total,
+        ->        ROW_NUMBER() OVER(ORDER BY Total DESC) AS Popularity，
+        ->        RANK() OVER(ORDER BY Total DESC) AS Popularity_R，
+        ->        DENSE_RANK() OVER(ORDER BY Total DESC) AS Popularity_D
+        -> FROM baby_names;
+    +--------+----------+--------+------------+--------------+---------------+
+    | Gender | Name     | Total  | Popularity | Popularity_R | Poppularity_D |
+    +--------+----------+--------+------------+--------------+---------------+
+    | Boy    | Noah     | 120    | 1          | 1            | 1             |  
+    | Boy    | Ethan    | 115    | 2          | 2            | 2             |
+    | Girl   | Emma     | 106    | 3          | 3            | 3             |
+    | Boy    | Jacob    | 101    | 4          | 4            | 4             |
+    | Girl   | Isabella | 100    | 5          | 5            | 5             |  *
+    | Girl   | Olivia   | 100    | 6          | 5            | 5             |  *
+    | Girl   | Ava      | 95     | 7          | 7            | 6             |  *
+    | Girl   | Sophia   | 88     | 8          | 8            | 7             |
+    | Boy    | Liam     | 84     | 9          | 9            | 8             |
+    | Boy    | Logan    | 73     | 10         | 10           | 9             |
+    +--------+----------+--------+------------+--------------+---------------+
+
+    mysql> SELECT Gender, Name, Total,
+        ->        ROW_NUMBER() OVER(PARTITION BY Gender ORDER BY Total DESC) AS Popularity
+        -> FROM baby_names;
+    +--------+----------+--------+------------+
+    | Gender | Name     | Total  | Popularity |
+    +--------+----------+--------+------------+
+    | Boy    | Noah     | 120    | 1          |
+    | Boy    | Ethan    | 115    | 2          |
+    | Boy    | Jacob    | 101    | 3          |
+    | Boy    | Liam     | 84     | 4          |
+    | Boy    | Logan    | 73     | 5          |
+    | Girl   | Emma     | 106    | 1          |
+    | Girl   | Isabella | 100    | 2          |
+    | Girl   | Olivia   | 100    | 3          |
+    | Girl   | Ava      | 95     | 4          |
+    | Girl   | Sophia   | 88     | 5          |
+    +--------+----------+--------+------------+
+
+    mysql> SELECT * FROM (
+        ->   SELECT Gender, Name, Total,
+        ->          ROW_NUMBER() OVER(PARTITION BY Gender ORDER BY Total DESC) AS Popularity
+        ->   FROM baby_names ) AS pop
+        -> WHERE Popularity <= 3;
+    +--------+----------+--------+------------+
+    | Gender | Name     | Total  | Popularity |
+    +--------+----------+--------+------------+
+    | Boy    | Noah     | 120    | 1          |
+    | Boy    | Ethan    | 115    | 2          |
+    | Boy    | Jacob    | 101    | 3          |
+    | Girl   | Emma     | 106    | 1          |
+    | Girl   | Isabella | 100    | 2          |
+    | Girl   | Olivia   | 100    | 3          |
+    +--------+----------+--------+------------+
+    
+    mysql>
+    ```
+
++ 示例
+
+  + [operating]
+
+    ```sql
+    mysql> USE douma;
+    Reading table information for completion of table and column names
+    You can turn off this feature to get a quicker startup with -A
+    
+    Database changed
+    mysql> SELECT * FROM emp;
+    +-------+--------+-----------+------+------------+---------+---------+--------+
+    | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno |
+    +-------+--------+-----------+------+------------+---------+---------+--------+
+    |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |
+    |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |
+    |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+    |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |
+    |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+    |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |
+    |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |
+    |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |
+    |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |
+    |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+    |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |
+    |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |
+    |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |
+    |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |
+    |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |
+    |  8889 | Liao   | CLERK     | 7902 | 1981-12-17 | 1300.00 |    NULL |     20 |
+    +-------+--------+-----------+------+------------+---------+---------+--------+
+    16 rows in set (0.01 sec)
+    
+    mysql> SELECT * FROM emp ORDER BY sal DESC;
+    +-------+--------+-----------+------+------------+---------+---------+--------+
+    | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno |
+    +-------+--------+-----------+------+------------+---------+---------+--------+
+    |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |
+    |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |
+    |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |
+    |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |
+    |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |
+    |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |
+    |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |
+    |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |
+    |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+    |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |
+    |  8889 | Liao   | CLERK     | 7902 | 1981-12-17 | 1300.00 |    NULL |     20 |
+    |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+    |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+    |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |
+    |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |
+    |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |
+    +-------+--------+-----------+------+------------+---------+---------+--------+
+    16 rows in set (0.01 sec)
+    
+    mysql> SELECT empno, ename, job, mgr, hiredate, sal, comm, deptno,
+        ->        ROW_NUMBER() OVER (ORDER BY sal DESC) AS Popularity
+        -> FROM emp;
+    +-------+--------+-----------+------+------------+---------+---------+--------+------------+
+    | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | Popularity |
+    +-------+--------+-----------+------+------------+---------+---------+--------+------------+
+    |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |          1 |
+    |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |          2 |
+    |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |          3 |
+    |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |          4 |
+    |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |          5 |
+    |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |          6 |
+    |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |          7 |
+    |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |          8 |
+    |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |          9 |
+    |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |         10 |
+    |  8889 | Liao   | CLERK     | 7902 | 1981-12-17 | 1300.00 |    NULL |     20 |         11 |
+    |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |         12 |
+    |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |         13 |
+    |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |         14 |
+    |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |         15 |
+    |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |         16 |
+    +-------+--------+-----------+------+------------+---------+---------+--------+------------+
+    16 rows in set (0.01 sec)
+    
+    mysql> SELECT empno, ename, job, mgr, hiredate, sal, comm, deptno,
+        ->        ROW_NUMBER() OVER (PARTITION BY deptno ORDER BY sal DESC) AS Popularity
+        -> FROM emp;
+    +-------+--------+-----------+------+------------+---------+---------+--------+------------+
+    | empno | ename  | job       | mgr  | hiredate   | sal     | comm    | deptno | Popularity |
+    +-------+--------+-----------+------+------------+---------+---------+--------+------------+
+    |  7839 | King   | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |          1 |
+    |  7782 | Clark  | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |          2 |
+    |  7934 | Miller | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |          3 |
+    |  7788 | Scott  | ANALYST   | 7566 | 1987-04-19 | 3000.00 |    NULL |     20 |          1 |
+    |  7902 | Ford   | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |          2 |
+    |  7566 | Jones  | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |          3 |
+    |  8889 | Liao   | CLERK     | 7902 | 1981-12-17 | 1300.00 |    NULL |     20 |          4 |
+    |  7876 | Adams  | CLERK     | 7788 | 1987-05-23 | 1100.00 |    NULL |     20 |          5 |
+    |  7369 | Smith  | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |          6 |
+    |  7698 | Blake  | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |          1 |
+    |  7499 | Allen  | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |          2 |
+    |  7844 | Turner | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |          3 |
+    |  7521 | Ward   | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |          4 |
+    |  7654 | Martin | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |          5 |
+    |  7900 | James  | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |          6 |
+    |  8888 | Tang   | CLERK     | 7902 | 1999-10-10 | 2000.00 |    NULL |     50 |          1 |
+    +-------+--------+-----------+------+------------+---------+---------+--------+------------+
+    16 rows in set (0.01 sec)
+    
+    mysql>
+    ```
+
 ### 编程
 
 #### 自定义函数
@@ -5367,6 +6037,13 @@ Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
 #### 视图
 
 #### 存储过程
+
++ 示例
+
+  + [operating]
+
+    ```sql
+    ```
 
 ### 导入导出
 
@@ -9952,6 +10629,133 @@ ref: [百度文库:goldendb gdca考试题库](https://wenku.baidu.com/view/658ef
           [edgar@ThinkPadT14P-23 bin]$ source bin/activate
           (PythonGameExercise) [edgar@ThinkPadT14P-23 bin]$ deactivate
           [edgar@ThinkPadT14P-23 bin]$
+          ```
+
+    + 20260520
+
+      + 系统更新
+
+        + [operating]
+
+          ```sh
+          [root@ThinkPadT14P-23 Workspace]# dnf update
+          Last metadata expiration check: 0:00:17 ago on Wed 20 May 2026 12:15:54 PM CST.
+          Dependencies resolved.
+          ================================================================================================================================================================
+           Package                                          Architecture                Version                                      Repository                      Size
+          ================================================================================================================================================================
+          Upgrading:
+           dbus                                             x86_64                      1:1.12.8-28.el8_10                           baseos                          41 k
+           dbus-common                                      noarch                      1:1.12.8-28.el8_10                           baseos                          46 k
+           dbus-daemon                                      x86_64                      1:1.12.8-28.el8_10                           baseos                         241 k
+           dbus-libs                                        x86_64                      1:1.12.8-28.el8_10                           baseos                         184 k
+           dbus-tools                                       x86_64                      1:1.12.8-28.el8_10                           baseos                          86 k
+           gdk-pixbuf2                                      x86_64                      2.36.12-8.el8_10                             baseos                         466 k
+           gdk-pixbuf2-modules                              x86_64                      2.36.12-8.el8_10                             appstream                      108 k
+           glib2                                            x86_64                      2.56.4-169.el8_10                            baseos                         2.5 M
+           glibc                                            x86_64                      2.28-251.el8_10.34                           baseos                         2.2 M
+           glibc-common                                     x86_64                      2.28-251.el8_10.34                           baseos                         1.0 M
+           glibc-devel                                      x86_64                      2.28-251.el8_10.34                           baseos                          90 k
+           glibc-gconv-extra                                x86_64                      2.28-251.el8_10.34                           baseos                         1.6 M
+           glibc-headers                                    x86_64                      2.28-251.el8_10.34                           baseos                         495 k
+           glibc-langpack-en                                x86_64                      2.28-251.el8_10.34                           baseos                         834 k
+           java-1.8.0-openjdk-headless                      x86_64                      1:1.8.0.492.b09-1.el8                        appstream                       35 M
+           jq                                               x86_64                      1.6-12.el8_10                                appstream                      203 k
+           kernel-headers                                   x86_64                      4.18.0-553.124.4.el8_10                      baseos                          12 M
+           kpartx                                           x86_64                      0.8.4-44.el8_10                              baseos                         119 k
+           krb5-devel                                       x86_64                      1.18.2-34.el8_10                             baseos                         562 k
+           krb5-libs                                        x86_64                      1.18.2-34.el8_10                             baseos                         844 k
+           libcap                                           x86_64                      2.48-6.el8_10.1                              baseos                          74 k
+           libkadm5                                         x86_64                      1.18.2-34.el8_10                             baseos                         188 k
+           libtiff                                          x86_64                      4.0.9-37.el8_10                              appstream                      190 k
+           libxml2                                          x86_64                      2.9.7-21.el8_10.4                            baseos                         697 k
+           openssh                                          x86_64                      8.0p1-29.el8_10                              baseos                         527 k
+           openssh-clients                                  x86_64                      8.0p1-29.el8_10                              baseos                         647 k
+           platform-python                                  x86_64                      3.6.8-76.el8_10.alma.1                       baseos                          88 k
+           python3-libs                                     x86_64                      3.6.8-76.el8_10.alma.1                       baseos                         7.8 M
+           python3.11                                       x86_64                      3.11.13-7.el8_10                             appstream                       31 k
+           python3.11-libs                                  x86_64                      3.11.13-7.el8_10                             appstream                       10 M
+           sudo                                             x86_64                      1.9.5p2-1.el8_10.5                           baseos                         1.0 M
+           systemd                                          x86_64                      239-82.el8_10.16                             baseos                         3.7 M
+           systemd-libs                                     x86_64                      239-82.el8_10.16                             baseos                         1.1 M
+           systemd-pam                                      x86_64                      239-82.el8_10.16                             baseos                         518 k
+           systemd-udev                                     x86_64                      239-82.el8_10.16                             baseos                         1.6 M
+           vim-common                                       x86_64                      2:8.0.1763-22.el8_10.3                       appstream                      6.3 M
+           vim-enhanced                                     x86_64                      2:8.0.1763-22.el8_10.3                       appstream                      1.4 M
+           vim-filesystem                                   noarch                      2:8.0.1763-22.el8_10.3                       appstream                       50 k
+           vim-minimal                                      x86_64                      2:8.0.1763-22.el8_10.3                       baseos                         575 k
+          
+          Transaction Summary
+          ================================================================================================================================================================
+          Upgrade  39 Packages
+          
+          Total download size: 95 M
+          Is this ok [y/N]: y
+          Downloading Packages:
+          ...
+          Upgraded:
+            dbus-1:1.12.8-28.el8_10.x86_64                  dbus-common-1:1.12.8-28.el8_10.noarch             dbus-daemon-1:1.12.8-28.el8_10.x86_64
+            dbus-libs-1:1.12.8-28.el8_10.x86_64             dbus-tools-1:1.12.8-28.el8_10.x86_64              gdk-pixbuf2-2.36.12-8.el8_10.x86_64
+            gdk-pixbuf2-modules-2.36.12-8.el8_10.x86_64     glib2-2.56.4-169.el8_10.x86_64                    glibc-2.28-251.el8_10.34.x86_64
+            glibc-common-2.28-251.el8_10.34.x86_64          glibc-devel-2.28-251.el8_10.34.x86_64             glibc-gconv-extra-2.28-251.el8_10.34.x86_64
+            glibc-headers-2.28-251.el8_10.34.x86_64         glibc-langpack-en-2.28-251.el8_10.34.x86_64       java-1.8.0-openjdk-headless-1:1.8.0.492.b09-1.el8.x86_64
+            jq-1.6-12.el8_10.x86_64                         kernel-headers-4.18.0-553.124.4.el8_10.x86_64     kpartx-0.8.4-44.el8_10.x86_64
+            krb5-devel-1.18.2-34.el8_10.x86_64              krb5-libs-1.18.2-34.el8_10.x86_64                 libcap-2.48-6.el8_10.1.x86_64
+            libkadm5-1.18.2-34.el8_10.x86_64                libtiff-4.0.9-37.el8_10.x86_64                    libxml2-2.9.7-21.el8_10.4.x86_64
+            openssh-8.0p1-29.el8_10.x86_64                  openssh-clients-8.0p1-29.el8_10.x86_64            platform-python-3.6.8-76.el8_10.alma.1.x86_64
+            python3-libs-3.6.8-76.el8_10.alma.1.x86_64      python3.11-3.11.13-7.el8_10.x86_64                python3.11-libs-3.11.13-7.el8_10.x86_64
+            sudo-1.9.5p2-1.el8_10.5.x86_64                  systemd-239-82.el8_10.16.x86_64                   systemd-libs-239-82.el8_10.16.x86_64
+            systemd-pam-239-82.el8_10.16.x86_64             systemd-udev-239-82.el8_10.16.x86_64              vim-common-2:8.0.1763-22.el8_10.3.x86_64
+            vim-enhanced-2:8.0.1763-22.el8_10.3.x86_64      vim-filesystem-2:8.0.1763-22.el8_10.3.noarch      vim-minimal-2:8.0.1763-22.el8_10.3.x86_64
+          
+          Complete!
+          [root@ThinkPadT14P-23 Workspace]#          
+          ```
+
+      + 安装 htop，btop
+
+        + [operating]
+
+          ```sh
+          [root@ThinkPadT14P-23 Workspace]# dnf install htop btop
+          Last metadata expiration check: 0:03:44 ago on Wed 20 May 2026 12:15:54 PM CST.
+          Dependencies resolved.
+          ================================================================================================================================================================
+           Package                            Architecture                         Version                                       Repository                          Size
+          ================================================================================================================================================================
+          Installing:
+           btop                               x86_64                               1.2.13-3.el8                                  epel                               569 k
+           htop                               x86_64                               3.2.1-1.el8                                   epel                               170 k
+          
+          Transaction Summary
+          ================================================================================================================================================================
+          Install  2 Packages
+          
+          Total download size: 738 k
+          Installed size: 1.9 M
+          Is this ok [y/N]: y
+          Downloading Packages:
+          (1/2): htop-3.2.1-1.el8.x86_64.rpm                                                                                              1.4 MB/s | 170 kB     00:00
+          (2/2): btop-1.2.13-3.el8.x86_64.rpm                                                                                             3.0 MB/s | 569 kB     00:00
+          ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+          Total                                                                                                                           1.1 MB/s | 738 kB     00:00
+          Running transaction check
+          Transaction check succeeded.
+          Running transaction test
+          Transaction test succeeded.
+          Running transaction
+            Preparing        :                                                                                                                                        1/1
+            Installing       : htop-3.2.1-1.el8.x86_64                                                                                                                1/2
+            Installing       : btop-1.2.13-3.el8.x86_64                                                                                                               2/2
+            Running scriptlet: btop-1.2.13-3.el8.x86_64                                                                                                               2/2
+            Verifying        : btop-1.2.13-3.el8.x86_64                                                                                                               1/2
+            Verifying        : htop-3.2.1-1.el8.x86_64                                                                                                                2/2
+          
+          Installed:
+            btop-1.2.13-3.el8.x86_64                                                        htop-3.2.1-1.el8.x86_64
+          
+          Complete!
+          [root@ThinkPadT14P-23 Workspace]#
           ```
 
 ## MySQL的系统管理

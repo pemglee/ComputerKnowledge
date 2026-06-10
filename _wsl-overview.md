@@ -53,14 +53,13 @@ markmap:
 + `wsl`
   + `--update`
 
-
 + `wsl`
   + `--list`
   + `--online`
   + 罗列所有的在线的可安装操作系统
     + 2026-Apr-22
-      
-      ```batch
+
+      ```cmd
       C:\Workspace>wsl --list --online
       The following is a list of valid distributions that can be installed.
       Install using 'wsl.exe --install <Distro>'.
@@ -97,7 +96,7 @@ markmap:
   + 罗列已安装的子系统
     + 2026-Apr-22
 
-      ```batch
+      ```cmd
       C:\Workspace>wsl  -l -v
         NAME              STATE           VERSION
       * AlmaLinux9        Stopped         2
@@ -110,7 +109,7 @@ markmap:
   + `--export` 子系统名 导出文件.tar
   + 导出/备份子系统
 
-    ```batch
+    ```cmd
     C:\Workspace>wsl --export KaliLinuxAll25     C:\Workspace\VirtualMachine\KaliLinuxAll_250422_01.tar
     Export in progress, this may take a few minutes. (809 MB): ./tmp/    qtsingleapplication-59e7-0: pax format cannot archive sockets: ./tmp/    qtsingleapplication-b8a4-0: pax format cannot archiv (39802 MB)
     
@@ -121,7 +120,7 @@ markmap:
   + `--unregister` 子系统名
   + 注销子系统
   
-    ```batch
+    ```cmd
     C:\Workspace>wsl --unregister KaliLinuxAll25
     Unregistering.
     The operation completed successfully.
@@ -131,7 +130,7 @@ markmap:
   + `--import` 子系统名 安装目录 导出文件.tar
   + 导入/恢复子系统
 
-    ```batch
+    ```cmd
     wsl --import KaliLinuxAll25 C:\Workspace\VirtualMachine\Kali\Kali C:\Workspace\VirtualMachine\KaliLinuxAll_251220.tar
     ```
 
@@ -139,6 +138,7 @@ markmap:
   + `--distribution` / `-d` 子系统名
   + `--user` / `-u` 登录用户名
   + 启动系统
-    ```batch
+
+    ```cmd
     wsl --distribution KaliLinuxAll25 --user edgar
     ```

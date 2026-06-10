@@ -365,6 +365,7 @@ markmap:
 + 约定
   + snack_case, 普通变量名
   + UPPER_SNAKE_CASE, 常量名
+  + UPPERCASE, 常量名
   + _leading_under_score, 受保护的属性和方法
     + "_" 较强
     + "__" 更强
@@ -496,11 +497,21 @@ markmap:
       ```
 
 + boolean `True` / `False`
+  + 说明
+    + 非零数字、非空对象 均为True
+    + 数0、空对象、特殊对象None 均为False
+    + 比较 和 相等测试 会递归地应用在数据结构中
+    + 比较 和 相等测试 会返回 True 或 False
+    + 布尔 and 和 or 运算符会返回 True 或 False的操作对象
 
   + 示例
     + [operating]
   
       ```python
+      >>> bool(0.0)
+      False
+      >>> bool(0.1)
+      True
       >>> bool(0)
       False
       >>> bool(2)
@@ -836,9 +847,91 @@ markmap:
 
 ### 流程控制
 
-#### 条件控制
+#### 条件控制 / 条件判断
+
++ if
+
++ if else
+
++ if elif else
+
++ 条件嵌套
+
++ 类 switch ... case ...
+
+  + 示例
+
+    + [operating]
+
+      ```python
+      >>> choice = "ham"
+      >>> print( {"spam": 1.25, "ham": 1.99, "eggs": 0.99, "bacon": 1.10}[choice])
+      1.99
+      >>>
+      ```
+
++ if/else三元表达式
+
+  + 示例
+
+    + [operating]
+
+      ```python
+      >>> a = "t" if True else "f"
+      >>> print(a)
+      t
+      >>> a = "t" if False else "f"
+      >>> print(a)
+      f
+      >>> ["f","t"][bool("")]
+      'f'
+      >>> ["f","t"][bool("True")]
+      't'
+      >>>
+      ```
 
 #### 循环控制
+
++ 关键词
+
+  + while
+  + break
+    跳出最近循环
+  + continue
+    跳过循环本次处理的剩余部分
+  + pass
+    占位语句
+  + else
+    循环正常结束时执行
+  + for
+
+    + 示例
+
+      + [operating]
+
+        ```python
+        >>> S = "lumberjack"
+        >>> for x in S: print(x, end=" ")
+        ... print("")
+        ...
+        l u m b e r j a c k 
+        >>> 
+        >>> T = ("and", "I'm", "okay")
+        >>> for x in T: print(x, end = " ")
+        ... print("")
+        ...
+        and I'm okay
+        >>> 
+        >>> L = [(1,2), (2,3), (3,4)]
+        >>> for (a, b) in L: print(a,b)
+        ... print("")
+        ...
+        1 2
+        2 3
+        3 4
+        
+        >>> 
+        ```
 
 #### 递归
 
@@ -1395,7 +1488,6 @@ markmap:
 #### 模块简述
 
 + 模块导入
-
   + [operating]
 
     ```sh
@@ -1452,6 +1544,37 @@ markmap:
     
     ┌──(edgar㉿ThinkPadT14P-23)-[~/workspaces/PythonWrkspces/Exercises26/Test/model1]
     └─$
+    ```
+
+  + [operating]
+
+    ```python
+    ┌──(edgar㉿ThinkPadT14P-23)-[~/workspaces/PythonWrkspces/Exercises26/Test/model1]
+    └─$ ll
+    total 12
+    -rw-r--r-- 1 edgar edgar   56 May 21 23:59 myfile.py
+    drwxr-xr-x 2 edgar edgar 4096 May 22 00:00 __pycache__
+    -rw-r--r-- 1 edgar edgar  132 May 19 00:56 say.py
+    
+    ┌──(edgar㉿ThinkPadT14P-23)-[~/workspaces/PythonWrkspces/Exercises26/Test/model1]
+    └─$ cat myfile.py
+    # -*- coding: utf-8 -*-
+    
+    title = "The Meaning of Life"
+    
+    
+    ┌──(edgar㉿ThinkPadT14P-23)-[~/workspaces/PythonWrkspces/Exercises26/Test/model1]
+    └─$ python
+    Python 3.13.12 (main, Feb  4 2026, 15:06:39) [GCC 15.2.0] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import myfile
+    >>> print(myfile.title)
+    The Meaning of Life
+    >>>
+    >>> from myfile import title
+    >>> print(title)
+    The Meaning of Life
+    >>>
     ```
 
 + 包导入
@@ -1563,6 +1686,36 @@ markmap:
           ```
 
 + re
+  + 说明，正则表达式处理库
+  + 属性 / 成员
+  + 方法 / 函数
+
+  + 常用规则代码
+
+    + 常用元字符
+      + ".", 匹配除换行符以外的任意字符
+      + "\w", 匹配字母或数字或下划线
+      + "\s", 匹配任意的空白符
+      + "\d", 匹配数字
+      + "\b", 匹配单词的开始或结束
+      + "^", 匹配字符串的开始
+      + "$", 匹配字符串的结束
+
+    + 常用限定符
+      + “*”, 重复零次或更多次
+      + "+", 重复一次或更多次
+      + "?", 重复零次或一次
+      + "{n}", 重复n次
+      + "{n,}", 重复n次或更多次
+      + "{n,m}", 重复n次到m次
+
+    + 常用反义词
+      + "\W", 匹配任意不是字母、数字、下划线、汉字的字符
+      + "\S", 匹配任意不是空白符的字符
+      + "\D", 匹配任意非数字的字符
+      + "\B", 匹配不是单词开头或结束的位置
+      + "[^x]", 匹配除了x以外的任意字符
+      + "[^aeiou]", 匹配除了aeiou这几个字母以外的任意字符
 
 ### 第三方库
 
