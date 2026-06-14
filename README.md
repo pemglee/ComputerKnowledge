@@ -8,10 +8,10 @@
   + [D] C_CPP
     + [D] C++
   + [D] DB_MySQL_etc
-    + [f] DB_Dbatbase.km
+    + [f] DB_Dbatbase.km  
       _DB_Database.md的思维导图 1_
     + [f] DB_Database.md
-    + [f] DB_Database-overview.md
+    + [f] DB_Database-overview.md  
       _DB_Database.md的思维导图 2_  
       _内嵌在 "DB_Database.md" 中_  
     + [f] DB_SQL_MySQL.md
@@ -32,7 +32,7 @@
       + [D] oracle
     + [D] src
   + [D] etc2
-    + [f] github-recovery-codes.txt
+    + [f] github-recovery-codes.txt  
       _github恢复码_
   + [D] images
   + [D] images2
@@ -109,14 +109,14 @@
   + [f] Oracle_CommonKnowledge.md
   + [f] Oracle_ErrorCode.md
   + [f] Python-Overview-2604.md
-  + [f] ~~Python-PyGame-THECOLORS.json~~
+  + [f] ~~Python-PyGame-THECOLORS.json~~  
     + 已移至"Python_Network_AI"目录下，且改名
   + [f] PythonProject-AI-Recommend2604.md
   + [f] PythonProject-AutoMaintenance.md
-  + [f] ~~PythonProject-PyGame2406.md~~
+  + [f] ~~PythonProject-PyGame2406.md~~  
     + 已移至"Python_Network_AI"目录下，且改名
   + [f] README.md
-  + [f] ~~README_Old.md~~
+  + [f] ~~README_Old.md~~  
     + 已删除
     + 被"README.md"更新
   + [f] vim-operatings.md
