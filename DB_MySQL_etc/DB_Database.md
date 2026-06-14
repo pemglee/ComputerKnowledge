@@ -138,7 +138,8 @@
   + 一个描述数据、数据联系、数据语义以及一致性约束的概念工具的集合  
 
 + 模型
-  + 层次模型 hierarchical model  
+  + 层次模型 
+    + ghierarchical model  
     + 基本层次联系， 两个记录及其之间的一对N(>=0)关系  
     + 每个节点表示一个记录类型，记录类型之间的联系用节点之间的连线(有向边)表示，这种联系是"双亲节点"与"子女节点"之间的一对多联系  
     + 图示 基本层次
@@ -162,12 +163,11 @@
       + "子女节点"查询须通过"双亲节点"
       + 结构严密，层次命令趋于程序化
 
-  + 网状模型 network model
-
+  + 网状模型  
+    + network model
     + 网状模型条件
       + 允许一个以上的节点无"双亲节点"
       + 一个节点可以有多个"双亲节点"
-
     + 网状模型的优点
       + 直接描述现实世界
       + 具有良好性能，存取效率较高
@@ -176,15 +176,27 @@
       + "数据定义语言"和"数据操纵语言"复杂
       + 记录类型之间的联系是通过存取路径实现的，所以应用程序在访问数据时必须选择适当的存取路径，用户须了解系统结构的细节
 
-  + 关系模型 relational model
-  + 实体-联系模型 entity-relationship model
-  + 半结构化数据模型 semi-structured data model :: 半结构化XML数据模型 semi-structured eXtensible Markup Language data model
-  + 半结构化数据模型 semi-structured data model :: 半结构化JSON数据模型 semi-structured JSON data model
-  + 基于对象的数据模型 object-based data model :: 面向对象数据模型 object-oriented data model
-  + 基于对象的数据模型 object-based data model :: 对象关系数据模型 object-relational data model
-  + _键值对(key value, KV)数据模型_
+  + 关系模型  
+    + relational model
+  + 实体-联系模型  
+    + entity-relationship model
+  + 半结构化XML数据模型 
+    + semi-structured eXtensible Markup Language data model 
+    + $\in$ 半结构化数据模型 semi-structured data model 
+  + 半结构化JSON数据模型 
+    + semi-structured JSON data model
+    + $\in$ 半结构化数据模型 semi-structured data model
+  + 面向对象数据模型
+    + object-oriented data model
+    + $\in$ 基于对象的数据模型 object-based data model  
+  + 对象关系数据模型  
+    + object-relational data model
+    + $\in$ 基于对象的数据模型 object-based data model  
+  + _键值对数据模型_
+    + KV(key-value) data model
   + _文档数据模型_
-  + _图数据模型 graph data model_
+  + _图数据模型_  
+    + graph data model
   + _时序数据模型_
   + _时空数据模型_
   + _流数据模型_
@@ -194,6 +206,20 @@
   + 数据结构
   + 数据操纵
   + 完整性约束
+
+## 数据库语言
+
+### DDL -- Data-Definition Language
+
+#### DDL概述
+
++ 定义数据库模式
+
+### DML -- Data-Manipulation Language
+
+#### DML概述
+
++ 数据库的查询和更新
 
 ## 附录
 
