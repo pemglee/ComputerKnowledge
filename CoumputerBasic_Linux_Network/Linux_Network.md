@@ -28,9 +28,9 @@ markmap:
 
 
   + [diagram]  
-    ![network topology](./images/network-topology-01.webp)  
-    ![network topology](./images/network-topology-02.png)  
-    ![network topology](./images/network-topology-03.webp)
+    ![network topology](../images/network-topology-01.webp)  
+    ![network topology](../images/network-topology-02.png)  
+    ![network topology](../images/network-topology-03.webp)
 
   + 说明
 
@@ -77,11 +77,77 @@ markmap:
 #### 简述
 
 + [diagram]  
-  ![网络状态时序图](./images/Network-StatusSeq.jpeg)
+  ![网络状态时序图](../images/Network-StatusSeq.jpeg)
+
+#### 网络状态
+
++ LISTEN
+
++ SYN_SENT
+
++ SYN_RECEIVED
+
++ ESTABLISHED
+
++ FIN_WAIT_1
+
++ FIN_WAIT_2
+
++ CLOSE_WAIT
+
++ CLOSING
+
++ LAST_ACK
+
++ TIME_WAIT
+
++ CLOSED
+
+#### 连接和断开
+
++ 三次握手: three-way handshaking
+
++ 四次挥手: four-way wavehanding
+
+#### 协议、服务和端口
+
+##### 简表
 
 + [table]
 
-## 常用命令 
+  | Abbreviations | Protocol | Service | Description                         | Comments                                  |
+  | :------------ | :------- | :------ | :---------------------------------- | :---------------------------------------- |
+  | ARP           | [X]      |         | Address Resolution Protocol         |                                           |
+  | DHCP          | [X]      |         | Dynamic Host Configuration Protocol |                                           |
+  | DNS           |          | [X]     | Domain Naming Service               |                                           |
+  | FINGER        |          | [X]     |                                     | Port:79                                   |
+  | FTP           | [X]      | [X]     | File Transfer Protocol              | Port:20 (for Data); Port:21 (for Service) |
+  | HTTP          | [X]      | [X]     | Hype Text Transfer Protocol         | Port:80                                   |
+  | IAMP          | [X]      | [X]     |                                     | Port:993                                  |
+  | ICMP          | [X]      |         | Internet Control Message Protocol   |                                           |
+  | IP            | [X]      |         | Internet Protocol                   |                                           |
+  | NAMESERVER    |          | [X]     |                                     | Port:42                                   |
+  | NAT           |          |         |                                     |                                           |
+  | NETBIOS       |          |         |                                     | Port:137, 138                             |
+  | POP3          | [X]      | [X]     | Post Office Protocol - Version 3    | Port:110                                  |
+  | RARP          | [X]      |         | Reverse ARP                         |                                           |
+  | RPC           |          |         | Remote Procedure Call               | Port:135                                  |
+  | SFTP          | [X]      | [X]     | Security FTP                        | Port:22                                   |
+  | SSH           |          |         | Security Shell Protocol             | Port:22                                   |
+  | SMTP          | [X]      | [X]     | Simple Mail Transfer Protocol       | Port:25, 465                              |
+  | SNMP          | [X]      |         |                                     | Port:161                                  |
+  | TCP           | [X]      |         | Transport Control Protocol          |                                           |
+  | Telnet        |          | [X]     |                                     | Port:23                                   |
+  | UDP           | [X]      |         | User Datagram Protocol              |                                           |
+
+##### 端口 ports
+
++ Well-Known Ports, 0 ~ 1023, 公认端口;  
++ Dynamic Ports,    1024 ~ 65535, 动态端口;  
+  + Registered Ports, 1024 ~ 49151, 注册端口;  
+  + Private Ports, 49152 ~ 65535, 私有端口;  
+
+## 常用命令
 
 ## Kali Tools
 
