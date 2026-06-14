@@ -214,12 +214,36 @@
 #### DDL概述
 
 + 定义数据库模式
++ 数据存储和定义 data storage and definition
++ 一致性约束 谓词
+  + 域约束 domain constraint
+  + 引用完整性 referential integrity
+  + 授权 authorization
+    + read authorization
+    + insert authorization
+      + **不**允许修改
+    + update authorization
+      + 允许修改
+      + **不**允许删除
+    + delete authorization
+      + 允许删除
++ DDL输出
+  + 数据字典 data dictionary
+    + 元数据 metadata    
 
 ### DML -- Data-Manipulation Language
 
 #### DML概述
 
 + 数据库的查询和更新
++ DML类型
+  + 过程化DML, procedural DML  
+    + 要求用户指定需要什么数据
+    + 如何获取数据
+  + 声明式DML, declarative DML
+    + 只要求用户指定需要什么数据
+
+####
 
 ## 附录
 
