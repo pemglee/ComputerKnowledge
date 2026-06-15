@@ -2,11 +2,19 @@
 
 ## 数据系统 DBS
 
-### OS
+### 数据库系统概述
+
++ 图示
+  + [diagram]
+    ![DBS Structure](../images2/DB-DatabaseSystemStructing.svg)
+
+### 硬件平台
+
+### OS 及 软件平台
 
 ### DBMS
 
-#### 概述
+#### 数据库管理系统概述
 
 + 图示
 
@@ -40,10 +48,10 @@
   + 数据独立性强
     + 数据物理独立性 -- physical data independence
       + 应用程序不受数据库存储结构(如文件组织方式、索引技术)改变的影响。
-      + 当数据库的内模式(存储模式)发生变化时，通过模式/内模式映像保证应用程序不变
+      + 当数据库的内模式(存储模式)发生变化时，通过**模式/内模式映像**保证应用程序不变
     + 数据逻辑独立性 -- logical data independence
       + 应用程序不受数据库逻辑结构(如表格结构调整)改变的影响
-      + 当数据库的概念模式发生变化时，通过外模式/模式映像保证应用程序不变
+      + 当数据库的概念模式发生变化时，通过**外模式/模式映像**保证应用程序不变
 
   + 数据由数据库管理系统统一管理和控制
     + 数据安全性(security)
@@ -63,9 +71,65 @@
 
 #### 数据库 Database
 
+##### 数据库引擎
+
+###### 查询处理器
+
++ query processor
+  + DDL解释器 DDL interpreter
+  + DML编译器 DML compiler
+  + 查询执行引擎 query evaluation engine
+
+###### 存储管理器 
+
++ storage manager
+  + 权限及完整性管理器 authorization and integrity manager
+  + 事务管理器 transaction manager
+  + 文件管理器 file manager
+  + 缓冲区管理器 buffer manager
+
++ 数据结构
+  + 数据文件 data file， 数据库自身
+  + 数据字典 data dictionary, 数据库结构的元数据，尤其是数据模式
+  + 索引 index
+
+###### 事务管理器
+
++ 说明
+  + 数据库应用中完成单一**逻辑功能**的**操作集合**
+
++ 事务管理要求
+  + 原子性
+  + 一致性
+  + 持久性
+
++ 事务管理器组成
+
+  + 恢复管理器 recovery manager
+    + 原子性
+    + 持久性
+  + 并发控制器 concurrency-control manager
+    + 一致性
+
 ### Application
 
 ### 用户
+
++ 业务用户
+
++ 开发用户
+
++ 数据库设计员和分析员
+
++ DBA
+
+  + 职责
+
+    + 模式定义 schema definition / database definition
+    + 存储结构和访问方式定义 storage structure and access-method definition
+    + 模式及物理组织定义 schema and physical-organization modification
+    + 数据访问授权 granting of authorization for data access
+    + 日常维护 routine maintenance
 
 ## 模式 和 实例
 
@@ -92,22 +156,29 @@
       | Oracle           | Schema ≈ 用户      | 每个用户拥有一个同名 Schema；Schema 是用户拥有的所有对象的集合；创建用户即隐式创建 Schema |
       | SQL Server‌       | Schema 是 Database 的子集 | Schema 独立于用户，可由多个用户共享；需显式创建（CREATE SCHEMA）‌|
 
-
-
 ### 抽象层次
 
-+ physical schema
-  + 物理层描述数据库的设计
++ 内模式/物理模式/存储模式
+  + internal schema / physical schema / storage schema  
+  + 物理层描述数据库的设计，物理结构和存储方式
+  + 数据库内部的组织方式
 
-+ logical schema
-  + 逻辑层描述数据库的设计
++ 模式/逻辑模式
+  + schema / logical schema
+  + **模式是数据库的核心和关键**
+  + **设计数据库，应首先确定数据库的逻辑模式**
+  + 逻辑层描述数据库的设计，定义了全局逻辑结构与存储结构之间的对应关系
+  + 全局逻辑结构，所有用户的公共数据视图
 
-+ subschema
++ 外模式/子模式
+  + external schema / subschema
+  + 局部逻辑结构
   + 视图层描述
+  + 应用程序时依据数据的外模式编写的
 
-## 数据抽象
+## 数据视图
 
-### 概述
+### 数据抽象概述
 
 + 数据模型是现实世界数据特征的抽象。  
 + 数据模型是数据库系统的核心和基础。  
@@ -207,43 +278,345 @@
   + 数据操纵
   + 完整性约束
 
-## 数据库语言
+### 数据建模
 
-### DDL -- Data-Definition Language
+#### 数据设计概述
 
-#### DDL概述
++ 图示
 
-+ 定义数据库模式
-+ 数据存储和定义 data storage and definition
-+ 一致性约束 谓词
-  + 域约束 domain constraint
-  + 引用完整性 referential integrity
-  + 授权 authorization
-    + read authorization
-    + insert authorization
-      + **不**允许修改
-    + update authorization
-      + 允许修改
-      + **不**允许删除
-    + delete authorization
-      + 允许删除
-+ DDL输出
-  + 数据字典 data dictionary
-    + 元数据 metadata    
+  + [diagram]
+    ![Data Modeling](../images2/DB-DataModeling.svg)
 
-### DML -- Data-Manipulation Language
+  + [diagram]
+    ![Data Design](../images2/DB_DatabaseDesign.svg)
 
-#### DML概述
+#### 概念设计
 
-+ 数据库的查询和更新
-+ DML类型
-  + 过程化DML, procedural DML  
-    + 要求用户指定需要什么数据
-    + 如何获取数据
-  + 声明式DML, declarative DML
-    + 只要求用户指定需要什么数据
+#### 逻辑设计
 
-####
+#### 物理设计
+
+## 关系数据库语言
+
+### 关系数据库的说明
+
++ 表 / 关系(基本关系)
+  + (data)table / relation
+
++ 行 / 元组
+  + row / tuple
+
++ 关系实例
+  + relation instance
+  + 元组集合 set
+
++ 列 / 属性
+  + col(column) / attribute
+
++ _表头_
+  + _table header_
+
++ _域_
+  + _domain_
+  + 属性的取值范围/集合
+
++ **空值**
+  + **null value**
+
+#### 码 key
+
++ 超码 superkey
+  + 一个或多个属性的集合，这些属性组合在一起可以在一个关系中唯一标识一个元组
+
++ 候选码 candidate key
+  + 如果 K 是一个超码，那么 K 的任意超集也是超码
+  + 一个超码的任意真子集都不是超码，则为**候选码**
+
++ 主码 primary key
+  + 被设计者挑选出的候选码
+  + primary key <==> primary key constraint
+
++ 外码 foreign key
+
+### 关系完整性
+
+#### 关系完整性约束
+
+##### 实体完整性 
+
++ entity integrity (关系不变性，自动支持)
++ 每个元组应该是可区分的、唯一的
+  + 实体完整性约束时针对基本关系。一个基本关系(数据表)是一个实体集合
+  + 实体是可区分的
+  + 关系模型以主码作为唯一性标识
+  + 主码属性不能取空值
+
+###### **规则**，实体完整性约束
+
++ 若属性(一个或一组)A是基本关系R的主属性，则A不能取空值(null value)
+
+##### 参照完整性  
+
++ referential integrity (关系不变性，自动支持)
+
+###### **定义**，外码、参照关系、等
+
++ 如果$F$是基本关系$R$的一个或一组属性，但**不**是关系R的码
++ $K_s$是基本关系S的主码
++ 如果$F$与$K_s$相对应，则$F$是$R$的**外码**(foreign key)
++ 基本关系$R$为**参照关系**(referenc**ing** relation)
++ 基本关系$S$为***被* 参照关系**(referenc**ed** relation)或**目标关系**(target relation)
++ $R$与$S$可以是同一关系，也可是不同关系
+
+###### **规则**，参照完整性约束
+
++ 若属性/属性组$F$是基本关系$R$的外码，它与基本关系$S$的主码$K_s$相对应(基本关系$R$和$S$不一定是不同关系)，则对于$R$中每个元组在$F$上的值必须：
+  + 或者取空值
+  + 或者等于$S$中某个元组的主码值
+
+##### 用户定义的完整性 user-defined integrity
+
+### 数据库语言概述
+
++ 关系操作  
+  + 查询
+    + query
+      + select
+      + project
+      + join
+      + divide
+      + union
+      + difference
+
+  + 更新
+    + insert
+    + delete
+    + update
+
++ 关系操作 vs {层次 + 网状}
+  + 关系操作
+    + 集合操作 / 成组数据处理(set-at-a-time processing)
+    + {层次 + 网状} / 单记录数据处理(record-at-a-time processing)
+
++ 关系数据语言
+  + 关系数据语言概述
+
+    ```mermaid
+    graph LR
+    A[关系数据语言] --> B[关系代数,如ISBL]
+    A --> C[关系演算]
+    A --> D[SQL]
+    C --> E[元组关系演算语言，如ALPHA, QUEL]
+    C --> F[域关系演算语言，如QBE]
+    ```
+
+  + 关系代数 relation algebra
+    + 关系运算
+
+      + 传统的集合运算
+
+        + 并
+          + $R \cup S = \{ t | t \in R \vee t \in S \}$
+
+        + 差
+          + $R - S = \{ t | t \in R \wedge t \notin S \}$
+
+        + 交
+          + $R \cap S = \{ t | t \in R \wedge t \in S \}$
+
+        + 笛卡尔积 Cartesian-product
+          + $ R \times S = \{ \stackrel\frown{t_r t_s} | t_r \in R \wedge t_s \in S \}$
+
+      + 专门的关系运算
+
+        + 选择 select / 限制 restriction
+          + $\sigma_{F}{R} = \{ t | t \in R \wedge F(t) = 'True'\}$
+          + $F$ 的基本形式 $X_i \theta Y_i$
+            + $\theta$为运算符
+              + 比较运算符
+                + $>$, 大于
+                + $\leq$, 大于等于
+                + $<$, 小于
+                + $\geq$, 小于等于
+                + $=$, 等于
+                + $<>$ 或 $\neq$, 不等于
+              + 逻辑运算符
+                + $\neg$, 非
+                + $\wedge$, 与
+                + $\vee$, 或
+          + 示例
+            + $\sigma_{Smajor = '信息安全'}{(Student)}$
+
+        + 投影 project
+          + $\prod_{A}{(R)} = \{ t[A] | t \in R \}$
+            + $A$为$R$中的属性列
+            + 投影操作是从列的角度进行的运算
+          + 示例
+            + $\prod_{Sno,Smajor}(Student)$
+            + `select Sno, Smajor from Student;`
+
+        + 连接 join / $\theta join$
+          + 从两个关系的笛卡尔积中选取其属性间满足一定条件的元组
+          + $R \Join_{A \theta B} S = \{ \stackrel\frown{t_r t_s} | t_r \in R \wedge t_s \in S \wedge t_r[A] \theta t_s[B]\}$
+            + $\theta$为运算符
+          + 等值连接(equijoin) & 自然连接(natural join)
+            + 等值连接
+              + $R \Join_{A \theta B} S = \{ \stackrel\frown{t_r t_s} | t_r \in R \wedge t_s \in S \wedge t_r[A] = t_s[B]\}$
+            + 自然连接
+              + $R \Join S = \{ \stackrel\frown{t_r t_s}[U - B] | t_r \in R \wedge t_s \in S \wedge t_r[B] = t_s[B]\}$
+
+        + 除 division
+          + **象集**定义除法
+            + 给定关系 $R(X,Y)$和$S(Y,Z)$
+            + $X$,$Y$,$Z$为属性列
+            + $R$中的$Y$和$S$中的$Y$可以有不同的属性名，但必须出自相同的域
+            + $R$与$S$的除运算得到一个新的关系$P(X)$,$P$是$R$中满足下列条件的元组在$X$属性列上的投影  
+              元组在$X$上分量值$x$的象集$Y_x$包含$S$在$Y$上投影的集合
+            + $R \div S = \{ t_r[X] | t_r \in R \wedge \prod_{Y}{(S)} \subseteq Y_x\}$
+            + $Y_x$为$x$在$R$中的象集, $x = t_r[X]$
+            + 除操作是同时从行与列角度进行运算
+          + 示例
+            + 关系$R$
+              + [table]
+
+                | A      | B      | C      |
+                | :----: | :----: | :----: |
+                | $a_1$  | $b_1$  | $c_2$  |
+                | $a_2$  | $b_3$  | $c_7$  |
+                | $a_3$  | $b_4$  | $c_6$  |
+                | $a_1$  | $b_2$  | $c_3$  |
+                | $a_4$  | $b_6$  | $c_6$  |
+                | $a_2$  | $b_2$  | $c_3$  |
+                | $a_1$  | $b_2$  | $c_1$  |
+
+            + 关系$R$中，$A$可以取4个值$\{ a_1, a_2, a_3, a_4 \}$。其中
+              + $a_1$的象集为$\{(b_1,c_2),(b_2,c_3),(b_2,c_1)\}$
+              + $a_2$的象集为$\{(b_3,c_7),(b_2,c_3)\}$
+              + $a_3$的象集为$\{(b_4,c_6)\}$
+              + $a_4$的象集为$\{(b_6,c_6)\}$
+
+            + 关系$S$
+              + [table]
+
+                | B      | C      | D       |
+                | :----: | :----: | :-----: |
+                | $b_1$  | $c_2$  | $d_1$   |
+                | $b_2$  | $c_1$  | $d_1$   |
+                | $b_2$  | $c_3$  | $d_2$   |
+
+            + $S$在$(B,C)$上的投影为$\{(b_1,c_2),(b_2,c_1),(b_2,c_3)\}$
+
+            + 只有$a_1$的象集$(B,C)_{a_1}$包含了$S$在$(B,C)$属性列上的投影，所以  
+              + $R \div S = \{ a_1 \}$
+
+              + [table]
+
+                | A      |
+                | :----: |
+                | $a_1$  |
+
+            + 运算过程
+
+              + [diagram]  
+                ![calc proc](../images2/DB-RelationAlgebra-Division.svg)
+
+              + 不包含，是指不全部包含，  
+                $a_2$的象集之一$(b_2,c_3)$在$a_1$象集中，但$(b_3,c_7)$不在，故不包含
+
+        + 赋值
+
+        + 更名 rename / $\rho$
+
+  + 关系演算 relation calculus
+    + 关系谓词
+      + 元组关系演算
+        + ALPHA
+          + GET
+          + PUT
+          + HOLD
+          + UPDATE
+          + DELETE
+          + DROP
+      + 域关系演算
+        + QBE
+          + ...
+
+  + 关系完备性
+    + 关系代数 <==> 元组关系演算 <==> 域关系演算
+
++ SQL(structure query language)简述
+  + 分类
+    + DQL -- data query language
+    + DML -- data manipulation language
+    + DDL -- data definition language
+    + DCL -- data control language
+  + SQL特点
+    + 功能综合且风格统一
+      + 创建和删除数据库模式
+      + 创建基本表、临时表、视图
+      + 使用数据库，如增删改查、事务处理
+      + 数据库控制, {安全、完整、并发}
+      + 数据库维护、重建
+    + 数据操纵高度非过程化
+    + 面向集合的操作方式
+    + 以统一的语法结构提供多种使用方式
+    + 语法简洁且易于掌握
+  + 基本概念
+    + [diagram]  
+      ![Scheama Structure](../images2/DB-SchemaStructure.svg)
+
+  + SQL组成
+    + DDL -- Data-Definition Language
+      + 定义数据库模式
+      + 数据存储和定义 data storage and definition
+        + SQL数据类型
+          + 参考各数据库产品
+      + 一致性约束 谓词
+        + 域约束 domain constraint
+        + 引用完整性 referential integrity
+        + 授权 authorization
+          + read authorization
+          + insert authorization
+            + **不**允许修改
+          + update authorization
+            + 允许修改
+            + **不**允许删除
+          + delete authorization
+            + 允许删除
+      + DDL输出
+        + 数据字典 data dictionary
+          + 元数据 metadata  
+    + DML -- Data-Manipulation Language
+      + 数据库的查询和更新
+      + DML类型
+        + 过程化DML, procedural DML  
+          + 要求用户指定需要什么数据
+          + 如何获取数据
+        + 声明式DML, declarative DML
+          + 只要求用户指定需要什么数据
+    + 完整性 integrity
+    + 视图定义 view definition
+    + 事务控制 transaction control
+    + 嵌入式SQL embedded SQL
+    + 授权 authorization
+
+#### 关系模式图示例 of DBSC7
+
++ 图示
+  + [diagram]
+    ![DB Schema Diagram](../images2/DB-dbsc7-SchemaDiagram.svg)
+
+## 数据库体系结构
+
+### 集中式数据库
+
+### 客户-服务器数据库系统
+
+### 并行数据库系统
+
+### 分布式数据库系统
+
+### 云数据库系统
 
 ## 附录
 

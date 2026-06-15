@@ -148,6 +148,8 @@
 | code             | demo             | note  |
 | :--------------- | :--------------- | :---- |
 | `\wedge`         | $\wedge$         | and   |
+| `\vee`           | $\vee$           | or    |
+| `\neg`           | $\neg$           | not   |
 
 #### 比较符号
 
@@ -170,7 +172,9 @@
 | `\in`            | $\in$            |       |
 | `\notin`         | $\notin$         |       |
 | `\subset`        | $\subset$        |       |
+| `\subseteq`      | $\subseteq$      |       |
 | `\supset`        | $\supset$        |       |
+| `\supseteq`      | $\supseteq$      |       |
 | `\cap`           | $\cap$           |       |
 | `\cup`           | $\cup$           |       |
 | `\emptyset`      | $\emptyset$      |       |
@@ -286,18 +290,45 @@
 
 + [code]
 
+  01 `graph TD`  
+  02 `    A[Root] --> B[Branch 1]`  
+  03 `    A --> C[Branch 2]`  
+  04 `    B --> D[Branch 3]`  
+  05 `    B --> E[Leaf 2]`  
+  06 `    C --> F[Leaf 3]`  
+  07 `    D --> G[Branch 4]`  
+  08 `    D --> H[left 4]`  
+
+  Note: "graph TD" vs "graph LR"
+
 + [demo]
 
   ```mermaid
   graph TD
-      A[Root] --> B[Branch 1]
-      A --> C[Branch 2]
-      B --> D[Branch 3]
-      B --> E[Leaf 2]
-      C --> F[Leaf 3]
-      D --> G[Branch 4]
-      D --> H[left 4]
+
+  A[Root] --> B[Branch 1]
+  A --> C[Branch 2]
+  B --> D[Branch 3]
+  B --> E[Leaf 2]
+  C --> F[Leaf 3]
+  D --> G[Branch 4]
+  D --> H[left 4]
   ```
+
++ [demo]
+
+  ```mermaid
+  graph LR
+  
+  A[Root] --> B[Branch 1]
+  A --> C[Branch 2]
+  B --> D[Branch 3]
+  B --> E[Leaf 2]
+  C --> F[Leaf 3]
+  D --> G[Branch 4]
+  D --> H[left 4]
+  ```
+
 
 ## 用例 状态流转图
 
