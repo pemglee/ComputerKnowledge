@@ -188,11 +188,13 @@
 | `\cos`           | $\cos$           |       |
 | `\tan`           | $\tan$           |       |
 | `\log_{a}{b}`    | $\log_{a}{b}$    |       |
+| `\lg{a}`         | $\lg{a}$         |       |
 | `\ln{a}`         | $\ln{a}$         |       |
 | `\lim_{x \to 0}` | $\lim_{x \to 0}$ |       |
 | `\sum_{i=1}^{n}` | $\sum_{i=1}^{n}$ |       |
 | `\int_{a}^{b}`   | $\int_{a}^{b}$   |       |
 | `\infty`         | $\infty$         |       |
+| `\prod`          | $\prod$          |       |
 
 #### 矩阵
 
@@ -266,25 +268,57 @@
 
 ### 多行公式
 
-+ [code]
++ 普通
 
-  01: `$$`  
-  02: `  \begin{align}`  
-  03: `    f(x) &= ax^2 + bx + c \\`  
-  04: `    f'(x) &= 2ax + b \\`  
-  05: `    f''(x) & = 2a`  
-  06: `  \end{align}`  
-  07: `$$`  
+  + [code]
 
-+ [demo]
+    01: `$$`  
+    02: `\begin{align}`  
+    03: `  f(x) &= ax^2 + bx + c \\`  
+    04: `  f'(x) &= 2ax + b \\`  
+    05: `  f''(x) & = 2a`  
+    06: `\end{align}`  
+    07: `$$`  
 
-  $$
+  + [demo]
+
+    $$
     \begin{align}
       f(x) &= ax^2 + bx + c \\
       f'(x) &= 2ax + b \\
       f''(x) & = 2a
     \end{align}
-  $$
+    $$
+
++ 符号对齐
+
+  + [code]
+
+  + [demo]
+
+    $$
+    \begin{equation}
+    \begin{aligned}
+    H &= abc \\
+    & =def
+    \end{aligned}
+    \end{equation}
+    $$
+
++ 条件方程
+
+  + [code]
+  + [demo]
+
+    $$
+    \begin{align*}
+      f(x) =
+      \begin{cases}
+      x^2 \qquad & a \gt 0 \\
+      e^x \qquad & a \le 0
+      \end{cases}
+    \end{align*}
+    $$
 
 ## 用例 树
 

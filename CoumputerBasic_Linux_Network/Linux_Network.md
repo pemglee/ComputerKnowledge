@@ -159,7 +159,7 @@ markmap:
 
 ### 工具分类 (Kali Menu)
 
-[Kali Menu Tools](kali-Tools.md)
+[Kali Menu Tools](./kali-Tools.md)
 
 ### 工具分类(1)
 
@@ -2427,3 +2427,65 @@ markmap:
       └─$ ln -s /opt/sublime_text/sublime_text sublime
       
       ```
+
++ op on 20260618
+
+  + install texinfo
+
+    + [operating]
+
+      ```sh
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$ sudo apt install texinfo
+      [sudo] password for edgar:
+      Installing:
+        texinfo
+      
+      Installing dependencies:
+        libtext-unidecode-perl  texinfo-lib
+      
+      Summary:
+        Upgrading: 0, Installing: 3, Removing: 0, Not Upgrading: 247
+        Download size: 2,683 kB
+        Space needed: 11.6 MB / 963 GB available
+      
+      Continue? [Y/n] y
+      Get:1 http://mirror.nyist.edu.cn/kali kali-rolling/main amd64 libtext-unidecode-perl all 1.30-3 [101 kB]
+      Get:3 http://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling/main amd64 texinfo all 7.3-2 [1,877 kB]
+      Get:2 http://mirror.nju.edu.cn/kali kali-rolling/main amd64 texinfo-lib amd64 7.3-2 [705 kB]
+      Fetched 2,683 kB in 2s (1,282 kB/s)
+      Selecting previously unselected package libtext-unidecode-perl.
+      (Reading database… 888355 files and directories currently installed.)
+      Preparing to unpack …/libtext-unidecode-perl_1.30-3_all.deb…
+      Unpacking libtext-unidecode-perl (1.30-3)…
+      Selecting previously unselected package texinfo-lib.
+      Preparing to unpack …/texinfo-lib_7.3-2_amd64.deb…
+      Unpacking texinfo-lib (7.3-2)…
+      Selecting previously unselected package texinfo.
+      Preparing to unpack …/archives/texinfo_7.3-2_all.deb…
+      Unpacking texinfo (7.3-2)…
+      Setting up texinfo-lib (7.3-2)…
+      Setting up libtext-unidecode-perl (1.30-3)…
+      Setting up texinfo (7.3-2)…
+      Running mktexlsr. This may take some time. ... done.
+      Processing triggers for kali-menu (2026.2.6)…
+      Processing triggers for libc-bin (2.42-16)…
+      Processing triggers for man-db (2.13.1-1)…
+      Processing triggers for tex-common (6.20)…
+      Running mktexlsr. This may take some time... done.
+      Processing triggers for install-info (7.3-2)…
+      Scanning processes...
+      
+      No services need to be restarted.
+      
+      No containers need to be restarted.
+      
+      No user sessions are running outdated binaries.
+      
+      No VM guests are running outdated hypervisor (qemu) binaries on this host.
+      
+      ┌──(edgar㉿ThinkPadT14P-23)-[~]
+      └─$
+      ```
+
++ 

@@ -30,7 +30,7 @@
   + 完整性 和 一致性 -- integrity & consistency constraint
   + 原子性 -- atomicity
   + 并发访问异常 -- concurrent-access anomaly
-  + 安全性 -- security 
+  + 安全性 -- security  
 
 + 主要功能
   + 数据定义(definition)功能
@@ -60,14 +60,17 @@
     + 数据恢复(recovery)
 
 + 数据库应用方式
-  + 联机事务处理
-  + 数据分析
+  + 联机事务处理 online transaction processing
+  + 数据分析 data analytics
+    + 预测模型 predictive model
+    + 数据挖掘 data mining
 
 #### 数据 Data
 
 + 说明
-  + 描述事物的符号记录
-  + 语义，数据的含义
+  + 对客观事物进行记录并可以鉴别的符号，是对客观事务的性质、状态以及相关关系等进行记者的的物理符号或这些物理符号的组合。
+    + 描述事物的符号记录
+    + 语义，数据的含义
 
 #### 数据库 Database
 
@@ -78,9 +81,10 @@
 + query processor
   + DDL解释器 DDL interpreter
   + DML编译器 DML compiler
+    + 查询优化 -- query optimization
   + 查询执行引擎 query evaluation engine
 
-###### 存储管理器 
+###### 存储管理器
 
 + storage manager
   + 权限及完整性管理器 authorization and integrity manager
@@ -96,7 +100,8 @@
 ###### 事务管理器
 
 + 说明
-  + 数据库应用中完成单一**逻辑功能**的**操作集合**
+  + 事务，原子性和一致性的单元，即一组操作要么全部执行，要么全部不执行  
+  + 数据库应用中完成单一**逻辑功能**的**操作集合**  
 
 + 事务管理要求
   + 原子性
@@ -148,13 +153,63 @@
   + 商用数据库
     + [table]
 
-      | Database Product | Schema & Database | Notes  |
-      | :--------------- | :---------------- | :----- |
-      | PostgreSQL       | Schema 是 Database 的子集 | 一个 Database 可有多个 Schema；默认有 public Schema；跨 Schema 查询需指定 schema.table |
-      | MySql            | Schema ≈ Database ![](./images/question-trans-small.png) | 在 MySQL 中，SCHEMA 和 DATABASE 是同义词，可互换使用；CREATE SCHEMA mydb 等同于 CREATE DATABASE mydb。`SHOW DATABASES;`可见"information_schema"和”performance_schema" |
-      |                  | Schema ≈ DataTable  ![](./images/question-trans-small.png)  | 在 MySQL 中，SCHEMA 和 Table 是同义词，可互换使用；CREATE SCHEMA mytable 等同于 CREATE TABLE mytable。 参考 DBSC7 |
-      | Oracle           | Schema ≈ 用户      | 每个用户拥有一个同名 Schema；Schema 是用户拥有的所有对象的集合；创建用户即隐式创建 Schema |
-      | SQL Server‌       | Schema 是 Database 的子集 | Schema 独立于用户，可由多个用户共享；需显式创建（CREATE SCHEMA）‌|
+      | Database Product | Schema & Database           | Notes  |
+      | :--------------- | :-------------------------- | :----- |
+      | PostgreSQL       | $Schema \subseteq Database$ | 一个 Database 可有多个 Schema；默认有 public Schema；跨 Schema 查询需指定 schema.table |
+      | MySql            | $Schema \approx Database$   | 在 MySQL 中，SCHEMA 和 DATABASE 是同义词，可互换使用；CREATE SCHEMA mydb 等同于 CREATE DATABASE mydb。`SHOW DATABASES;` & `SHOW SCHEMA` 可见"information_schema"和”performance_schema" |
+      |                  | $Schema \neq DataTable$     | ~~在 MySQL 中，SCHEMA 和 Table 是同义词，可互换使用；CREATE SCHEMA mytable 等同于 CREATE TABLE mytable。~~ 参考 DBSC7 |
+      | Oracle           | $Schema \approx User$       | 每个用户拥有一个同名 Schema；Schema 是用户拥有的所有对象的集合；创建用户即隐式创建 Schema |
+      | SQL Server‌       | $Schema \subset Database$   | Schema 独立于用户，可由多个用户共享；需显式创建（CREATE SCHEMA）‌|
+
+    + MySQL简示
+
+      + [operating]
+
+        ```sql
+        [edgar@ThinkPadT14P-23 Workspace]$ mysql -uadmin -pLiHaobo#1119
+        mysql: [Warning] Using a password on the command line interface can be insecure.
+        Welcome to the MySQL monitor.  Commands end with ; or \g.
+        Your MySQL connection id is 8
+        Server version: 8.4.9 MySQL Community Server - GPL
+        
+        Copyright (c) 2000, 2026, Oracle and/or its affiliates.
+        
+        Oracle is a registered trademark of Oracle Corporation and/or its
+        affiliates. Other names may be trademarks of their respective
+        owners.
+        
+        Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+        
+        mysql> SHOW databases;
+        +--------------------+
+        | Database           |
+        +--------------------+
+        | dbsc7              |
+        | douma              |
+        | information_schema |
+        | mysql              |
+        | performance_schema |
+        | rucedu             |
+        | sys                |
+        +--------------------+
+        7 rows in set (0.00 sec)
+        
+        mysql> SHOW schemas;
+        +--------------------+
+        | Database           |
+        +--------------------+
+        | desc7              |
+        | douma              |
+        | information_schema |
+        | mysql              |
+        | performance_schema |
+        | rucedu             |
+        | sys                |
+        +--------------------+
+        7 rows in set (0.00 sec)
+        
+        mysql>
+        ```
 
 ### 抽象层次
 
@@ -290,6 +345,384 @@
   + [diagram]
     ![Data Design](../images2/DB_DatabaseDesign.svg)
 
+#### 范式 和 规范化理论
+
+##### 说明
+
++ 示意图
+  + [diagram]
+    ![DBNF](../images/DBNormalForm.webp)
+
++ 规范化过程
+  + 确定一个给定的关系表(数据表)是否为**良构的**，即范式
+  + 将一个非良构的关系表分解为多个良构的
+
++ 码 key, 以区分实体(记录)的属性或属性集/组。
+  一个元组(行)的所有属性必须能唯一标识元组。即，不能出现两个元组的属性完全相同。
+
+  + 超码 superkey
+    + 一个或多个属性的集合，这些属性组合在一起可以在一个关系中唯一标识一个元组
+
+  + 候选码 candidate key
+    + 如果 K 是一个超码，那么 K 的任意超集也是超码
+    + 一个超码的任意真子集都不是超码，则为**候选码**
+
+  + 主码 primary key / 主码约束 primary key constraint
+    + 被设计者挑选出的候选码
+    + primary key <==> primary key constraint
+
+  + 外码 foreign key/ 外码约束 foreign key constraint / 被引用关系 referenced relation
+    + 引用完整性 referential integrity constraint
+
++ 符号惯例
+  + $\alpha$, 属性集
+  + $r(R)$, 模式$R$对于关系$r$而言
+  + $K$, 属性集的一个超码, $K$是$R$的一个超码
+
++ 函数依赖
+  + 给定一个$r(R)$的一个实例，如果对于该实例中的所有元组对$t_1$和$t_2$,  
+    使得若$t_1[\alpha] = t_2[\alpha]$,  
+    则$t_1[\beta] = t_2[\beta]$。  
+    称该实例满足(satisfy)函数依赖(functional dependency), 即 $\alpha\longrightarrow\beta$  
+  + 如果$r(R)$的每个合法实例都满足函数$\alpha\longrightarrow\beta$,  
+    则我们称该函数依赖模式$r(R)$上成立(**hold**)
+    + 成立条件
+      + 测试关系的实例，看它们是否_满足_一个给定的函数依赖集$F$
+      + 声明合法关系集上的约束。因此，我们将_只_关注满足给定函数依赖集的那些关系实例。  
+        如果我们希望把注意力放到模式$r(R)$上满足函数依赖集$F$的关系，  
+        称其为 $F$ 在 $r(R)$ 上成立
+  
+  + 平凡(trivial)的函数依赖
+    + 被所有关系被满足的函数依赖
+      + 示例  
+        例如 $A \longrightarrow A$ 被包含属性 $A$ 的所有关系满足。  
+        从字面上理解函数依赖的定义, 我们知道, 对于所有满足 $t_1[A] = t_2[A]$ 的元组 $t_1$ 和 $t_2$, $t_1[A] = t_2[A]$ 成立。  
+        类似地, $AB \longrightarrow A$也被包含属性 $A$ 的所有关系满足。  
+        一般的，如果 $\beta \subseteq \alpha$，则形如 $\alpha \longrightarrow \beta$ 的函数依赖是平凡的。  
+
+    + 认知 1，一个关系的实例可能满足的某些函数依赖并不需要在该关系的模式上成立。  
+      + 示例
+
+        + table
+
+          | building | room_number | capacity |
+          | :------- | :---------: | -------: |
+          | Packard  | 101         | 500      |
+          | Painter  | 514         | 10       |
+          | Taylor   | 3128        | 70       |
+          | Watson   | 100         | 30       |
+          | Watson   | 120         | 50       |
+
+        + 上表中，$room\_number \longrightarrow capacity$ 满足函数依赖。  
+          现实中， 不同教学楼的两个教室可以具有相同的房间号，但可以有不同的空间容量。  
+          因此可能存在某个时刻存在classroom关系的一个实例，其中并不满足 $room\_number \longrightarrow capacity$  
+          所以， 不应该将 $room\_number \longrightarrow capacity$ 包含在 classroom 关系模式上成立的 _函数依赖集_ 中
+
+    + 认知 2，假设属性名在数据库模式中只有一种含义，  
+      如果我们声明一个函数依赖$\alpha \longrightarrow \beta$作为数据库上的约束成立，  
+      那么对于任何模式R，只要 $\alpha \subseteq R$ 且 $\beta \subseteq R$，  
+      则 $\alpha \longrightarrow \beta$ 必然成立  
+
+    + $F ^ +$表示集合F的闭包(closure)，即，能够从给定的集合$F$推导出的所有函数依赖的集合。  
+      $F ^ +$包含$F$中所有的函数依赖。  
+
+    + 函数依赖理论
+      + 函数依赖集的闭包
+        + 逻辑蕴涵 logically imply  
+          给定一个关系模式 $r(R)$，如果关系 $r(R)$ 的每一个满足 $F$ 的实例也满足 $f$，  
+          则 $R$ 上的函数依赖 $f$ 被 $R$ 上的函数集 $F$ 所 逻辑蕴涵  
+
+        + 令 $F$ 为一个函数依赖集。 $F$ 的闭包是被 $F$ 所逻辑蕴涵的所有函数依赖的集合，记作 $F ^ +$。  
+          给定 $F$，我们可以由函数依赖的形式化定义直接计算出 $F ^ +$ 。  
+
+        + 公理(axiom)  
+          + 阿姆斯特朗公理 (Armstrong's axiom)  
+            + 自反律 reflexivity rule  
+              若 $\alpha$ 为一个属性集，且 $\beta \subseteq \alpha$，  
+              则 $\alpha \longrightarrow \beta$ 成立。  
+            + 增补律 augmentation rule  
+              若 $\alpha \longrightarrow \beta$，且 $\gamma$ 为一个属性集，   
+              则 $\gamma\alpha \longrightarrow \gamma\beta$ 成立。  
+            + 传递律 transitivity rule  
+              若 $\alpha \longrightarrow \beta$，且 $\beta \longrightarrow \gamma$，  
+              则 $\alpha \longrightarrow \gamma$ 成立。  
+            + 合并律 union rule  
+              若 $\alpha \longrightarrow \beta$ 且 $\alpha \longrightarrow \gamma$，  
+              则 $\alpha \longrightarrow \beta\gamma$ 成立。  
+            + 分解律 decomposition  
+              若 $\alpha \longrightarrow \beta\gamma$，  
+              则 $\alpha \longrightarrow \beta$ 且 $\alpha \longrightarrow \gamma$ 成立。  
+            + 伪传递律 pseudo transitivity rule  
+              若 $\alpha \longrightarrow \beta$ 成立，且 $\gamma\beta \longrightarrow \delta$，  
+              则 $\alpha\gamma \longrightarrow \delta$ 成立。  
+
+      + 属性集闭包  
+
+        + 函数决定 functionally determine  
+          如果 $\alpha \longrightarrow B$，则称 属性 $B$ 被 $\alpha$ 函数决定。  
+
+        + 算法
+
+          + 计算 $F ^ +$ 过程  
+
+            $$
+            \begin{equation}
+            \begin{aligned}
+            & F^+ = F \\
+            & 应用自反律 /*生成所有的平凡依赖*/ \\
+            & repeat \\
+            & \:\:\:\: for\:each\: F^+中的函数依赖f \\
+            & \:\:\:\:\:\:\:\: 在f上应用增补律 \\
+            & \:\:\:\:\:\:\:\: 将函数依赖的结果加入到F^+中 \\
+            & \:\:\:\: for\:each\: F^+中的一对函数依赖f_1和f_2 \\
+            & \:\:\:\:\:\:\:\:if\: f_1和f_2可以使用传递律进行结合 \\
+            & \:\:\:\:\:\:\:\:\:\:\:\: 将函数依赖的结构加入到F^+中 \\
+            & until F^+不再发生改变
+            \end{aligned}
+            \end{equation}
+            $$
+
+          + 计算 $F$ 下 $\alpha$ 的闭包 $\alpha^+$ 的算法
+
+            $$
+            \begin{equation}
+            \begin{aligned}
+            & result := \alpha \\
+            & repeat \\
+            & \:\:\:\: for\:each\:函数依赖 \beta \longrightarrow \gamma\:in\:F\:do \\
+            & \:\:\:\:\:\:\:\:begin \\
+            & \:\:\:\:\:\:\:\:\:\:\:\:if \beta \subseteq result\:then\:result:=result \cup \gamma \\
+            & \:\:\:\:\:\:\:\:end \\
+            & until (result不发生改变)
+            \end{aligned}
+            \end{equation}
+            $$
+
+        + 属性闭包算法的用途  
+          + 为了测试 $\alpha$ 是否为超码，我们计算 $\alpha ^ +$，并检查 $\alpha ^ +$ 是否包含 $R$ 中的所有属性。  
+          + 通过检查是否 $\beta \subseteq \alpha ^ +$，可以检查一个函数依赖 $\alpha \longrightarrow \beta$ 是否成立，即是否属于 $F ^ +$  
+            用属性闭包计算 $\alpha ^ +$，然后检查它是否包含 $\beta$。
+          + 计算 $F ^ +$ 的替代方法：  
+            对于任意的 $\gamma \subseteq R$，我们找出闭包 $\gamma ^ +$  
+            对于任意 $S \subseteq \gamma ^ +$，我们输出一个函数依赖 $\gamma \longrightarrow S$
+
+    + 正则覆盖
+
+      + 无关属性(extraneous attribute)
+        + 说明
+          考虑一个函数依赖集$F$以及$F$中的函数依赖 $\alpha \longrightarrow \beta$
+        + 从一个函数依赖的左侧删除一个属性可以使其成为更**强**的约束  
+          如果 $A \in \alpha$ 并且 $F$ 逻辑蕴涵 $(F - \{\alpha \longrightarrow \beta\}) \: \cup \: \{(\alpha - A) \longrightarrow \beta\}$  
+          则属性 $A$ 在 $\alpha$ 中是无关的。  
+        + 从一个函数依赖的右侧删除一个属性可以使其成为更**弱**的约束  
+          如果 $A \in \alpha$ 并且 函数依赖集 $(F - \{\alpha \longrightarrow \beta\}) \: \cup \: \{\alpha \longrightarrow （\beta - A)\}$ 逻辑蕴涵 $F$  
+          则属性 $A$ 在 $\beta$ 中是无关的。  
+
+      + 正则覆盖(canonical cover)  
+        依赖集 $F_c$ , $F$ 逻辑蕴涵 $F_c$ 中的所有依赖，并且 $F_c$ 逻辑蕴涵 $F$ 中的所有依赖。  
+        + $F_c$ 中任何函数依赖都不包含无关属性。  
+        + $F_c$ 中每个函数依赖的左侧都是唯一的。
+          即，$F_c$ 中不存在两个依赖 $\alpha_1 \longrightarrow \beta_1$ 和 $\alpha_2 \longrightarrow \beta_2$，满足 $\alpha_1 = \alpha_2$ 。  
+
+      + 正则覆盖计算
+
+        $$
+        \begin{equation}
+        \begin{aligned}
+        & F_c\:=F \\
+        & repeat \\
+        & \:\:\:\: 使用合并律将F_c中任何形如 \alpha_1 \longrightarrow \beta_1 和 \alpha_1 \longrightarrow \beta_2 的依赖替换为 \alpha_1 \longrightarrow \beta_1\beta_2 \\
+        & \:\:\:\: 在 F_c 中寻找一个函数依赖 \alpha \longrightarrow \beta，它要么在 \alpha 中要么在 \beta 中具有一个无关属性 \\
+        & \:\:\:\: /*请注意，使用 F_c 而非 F 来检验无关属性*/ \\
+        & \:\:\:\: 如果找到一个无关属性，则将它从 F_c 中的 \alpha \longrightarrow \beta$ 中删除 \\
+        & until\:(F_c不再改变)
+        \end{aligned}
+        \end{equation}
+        $$
+
+    + 保持依赖
+
+      + 说明
+
+        限定 $F_1$, $F_2$, ..., $F_n$ 的集合是能被 _高效_ 检查的依赖集。  
+        令 $F' = F_1\:\cup\:F_2 \:\cup\:...\:\cup\:F_n$  
+        $F'$ 是模式 $R$ 上的的一个函数依赖集，通常 $F' \neq F$ 。  
+        但是，即使 $F' \neq F$，也有可能 ${F'}^+ = F^+$ 。  
+        如果 ${F'}^+ = F^+$，则 $F$ 中的每个依赖都被 $F'$ 逻辑蕴涵，并且，如果我们证明了 $F'$ 是被满足的，就证明了 $F$ 是被满足的。  
+        称 具有性质 ${F'}^+ = F^+$ 的分解为 **保持依赖的分解** (dependency-preserving decomposition)。
+
+      + 保持依赖测试
+
+        + 常规测试
+
+          $$
+          \begin{equation}
+          \begin{aligned}
+          & 计算 F^+; \\
+          & for\:each\:D中的模式 R_i \:do \\
+          & \:\:\:\:begin \\
+          & \:\:\:\:\:\:\:\:F_i := F^+对R_i的限定 \\
+          & \:\:\:\:end \\
+          & \:\: \\
+          & F' = \emptyset \\
+          & for\:each\:限定 F_i \:do \\
+          & \:\:\:\:begin \\
+          & \:\:\:\:\:\:\:\:F' = F'\:\cup\:F_i \\
+          & \:\:\:\:end \\
+          & \: \\
+          & 计算 {F'}^+; \\
+          & if ({F'}^+ = F^+) \\
+          & then \\
+          & \:\:\:\:return\:(true) \\
+          & else \\
+          & \:\:\:\:return\:(false); \\
+          \end{aligned}
+          \end{equation}
+          $$
+
+        + 替代方案 1
+
+          + 如果 $F$ 中的每一个函数依赖都可以再分解后的一个关系上得到验证，那么这个分解就是保持以来的。是简单的验证保持依赖的方式。  
+          + 并非总是有效，存在特例。 验证方式只能被用作易于检查的一个充分条件，即，验证失败也不能判断这个分解就不是保持依赖。  
+
+        + 替代方案 2
+          + 验证方式对$F$中的每个$\alpha \longrightarrow \beta$使用下述过程  
+            $$
+            \begin{equation}
+            \begin{aligned}
+            & result = \alpha \\
+            & repeat \\
+            & \:\:\:\: for \: each \: 分解后的 R_i \\
+            & \:\:\:\:\:\:\:\: t = {(result\:\cap\:R_i)}^+ \: \cap \: R_i \\
+            & \:\:\:\:\:\:\:\: result = result \: \cup \: t \\
+            & until \: (result未发生变化)
+            \end{aligned}
+            \end{equation}
+            $$
+
+            + 属性闭包是在函数依赖集$F$下的  
+              如果 result 包含了 $\beta$ 的所有属性，则函数依赖 $\alpha \longrightarrow \beta$ 被保持。  
+
+          + 关键思想 1  
+            验证 $F$ 中的每个函数依赖 $\alpha \longrightarrow \beta$，看是否在 $F'$ 中被保持。  
+            计算 $F'$ 下 $\alpha$ 闭包；当该闭包包含 $\beta$ 时，该依赖一定得以保持。  
+            当且仅当 $F$ 中的所有依赖都被证明时保持的，该分解时保持以来的。  
+          + 关键思想 2  
+            使用修改后的属性闭包算法计算 $F'$ 下的闭包，而不用先真正计算出 $F'$，避免 $F'$ 计算开销过大。  
+            $F'$ 是所有 $F_i$ 的并集，其中 $F_i$ 是 $F$ 在 $R_i$ 上的限定。  
+            算法 $(result \cap R_i)$ 关于 $F$ 的属性闭包，并将此闭包与 $R_i$ 求交集，然后将结果属性集加入 $result$。  
+            上述一系列步骤等价于计算 $F_i$ 下的 $result$ 闭包。  
+            在 `while` 循环中对每个 $i$ 重复步骤就得到 $F'$ 下的 $result$ 闭包。  
+
+            对于任意$\gamma \subseteq R_i$, $\gamma \longrightarrow \gamma^+$ 是 $F^+$ 中的一个函数依赖，  
+            且 $\gamma \longrightarrow \gamma^+ \: \cap \: R_i$ 是 $F^i$ 对于 $R_i$ 的限定 $F_i$ 中的一个函数依赖。  
+            反之，如果 $\gamma \longrightarrow \delta$ 出现在 $F_i$ 中，则 $\delta$ 将是 $\delta^+ \: \cap \: R_i$ 的一个子集。  
+
+            时间花费是多项式的花费，而非 $F^+$ 所需的指数时间的代价。  
+
++ 分解
+
+  + 避免数据表信息重复问题的唯一方式是将其分解为多个数据表
+
+  + 有损分解 lossy decomposition
+
+  + 无损分解 lossless decomposition  
+    + 令 $R$, $R_1$, $R_2$ 和 $F$ 如上所述。  
+      $R_1$ 和 $R_2$ 构成 $R$ 的一个无损分解的条件是，以下函数依赖中至少有一个是在 $F ^ +$ 中：  
+      $R_1 \cap R_2 \longrightarrow R_1$  
+      $R_1 \cap R_2 \longrightarrow R_2$  
+      i.e. $R_1 \cap R_2$ 要么构成 $R_1$ 的超码，要么构成 $R_2$ 的超码，则 $R$ 的分解就是一个无码分解。  
+
+##### 1NF - 第一范式
+
++ 定义: 所有域都是原子性的，即数据库表的每一列都是不可分割的原子数据项
++ 示例
+  + 错误
+    + [Table]
+
+      | reader_id | name  | Dept_id | Book  | Borrowing_Date | Return_date |
+      | :-------- | :---- | :------ | :---- | :------------: | :---------: |
+      | 001       | Bob   | 100     | 101 DB Conceptions  | 2021/08/20 |  |
+      | 002       | Auth  | 200     | 102 C++ Programming | 2021/08/21 |  |
+
+    + 说明
+      Book字段可以拆分为 Book_ID 和 Book_Name
+  + 纠正
+    + [Table]
+
+      | reader_id | name  | Dept_id | Book_ID | Book_Name | Borrowing_Date | Return_date |
+      | :-------- | :---- | :------ | :------ | :-------- | :------------: | :---------: |
+      | 001       | Bob   | 100     | 101     | DB Conceptions  | 2021/08/20 |  |
+      | 002       | Auth  | 200     | 102     | C++ Programming | 2021/08/21 |  |
+
+##### 2NF - 第二范式
+
++ 定义: 在1NF的基础上，非码属性必须完全依赖于候选码（在1NF基础上消除非主属性对主码的部分函依赖）
++ 要求: 数据库表中的每个实例或记录必须可以被唯一地区分。选取一个能区分每个实体的**属性**或*属性组**，作为实体的唯一标识
++ 示例
+  + 错误
+  + 纠正
++ Problems
+  + 数据冗余
+  + 操作(更新、插入、删除)异常
+
+##### 3NF - 第三范式
+
++ 定义: 在2NF基础上，任何非主属性不依赖于其它非主属性（在2NF基础上消除传递依赖）
++ 要求:  
+  + 一个关系中不包含已在其它关系已包含的非主关键字信息。  
+  + 关系模式$R$是关于函数依赖集$F$的第三范式的条件是，  
+    对于$F ^ +$中所有形如 $\alpha \longrightarrow \beta$ 的函数依赖  
+    (其中 $\alpha \subseteq R$ 且 $\beta \subseteq R$)，以下至少有一项成立：
+    + $\alpha \longrightarrow \beta$ 是一个平凡的函数依赖。  
+    + $\alpha$ 是 $R$ 的一个超码。  
+    + $\beta - \alpha$ 中的每个属性 $A$ 都被包含于 $R$ 的一个候选码中。  
+      并 **非** 单个候选码必须包含 $\beta - \alpha$ 中的所有属性；$\beta - \alpha$ 中的每个属性 $A$ 可能被包含于 _不同_ 的候选码中。  
++ 示例
+  + 错误
+  + 纠正
+
+##### BCNF
+
+Boyce-Codd Normal Form -- 巴斯-科德范式 / 修正第三方式
+
++ 定义: 
+  + 在3NF基础上，任何主属性不能对主键子集依赖（在3NF基础上消除主属性对主码子集的依赖）  
+  + 关于函数依赖集$F$的关系模式$R$属于BCNF的条件  
+    对于$F ^ +$中所有形如$\alpha \longrightarrow \beta$的函数依赖(其中 $\alpha \subseteq R$ 且 $\beta \subseteq R$)，下面至少有一项成立:  
+    + $\alpha \longrightarrow \beta$是平凡的函数依赖(即$\beta \subseteq \alpha$) **同3NF条件**  
+    + $\alpha$ 是模式 $R$ 的一个超码 **同3NF条件**  
+
++ 说明:  
+  + 任何决定因素都是超键。  
+  + 一个数据库设计属于BCNF的条件是，构成该设计的关系模式集中的每个模式都属于BCNF。  
+
++ 保持依赖
+
+  + 主码约束
+  + 函数依赖
+  + check约束
+  + 断言
+  + 触发器
+
++ 示例
+  + 错误
+  + 纠正
+
+##### 4NF - 第四范式
+
++ 定义
++ 示例
+  + 错误
+  + 纠正
+
+##### 5NF - 第五范式
+
++ 定义
++ 示例
+  + 错误
+  + 纠正
+
 #### 概念设计
 
 #### 逻辑设计
@@ -322,21 +755,6 @@
 
 + **空值**
   + **null value**
-
-#### 码 key
-
-+ 超码 superkey
-  + 一个或多个属性的集合，这些属性组合在一起可以在一个关系中唯一标识一个元组
-
-+ 候选码 candidate key
-  + 如果 K 是一个超码，那么 K 的任意超集也是超码
-  + 一个超码的任意真子集都不是超码，则为**候选码**
-
-+ 主码 primary key
-  + 被设计者挑选出的候选码
-  + primary key <==> primary key constraint
-
-+ 外码 foreign key
 
 ### 关系完整性
 
@@ -417,12 +835,45 @@
 
         + 并
           + $R \cup S = \{ t | t \in R \vee t \in S \}$
+          + [code]
+
+            ```sql
+            (select course_id
+               from section
+              where semester = 'Fall' and year = 2017)
+            union
+            (select course_id
+               from section
+              where semester = 'Spring' and year = 2018)
+            ```
 
         + 差
           + $R - S = \{ t | t \in R \wedge t \notin S \}$
+          + [code]
+
+            ```sql
+            (select course_id
+               from section
+              where semester = 'Fall' and year = 2017)
+            except
+            (select course_id
+               from section
+              where semester = 'Spring' and year = 2018)
+            ```
 
         + 交
           + $R \cap S = \{ t | t \in R \wedge t \in S \}$
+          + [code]
+
+            ```sql
+            (select course_id
+               from section
+              where semester = 'Fall' and year = 2017)
+            intersect [all]
+            (select course_id
+               from section
+              where semester = 'Spring' and year = 2018)
+            ```
 
         + 笛卡尔积 Cartesian-product
           + $ R \times S = \{ \stackrel\frown{t_r t_s} | t_r \in R \wedge t_s \in S \}$
@@ -455,7 +906,7 @@
             + $\prod_{Sno,Smajor}(Student)$
             + `select Sno, Smajor from Student;`
 
-        + 连接 join / $\theta join$
+        + 连接 join / $\Join$
           + 从两个关系的笛卡尔积中选取其属性间满足一定条件的元组
           + $R \Join_{A \theta B} S = \{ \stackrel\frown{t_r t_s} | t_r \in R \wedge t_s \in S \wedge t_r[A] \theta t_s[B]\}$
             + $\theta$为运算符
@@ -617,6 +1068,647 @@
 ### 分布式数据库系统
 
 ### 云数据库系统
+
+## 数据库物理系统
+
+### 存储系统
+
+![Database Storage Level](../images2/DB-StorageLevel.svg)
+
+#### 物理体系
+
++ 主存储器 primary storage  
+
+  + 高速缓存 cache  
+
+  + 主存 main memory
+
++ 辅助存储器 secondary storage / 在线存储器 online storage  
+
+  + 闪存 flash memory
+
+    + NOR FLASH, Not OR Flash Memory, 或非逻辑门阵列结构闪存
+
+    + NAND FLASH, Not AND Flash Memory, 与非逻辑门阵列结构闪存
+
+    + [table]
+
+      | features | NOR Flash | NAND Flash |
+      | :------- | :-------- | :--------- |
+      | 结构 | 并行连接，随机访问 | 串联连接，页/块访问 |
+      | 读取速度 | 快(随机) | 较慢(连续读取快) |
+      | 写/擦速度 | 慢(字节写入,块擦除) | 快(页写入,快擦除) |
+      | 容量 | 小(Mb ~ Gb级) | 大(Gb ~ Tb级) |
+      | 成本 | 高(每比特) | 低(每比特) |
+      | 寿命 | 约10万次擦写 | SLC:约10万次；MLC/TLC:更低 |
+      | 接口 | 独立地址/数据总线 | 复用I/O接口，需控制器 |
+      | 典型应用 | 代码存储、XIP | 大容量数据存储(SSD、U盘) |
+
+  + 磁盘存储器 magnetic-disk storage / 硬盘驱动器 Hard Disk Drive,HDD
+
++ 三级存储器 tertiary storage / 离线存储器 offline storage  
+
+  + 光学存储器 optical storage  
+
+  + 磁带存储器 tape storage
+
+#### RAID
+
+RAID, Redundant Array of Independent Disk
+
+##### 特性
+
++ 冗余
+
++ 并行
+
+  + 数据拆分
+
+    + 比特级拆分
+
+    + 块级拆分
+
+##### 级别
+
++ RAID 0
+  + 块级拆分
+  + **无**冗余
+
++ RAID 1
+
++ RAID 5
+
++ RAID 6
+
++ RAID 10
+
+### 数据库存储架构
+
+#### 文件组织
+
++ 一个数据库被映射为多个不同的文件  
+  这些文件由底层的操作系统来维护  
+  文件永久驻留在磁盘上  
+
++ 一个文件在逻辑上被组织为记录的一个序列，一个文件相当于一个数据表？  
+  块，每个文件从逻辑上被分成定长的存储单元  
+  记录被映射到磁盘块上  
+  块在逻辑上是定长的存储单元，是存储分配和数据传输的单位  
+  块规模默认 4K 或 8K  
+
++ **每条记录被完全包含在单个块中**
+
++ 定长记录  
+
++ 变长记录  
+
++ 大对象存储  
+
+  + blob
+
+  + clob  
+
+#### 记录组织
+
++ 堆文件组织, $heap \: file \: organization$  
+
++ 顺序文件组织, $sequential \: file \: organization$  
+
++ 多表聚簇文件组织, $multi-table \: clustering \: file \: organization$  
+
++ $B^+\:Tree$文件组织, $B^+-tree \: file \: organization$  
+
++ 散列文件组织, $hashing \: file \: organization$  
+
+#### 数据表组织
+
+#### 数据字典
+
++ 元数据，数据的数据
+
++ 关系模式和关于关系的其他元数据存储在数据字典(Data Dictionary)/系统文件(system catalog)的结构  
+  + 必须存储的信息类型
+    + 关系的名称
+    + 每个关系中属性的名称
+    + 属性的域和长度
+    + 在数据库上定义的视图的名称，以及这些视图的定义
+    + 完整性约束
+
+  + 系统用户信息
+    + 用户名称、用户缺省模式、用户密码(认证信息)、其他信息
+    + 用户授权信息
+
+  + 关系/数据表的存储组织
+    + 如果关系被存储在操作系统中，数据字典将会记录包含每个关系的单个文件的名称  
+    + 如果数据库把所有关系存储在单个文件中，数据字典可能将包含每个关系的记录的块'记在诸如链表那样的数据结构中  
+
+  + 每个关系的每个索引信息
+    + 索引的名称  
+    + 被索引的关系的名称  
+    + 在其上定义索引的属性  
+    + 构造的索引的类型  
+
+#### 数据库缓冲区
+
++ 缓冲区
+  + 原因
+    + 数据库的内存量小于数据的规模。  
+
++ 缓冲区管理器
+  + 块移出, evicted  
+  + 钉住, pin
+  + 锁
+  + 块写出 & 块强制写出
+  + 缓冲区替换策略  
+    + LRU, Least Recently Used, 最近最少使用
+    + toss-immediate, 立即丢弃
+    + MRU, Most Recently Used, 最近最常使用
+  + 写操作的重排序与恢复
+
+#### 面向列的存储
+
++ 面向列的存储 column-oriented storage / 柱状存储 columnar storage  
+  + 关系/数据表的每个属性都被单独存储  
+  + 来自相邻元组的属性值存储在文件中相邻的位置上  
+
++ 面向列的存储适合数据分析查询  
+  + 减少I/O
+  + 提高CPU缓存性能
+  + 提高压缩效率
+  + 向量处理
+
++ 面向列的存储的缺点，不适用于事务处理  
+  + 元组重构的代价大
+    获取单个元组的多个属性需要多次I/O操作
+  + 元组删除和更新的代价大
+  + 解压的代价大  
+
+### 索引
+
+#### 技术评价
+
++ 访问类型, access type
++ 访问时间, access time
++ 插入时间, insertion time
++ 删除时间, deletion time
++ 空间开销, space overhead
+
+#### 顺序索引, ordered index
+
++ 搜索码
++ 非唯一性搜索码 non-unique search key  
+  一种关系可以有不止一条包含相同搜索码值的记录(即，两条或多条记录对于索引属性可以具有相同的值)，则搜索码称为**非唯一性搜索码**
+
++ 每个索引结构与一个特定的搜索码相关联
++ 按照 排好的顺序 存储 搜索码 的值，并将每个 搜索码 与 包含该 搜索码 的记录 关联起来
++ 被索引的文件中的记录本身也可以按照某种排序顺序存储  
++ 一个文件可以有多个索引，分别基于不同的搜索码
+
++ 索引项 index entry / 索引记录 index record
+  + 由 搜索码值 和 指针 构成  
+  + 指针 指向具有该搜索码值的一条或多条记录  
+    指向一条记录的 指针 由磁盘块的标识 和 标识出块内记录的磁盘块内偏移量 组成  
+
++ 稠密索引 dense index / 稀疏索引 sparse index  
+
+  + 稠密索引 v.s. 稀疏索引  
+
+    + 稠密索引更快  
+    + 稀疏索引更省空间，插入、删除开销小  
+
+  + 稠密索引
+
+    + 稠密索引中，对于文件中的每个搜索码值都有有一个索引项  
+      + 稠密**聚集**索引中，索引记录包括搜索码值以及指向具有该搜索码值得第一条数据记录的指针。  
+        具有相同搜索码值的其余记录会顺序存储在第一条记录后，由于该索引是聚集索引，因此记录是根据相同的搜索码值排序的。  
+      + 稠密**非聚集**索引中，索引必须存储指向具有相同搜索码值的索引记录的指针列表。  
+
+    + [diagram]
+
+      ![Dense Index ID](../images2/DB-DenseIndex.svg)  
+      ![Dense Index Name](../images2/DB-DenseIndex-Name.svg)  
+
+    + 插入
+
+      + 如果该搜素码值并未出现在索引中，系统就在索引中适当的位置插入带有该搜索码值的索引项。  
+      + 否则，执行如下操作  
+        + 如果索引项存储的是指向具有相同搜索码值的所有记录的指针，那么系统就在索引项中增加一个指向新记录的指针  
+        + 否则，索引项存储一个仅指向具有相同搜索码值的第一条记录的指针，系统把待插入的记录放到具有相同搜索码值的其他记录之后。  
+
+    + 删除
+
+      + 如果待删除的记录是具有这个特定搜索码值的唯一一条记录，则系统就从索引中删除相应的索引项。  
+      + 否则，执行如下操作  
+        + 如果索引项存储的是指向具有相同搜索码值的所有记录的指针，那么系统就从索引项中删除指向待删除记录的指针。  
+        + 否则，索引项存储一个仅指向具有该搜索码值的第一条记录的指针。  
+          在这种情况下，如果待删除的记录是具有该搜索码值的第一条记录，系统就更新索引项，使其指向下一条记录。
+
+  + 稀疏索引
+    + 只有当关系按搜素吗排列次序存储时才能使用稀疏索引。(只有索引时聚集索引时才使用稀疏索引)  
+      每个索引项包括 一个搜索码值 和 指向具有该搜索码值的第一条数据记录的指针  
+      为了定位一条记录，找到所具有的最大搜索码值小于或等于我们所找记录的搜索码值的索引项。从该索引项指向的记录开始，沿着文件中的指针查找，直到找到所需记录为止。  
+
+    + [diagram]
+
+      ![Sparse Index ID](../images2/DB-SparseIndex.svg)  
+
+    + 插入
+      假设索引为每个块保存一个索引项。  
+      如果系统创建了一个新的块，它会将出现在新块中的第一个搜索码值(按照搜索码的次序)插入索引中。  
+      另一方面，如果这条新插的记录具有它在块中的最小搜索码值，那么系统就更新指向该块的索引项；否则，系统对索引不做任何改动。  
+
+    + 删除
+
+      + 如果索引中并不包含具有待删除记录搜索码值的索引项，则索引不必左任何改动
+      + 否则，执行如下操作  
+        + 如果待删除记录时具有该搜索码值的唯一记录，则系统用下一个搜索码值(按搜索码次序)的索引记录来替换相应的索引记录。  
+          如果下一个搜索码值已经有了一个索引项，则删除而不是替换该索引项。  
+        + 否则，如果该搜索码值的索引项指向待删除的记录，系统就更新索引项，使其指向具有相同搜索码值的下一条记录。  
+
+  + 多级索引
+
++ 聚簇索引 / 主索引
+  + clustering index, clustered index, primary index
+  + 搜索码定理了文件的次序
+  + 主索引，通常是建立在主码上的索引，但并非必须，可以建立在任何搜索码上
+  + 聚集索引可以是稀疏的  
+
++ 非聚簇索引 / 辅助索引
+  + non-clustering, non-clustered, secondary index
+  + 辅助索引必须是稠密索引
+  + 辅助索引必须包含指向所有记录的指针  
+  + 在**非唯一性搜索码**上实现辅助索引的方式:  
+    + 与主索引的情况不同，这种辅助索引中的指针并不直接指向记录。  
+      相反，索引中的每个指针都指向一个桶(bucket)，该桶继而又包含指向文件的指针。  
+
+      + [diagram]
+
+        ![non-unique search key](../images2/DB-NonUniqueSearchKey.svg)
+
+      + 缺点  
+        + 由于附加的间接指针层可能需要随机I/O操作，索引访问需要花费更长的时间  
+        + 如果一个码很少或没有重复，那么将整个块分配给其关联的桶会浪费大量的空间  
+
+#### $B^+ Tree \: Index$
+
++ $B^+ Tree \: Index$ 采用 平衡树(balanced tree) 结构
+
+  + 从 树根 到 树叶 的每条路径的长度都是相同的  
+
+  + 树中每个非叶节点(除根节点外)有 $[n/2]$ 到 $n$ 个孩子，  
+    其中 $n$ 对于特定的树是固定的；  
+    根节点有 $2$ 到 $n$ 个孩子。  
+
+  + 叶节点 leaf node
+
+  + [diagram]
+
+    ![B plus Tree Basic](../images2/DB-B+IndexBasic.svg)  
+    $B^+$树典型结构  
+
+    ![B plus Tree Example (n=4) 01 Full View](../images2/DB-B+IndexExample01-Full-n4.svg)  
+    $B^+$树示例全图 (n=4)  
+
+    ![B plus Tree Example (n=6) 01 Full View](../images2/DB-B+IndexExample01-Full-n6.svg)
+    $B^+$树示例全图 (n=6)
+
++ 查询
+
+  + 搜索码查询
+
+    $$
+    \begin{equation}
+    \begin{aligned}
+    & \textbf{function} \: find(v) \\
+    & /* 假设没有重复码，并且如果存在这样一条搜索码值为v的记录 */ \\
+    & /* 则返回指向该记录的指针，否则返回空 */ \\
+    & \:\:\:\: 置 C = 根节点 \\
+    & \:\:\:\: \textbf{while} \: (C不是叶节点) \: \textbf{begin} \\
+    & \:\:\:\:\:\:\:\: 令 i = (满足 v <= C.K) \\
+    & \:\:\:\:\:\:\:\: \textbf{if} \: 无满足条件的i \: \textbf{then} \: \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: \textbf{begin} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 令P_m=该节点中最后一个非空指针 \\
+    & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 置C=C.P_m \\  
+    & \:\:\:\:\:\:\:\:\:\:\:\: \textbf{end} \\
+    & \:\:\:\:\:\:\:\: \textbf{else if} \: (v == C.P_{i+1}) \: \textbf{then} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: 置C = C.P_{i+1} \\
+    & \:\:\:\:\:\:\:\: \textbf{else} \: \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: 置C = C.P_i \:\:\:\: /* \: v < C.K_i \: */ \\  
+    & \:\:\:\: \textbf{end} \\
+    & \:\:\:\: \\
+    & \:\:\:\: /* C是叶节点 */ \\
+    & \:\:\:\: \textbf{if} \: 有某个i, 满足K_i = v \: \textbf{then} \\
+    & \:\:\:\:\:\:\:\: 返回P_i \\
+    & \:\:\:\: \textbf{else} \\
+    & \:\:\:\:\:\:\:\: 返回空； /* 不存在码值等于v的记录 */ \\
+    \end{aligned}
+    \end{equation}
+    $$
+
+  + 范围查询
+
+    $$
+    \begin{equation}
+    \begin{aligned}
+    & \textbf{function} \: findRange(lb,ub) \\
+    & /* 返回具有搜索码值V且满足 lb \leq V \leq ub 的所有记录 */ \\
+    & \:\:\:\: 置resultSet=\{\}; \\
+    & \:\:\:\: 置C=根节点 \\
+    & \:\:\:\: \textbf{while} \: (C不是叶节点) \: \textbf{begin} \\
+    & \:\:\:\:\:\:\:\: 令 \: i=满足lb \leq C.K_i的最小值 \\
+    & \:\:\:\:\:\:\:\: \textbf{if} \: 无满足条件的i \: \textbf{then} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: \textbf{begin} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 令 \: P_m = 节点中最后一个非空指针 \\
+    & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 置 \: C = C.P_m \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: \textbf{end} \\
+    & \:\:\:\:\:\:\:\: \textbf{else if} \: (lb=C.K_i) \: \textbf{then} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: 置 \: C=C.P_{i+1} \\
+    & \:\:\:\:\:\:\:\: \textbf{else} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: 置 \: C=C.P_i \:\:\:\: /* \: lb \leq C.K_i \: */ \\
+    & \:\:\:\: \textbf{end} \\
+    & \:\:\:\: \\
+    & \:\:\:\: /* \: C是叶节点 \: */ \\
+    & \:\:\:\: 令 \: i是满足K_i \geq lb的最小值 \\
+    & \:\:\:\: \textbf{if} \: 无满足条件的i \: \textbf{then} \\
+    & \:\:\:\:\:\:\:\: 置 \: i=1+C中码的数量 \:\:\:\: /* \: 强制移动至下一个叶节点 \: */ \\
+    & \:\:\:\: \\
+    & \:\:\:\: 置 done = \textbf{false} \\
+    & \:\:\:\: \textbf{while} \: (\textbf{not} \: done) \: \textbf{begin} \\
+    & \:\:\:\:\:\:\:\: 令 \: n=C中码的数量 \\
+    & \:\:\:\:\:\:\:\: \textbf{if} \: (i \leq n) \: \textbf{and} \: (C.K_i \leq ub) \: \textbf{then} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: \textbf{begin} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 把C.P_i加入resultSet \\
+    & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 置i = i + 1 \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: \textbf{end} \\
+    & \:\:\:\:\:\:\:\: \textbf{else if} ( i \leq n) \: \textbf{and} \: (C.K_i) \geq ub ) \: \textbf{then}  \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: 置done=\textbf{true}; \\
+    & \:\:\:\:\:\:\:\: \textbf{else if} ( i \geq n) \: \textbf{and} \: (C.K_i不为空) \: \textbf{then} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: 置C=C.P_{n+1}; \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: 置i = 1; \:\:\:\: /* \: 移至下一个叶节点 \: /* \\
+    & \:\:\:\:\:\:\:\: \textbf{else} \\
+    & \:\:\:\:\:\:\:\:\:\:\:\: 置done=\textbf{true}; \:\:\:\: /* \: 右侧没有更多的叶节点 \: */\\
+    & \:\:\:\: \textbf{end} \\
+    & \:\:\:\: \textbf{return} \: resultSet; \\
+    \end{aligned}
+    \end{equation}
+    $$
+
+  + 说明  
+    + 查询代价  
+      + 在处理一个查询的过程中，需要遍历树中从跟到某个叶节点的一条路径。  
+        如果文件中有$N$个搜索码值，则$B^+$树路径长度不超过 $[log_{[n/2]}{(N)}]$  
+      + $B^+$树结构与内存中树结构(二叉树)之间的一个重要区别在于节点的规模及其导致的树的高度的不同  
+        如果文件中有$N$个搜索码值，则二叉树的路径长度不超过 $[log_{2}{(N)}]$
+
++ 更新
+
+  + 说明
+    + 拆分 split
+    + 合并 coalesce
+    + 重新分配 redistribute  
+
+  + 插入
+
+    + 说明
+
+      使用查找函数找到搜索码值将出现的叶节点，  
+      在叶节点中插入一项，搜索码和指针对，  
+      使得插入后搜索码仍然有序。  
+
+    + 过程
+
+      + [diagram]  
+        + 原始$B^+$树  
+          ![B plus Tree Example (n=4) 01 Full Begin View](../images2/DB-B+IndexExample01-Full-n4-begin.svg)  
+
+        + 插入Adams及结果$B^+$树  
+
+          + 按照查找算法，发现 $Adams$ 应出现在 $Brandt$, $Califieri$ 和 $Crick$ 的 **叶节点** 中
+          + 该 **叶节点** 中已没有插入搜索码 $Adams$ 所需的空间  
+          + 新节点 Admas 以 Califieri 作为 最小搜索码值  
+            + Admas 小于 根节点 的 第一个$K_1$(=$| \: | Mozart | \: | \:\:\:\:\: | \: | \:\:\:\:\: | \: | \longrightarrow $) 第一元素  
+            + 按 $P_1$ 查找至内部节点$K_{1.1}$(=$| \: | Einstein | \: | Gold | \: | \:\:\:\:\: | \: | \longrightarrow $)
+            + Admas 小于 内部节点$K_{1.1}$(=$| \: | Einstein | \: | Gold | \: | \:\:\:\:\: | \: | \longrightarrow $) 第一元素
+            + 按 $P_{1.1}$ 查找至 叶节点$K_{1.1.1}$(=$| \: | Brandt | \: | Califieri | \: | Crick | \: | \longrightarrow $)
+          + 该 **叶节点** 被拆分为两个 **叶节点**  
+            + $| \: | Brandt | \: | Califieri | \: | Crick | \: | \longrightarrow $ 拆分为
+              $| \: | Adams  | \: | Brandt    | \: | \:\:\:\:\: | \: | \longrightarrow | \: | Califieri | \: | Crick | \: | \:\:\:\:\: | \: | \longrightarrow$  
+            + 一般说，将这n个搜索码值(叶节点中原有的n-a个值再加上待插入的值)分为两组，  
+              将前[n/2]个值放在原来的节点中，  
+              并将剩下的值放在一个新创建的节点中  
+          + 需要将具有此搜索码值以及指向新节点的指针的项插入被拆分的叶节点的父节(即，内部节点$| \: | Einstein | \: | Gold | \: | \:\:\:\:\: | \: | \longrightarrow $)点中
+            无需拆分，因其有空间类容纳新项  
+
+          ![B plus Tree Example (n=4) 01 Full End View  ](../images2/DB-B+IndexExample01-Full-n4-end.svg)  
+
+        + 插入Lamport及结果$B^+$树  
+
+          + Lamport 应插入 $| \: | Gold | \: | Katz | \: | Kim | \: | \longrightarrow $ 叶节点中  
+            该叶节点已被充满空间，须拆分  
+            原节点变形为$| \: | Gold | \: | Katz | \: | \:\:\:\:\: | \: | \longrightarrow $  
+            产生新的叶节点为 $| \: | Kim | \: | Lamport | \: | \:\:\:\:\: | \: | \longrightarrow $  
+          + 必须把一个$(Kim, n1)$ (即，$| \: | Kim | \: | \:\:\:\:\: | \: | \:\:\:\:\: | \: | $)项添加至中层节点中，
+            并变形原节点($| \: | Califieri | \: | Einstein | \: | Gold | \: | $)为  
+            $| \: | Califieri | \: | Einstein | \: | \:\:\:\:\: | \: | $, 即删除了 $Gold$  
+            修改相关指针  
+          + 修改根节点  
+
+          ![B plus Tree Example (n=4) 01 Full End View 2](../images2/DB-B+IndexExample01-Full-n4-end2.svg)  
+
+    + 伪代码
+
+      + 在$B^+$树中插入项  
+        $$
+        \begin{equation}
+        \begin{aligned}
+        & \textbf{procedure} \: insert( \textbf{value} \: K, \textbf{pointer} \: P ) \\
+        & \:\:\:\: \textbf{if} \: (树为空) \: \textbf{then} \\
+        & \:\:\:\:\:\:\:\: 创建一个空的叶节点L, 同时也是叶节点 \\
+        & \:\:\:\: \textbf{else} \\
+        & \:\:\:\:\:\:\:\: 找到应该包含码值K的叶节点L \\
+        & \:\:\:\: \\
+        & \:\:\:\: \textbf{if} \: (L具有不到n-1码值) \: \textbf{then} \\  
+        & \:\:\:\:\:\:\:\: insert\_in\_leaf(L, K, P) \\
+        & \:\:\:\: \textbf{else} \\
+        & \:\:\:\:\:\:\:\: \textbf{begin} \:\:\:\: /* \: L已经具有n-1个码值了，需拆分L \: */\\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 创建节点L' \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 把 \: L.P_1, ..., L.K_{n-1} \: 复制到可以容纳n个 \: (指针, 码值)对 \: 的 \: 内存块T \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: insert\_in\_leaf(T, K, P) \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 令 L'.P_n=L.P_n \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 令 L.P_n=L' \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 从L中删除L.P_1到L.K_{n-1} \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 把T.P_1到T.K_{[n/2]}从T复制到L中， L以L.P_1作为开始 \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 把T.P_{[n/2]+1}到T.K_n从T复制到L'中， L'以L'.P_1作为开始 \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 令K'为L'中的最小码值 \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: insert\_in\_parent(L,K',L') \\  
+        & \:\:\:\:\:\:\:\: \textbf{end} \\
+        \end{aligned}
+        \end{equation}
+        $$
+
+      + 辅助过程
+
+        $$
+        \begin{equation}
+        \begin{aligned}
+        & \textbf{procedure} \: insert\_in\_leaf(node \: L, \textbf{value} \: K, \textbf{pointer} \: P) \\
+        & \:\:\:\: \textbf{if} \: (K比L.K_1小) \: \textbf{then} \\
+        & \:\:\:\:\:\:\:\: 把P、K插入L中，紧接在L.P_1前面 \\
+        & \:\:\:\: \textbf{else} \\
+        & \:\:\:\:\:\:\:\: \textbf{begin} \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 创建K_i表示L中小于或等于K的最大值 \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 把P、K插入L中，紧跟在L.K_i后面 \\
+        & \:\:\:\:\:\:\:\: \textbf{end} \\
+        & \:\:\:\: \\
+        & \:\:\:\: \\
+        & \textbf{procedure} \: insert\_in\_parent(node \: N, \textbf{value} \: K', node \: N') \\
+        & \:\:\:\: \textbf{if} \: (N是树的根节点) \: \textbf{then} \\
+        & \:\:\:\:\:\:\:\: \textbf{begin} \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 创建一个新的节点R(包含N、K'、N') \:\:\:\: /* \: N 和 N' 都是指针 \: /* \\  
+        & \:\:\:\:\:\:\:\:\:\:\:\: 令R为树的根节点 \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: \textbf{return} \\
+        & \:\:\:\:\:\:\:\: \textbf{end} \\
+        & \:\:\:\: \\
+        & \:\:\:\: 令P=parent(N) \\
+        & \:\:\:\: \textbf{if} \: (P有不到n个指针) \: \textbf{then} \\
+        & \:\:\:\:\:\:\:\: 将(K', N')插入P中，紧跟在N后面 \\
+        & \:\:\:\: \textbf{else} \\
+        & \:\:\:\:\:\:\:\: /* \: 拆分 \: */ \\
+        & \:\:\:\:\:\:\:\: \textbf{begin} \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 将P复制到可以容纳P和(K',N')的内存块T中 \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 将(K', N')插入T中，紧跟在N后面 \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 删除P中所有项 \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 创建节点P' \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 把T.P_1, ..., T.P_{[(n+1)/2]}复制到P \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 令K''=T.K_{[(n+1)/2]} \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: 把T.P_{[(n+1)/2]+1}, ..., T.P_{n+1}复制到P' \\
+        & \:\:\:\:\:\:\:\:\:\:\:\: insert\_in\_parent(P, K'', P') \\
+        & \:\:\:\:\:\:\:\: \textbf{end} \\
+        & \:\:\:\: \\
+        & \:\:\:\: \\
+        & \textbf{procedure} \: insert\_into\_index(......) \\
+        \end{aligned}
+        \end{equation}
+        $$
+
+  + 删除
+
+    + 说明
+
+      通过待删除记录的搜索码使用查找函数找到包含待删除项的叶节点；  
+      如果存在具有相同搜索码值的多个项，就遍历所有这些具有相同搜索码值的项，直到找到指向待删除记录的项。  
+      从叶节点中移除该项。  
+      将 该叶节点中位于 待删除项 右边 的所有项 都左移一个位置，以便在删除该项后不会留下空隙。  
+
+    + 过程
+
+      + [diagram]
+
+        + 原始$B^+$树  
+          ![B plus Tree Example (n=4) 01 Full End View  ](../images2/DB-B+IndexExample01-Full-n4-end.svg)  
+
+        + 删除Srinivasan及结果$B^+$树  
+
+          + 查找并定位 Srinivasan 叶节点($ | \: | Srinivasan | \: | Wu\:\:\: | \: | \:\:\:\:\:\: | \: |$)  
+          + 删除 Srinivasan 后，该叶节点只剩 Wu，此时 $ n =4, and \: 1 < [(n-1)/2] $  
+            + 或将该节点和一个兄弟节点合并  
+            + 或在节点间重新分配项  
+          + 修改父节点中相关搜索值项  
+
+          ![B plus Tree Example (n=4) 01 Full End View 3](../images2/DB-B+IndexExample01-Full-n4-end3.svg)  
+
+        + 删除Singh和Wu及结果$B^+$树  
+
+          + ...  
+
+          ![B plus Tree Example (n=4) 01 Full End View 4](../images2/DB-B+IndexExample01-Full-n4-end4.svg)  
+
+    + 伪代码
+
+      $$
+      \begin{equation}
+      \begin{aligned}
+      & \textbf{procedure} \: delete(\textbf{value} \: K,\textbf{pointer} \: P) \\
+      & \:\:\:\: 找到包含(K,P)的叶节点L \\
+      & \:\:\:\: delete\_entry(L, K, P) \\
+      & \\
+      & \\
+      & \textbf{procedure} \: delete_entry(node \: N, \textbf{value} \: K, \textbf{pointer} \: P) \\
+      & \:\:\:\: 从N中删除(K,P) \\
+      & \:\:\:\: \textbf{if} \: (N是根节点 \: \textbf{and} \: N只剩一个子节点) \: \textbf{then} \\
+      & \:\:\:\:\:\:\:\: 使N的子结点称为该树的新节点并删除N \\
+      & \:\:\:\: \textbf{else if} \: (N有太少的值或指针) \: \textbf{then} \\
+      & \:\:\:\:\:\:\:\: \textbf{begin} \:\:\:\: /* \: block\_1 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\: 令N'为parent(N)的前一个或后一个孩子节点 \\
+      & \:\:\:\:\:\:\:\:\:\:\:\: 令K'为parent(N)中指针N和N'之间的值 \\
+      & \:\:\:\:\:\:\:\:\:\:\:\: \textbf{if} \: (N和N'中的项能放入单个节点中) \: \textbf{then} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{begin} \:\:\:\: /* \: block\_2 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: /* \: 合并节点 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{if} \: (N是N'的前一个节点) \: \textbf{then} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: swap\_variables(N, N') \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{else} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{begin} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 将N中所有\:(K_i, P_i)对\:附加到N'中 \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 令N'.P_n=N.P_n \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{end} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: delete\_entry(parent(N), K', N) \:\:\:\: /* \: 删除N的父节点 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 删除节点N \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{end} \:\:\:\: /* \: block\_2 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\: \textbf{else} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: /* \: 重新分配，从N'借来一个项 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{begin} \:\:\:\: /* \: block\_3 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{if} \: (N'是N的前一个节点) \: \textbf{then} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{begin} \:\:\:\: /* \: block\_4 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{if} \: (N是非叶节点) \: \textbf{then} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{begin} \:\:\:\: /* \: block\_5 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 令m满足:N'.P_m是N'中的最后一个指针 \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 从N'中去除(N'.K_{m-1}, N'.K_{m}) \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 插入(N'.P_m, K')，并通过将其他指针和值右移使之成为N中的第一个指针和值 \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 用N'.K_{m-1}替换parent(N)中的K'  \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{end} \:\:\:\: /* \: block\_5 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{else} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{begin} \:\:\:\: /* \: block\_6 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 令m满足:(N'.P_m, N'.K_m)是N'中的最后一个"指针,值"对  \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 从N'中去除(N'.P_m, N'K_m)  \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 插入(N'.P_m, N'.K_m)，并通过将其他指针和值右移使之成为N中的第一个指针和值 \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: 用N'.K_m替换parent(N)中的K' \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{end} \:\:\:\: /* \: block\_6 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{end} \:\:\:\: /* \: block\_4 \: */ \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{else} \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: ...与then情况对称... \\
+      & \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\: \textbf{end} \:\:\:\: /* \: block\_3 \: */ \\
+      & \:\:\:\:\:\:\:\: \textbf{end} \:\:\:\: /* \: block\_1 \: */ \\
+      \end{aligned}
+      \end{equation}
+      $$
+
+  + 更新复杂度
+
+  + $B^+$扩展树
+
+#### 散列索引, hash index
+
++ 说明
+
+  + 桶 bucket
+    + 桶溢出(bucket overflow) vs 溢出桶(overflow bucket)
+  + 散列文件组织 hash file organization
+  + 散列函数 hash function
+  + 溢出链 overflow chaining
+  + 闭寻址(closed addressing) _和_ 闭散列(closed hashing)
+  + 偏斜(skew)
+  + 静态散列(static hashing)  
+  + 动态散列(dynamic hashing)  
+    + 线性散列(linear hashing)  
+    + 可扩展散列(extendable hashing)  
+
+#### 多码访问
+
+##### 多个单码访问
+
+##### 多码索引
+
+##### 覆盖索引 covering index
 
 ## 附录
 
@@ -1468,12 +2560,19 @@
   + 第32章 PostgreSQL
 
 + 学习库
+
   + dbsc7
+
     + info:
       + host: wsl / AlmaLinux8
       + database:dbsc7
       + users
         + user1: dbsc7admin / !QAZ2wsx
+
+    + ER图例 1
+
+      + [diagram]
+        ![Database Diagram](../images/dbsc7-diagram-260424.png)
 
     + 数据表
 
@@ -2180,50 +3279,50 @@
       + 6.5.2, 无损连接的模式分解 与 保持函数依赖的模式分解 之间的关系 .... 193
       + 6.5.3, 既无损连接又保持函数依赖的模式分解算法 .... 193
       + 6.5.4, 无损连接的模式分解算法 .... 194
-    + 本章小结 .... 195
-    + 习题 6 .... 196
-    + 参考文献 6 .... 197
+    + 本章小结 .... 195/221
+    + 习题 6 .... 196/222
+    + 参考文献 6 .... 197/224
 
-  + 第7章 数据库设计 .... 201
+  + 第7章 数据库设计 .... 201/227
     + 7.1, 数据库设计概述 .... 201
-      + 7.1.1, 数据库设计的特点 .... 202
-      + 7.1.2, 数据库设计的方法 .... 203
+      + 7.1.1, 数据库设计的特点 .... 202/228
+      + 7.1.2, 数据库设计的方法 .... 203/229
       + 7.1.3, 数据库设计的基本步骤 .... 204
       + 7.1.4, 数据库设计过程中的各种模式 .... 207
     + 7.2, 需求分析 .... 207
-      + 7.2.1, 需求分析的任务 .... 207
+      + 7.2.1, 需求分析的任务 .... 207/223
       + 7.2.2, 需求分析的方法 .... 208
       + 7.2.3, 数据字典 .... 209
-    + 7.3, 概念结构设计 .... 211
+    + 7.3, 概念结构设计 .... 211/237
       + 7.3.1, 概念模型 .... 211
       + 7.3.2, E-R模型 .... 211
-      + 7.3.3, 扩展的E-R模型 .... 215
-      + 7.3.4, 用UML中的类图表示E-R图 .... 218
-      + 7.3.5, 用E-R图进行概念结构设计 .... 220
+      + 7.3.3, 扩展的E-R模型 .... 215/241
+      + 7.3.4, 用UML中的类图表示E-R图 .... 218/244
+      + 7.3.5, 用E-R图进行概念结构设计 .... 220/246
     + 7.4, 逻辑结构设计 .... 228
       + 7.4.1, E-R图向关系模型的转换 .... 229
       + 7.4.2, 数据模型的优化 .... 230
       + 7.4.3, 设计用户外模式 .... 231
-    + 7.5, 物理结构设计 .... 232
+    + 7.5, 物理结构设计 .... 232/258
       + 7.5.1, 数据库物理结构设计的内容和方法 .... 232
       + 7.5.2, 选择关系模式存取方法 .... 233
       + 7.5.3, 确定数据库的存储结构 .... 235
       + 7.5.4, 评价数据库的物理结构 .... 235
-    + 7.6, 数据库的实施和维护 .... 236
+    + 7.6, 数据库的实施和维护 .... 236/262
       + 7.6.1, 数据的载入和应用程序的编码与调试 .... 236
       + 7.6.2, 数据库的试运行 .... 235
       + 7.6.3, 数据库的运行和维护 .... 237
-    + 本章小结 .... 238
-    + 习题 7 .... 238
-    + 第 7 章实验 数据库设计 .... 239
-    + 参考文献 7 .... 240
+    + 本章小结 .... 238/264
+    + 习题 7 .... 238/264
+    + 第 7 章实验 数据库设计 .... 239/265
+    + 参考文献 7 .... 240/266
 
-  + 第8章 数据库编程 .... 241
+  + 第8章 数据库编程 .... 241/267
     + 8.1, 概述 .... 241
       + 8.1.1, SQL表达能力的限制 .... 241
       + 8.1.2, 扩展SQL的功能 .... 244
       + 8.1.3, 通过高级语言实现复杂应用 .... 248
-    + 8.2, 过程化SQL .... 250
+    + 8.2, 过程化SQL .... 250/276
       + 8.2.1, 过程化SQL的块结构 .... 250
       + 8.2.2, 变量和常量的定义 .... 251
       + 8.2.3, 流程控制 .... 251
@@ -2240,7 +3339,7 @@
     + 第 8 章实验 数据库编程与大作业 .... 271
     + 参考文献 8 .... 271
 
-  + 第9章 数据组织 .... 275
+  + 第9章 数据组织 .... 275/301
     + 9.1, 数据组织 .... 275
       + 9.1.1, 数据库的逻辑组织方式与物理组织方式 .... 276
       + 9.1.2, 记录表示 .... 277
@@ -2411,6 +3510,17 @@
 
   + 附录 "高校本科教务管理"信息系统的E-R图和关系模式 .... 461
 
++ 学习库
+
+  + rucedu
+
+    + info:  
+      + host: wsl / AlmaLinux8
+      + database: rucedu
+      + users
+        + user1:
+
+
 ### 参考网站
 
 + [bilibili](https://www.bilibili.com/index.html)
@@ -2425,26 +3535,24 @@
 
     + [Ed5 / 圣才教育 / 赵亮 (45小时)](https://www.bilibili.com/video/BV1W3411y7dw/?spm_id_from=333.788.recommend_more_video.3&trackid=web_related_0.router-related-2589621-dpmnd.1779438553872.242&vd_source=38fc599412349dcfe60484e3ff320c66)
 
-    + 学习库
-      + rucedu
-        + info: 
-          + host: wsl / AlmaLinux8
-          + database: rucedu
-          + users
-            + user1":
++ [tencent.com]()
+
+  + [MySQL]
+
+    + [硬核万字图解 MySQL 表空间、Tables、Index、双写缓冲、Redo Log、Undo Log 原理 / 码哥字节](https://cloud.tencent.com/developer/article/2554064)
+    + [一文搞懂 MySQL InnoDB架构 Buffer Pool、Change Buffer、自适应哈希索引、Log Buffer / 码哥跳动](https://mp.weixin.qq.com/s?__biz=MzkzMDI1NjcyOQ==&mid=2247505446&idx=1&sn=472f40d23fd19bbb16ad8e60077e3114&scene=21&poc_token=HGKGMWqjUO-FF8WTsn6qlSaSQ8Km4wa3E7Nv9_FU)
 
 ### 数据库及厂商
 
 #### 综述
 
 + 数据库类型
+  + 层次数据库
+  + 网状数据库
   + 关系数据库
     + 产品
       MySQL, Oracle, DB2, MS SQLServer, SyBase, etc.
-    + 数据表/关系
-    + 行/元组
-    + 列/属性
-  + 非关系型数据库， NoSql(Not Only SQL)
+  + 非关系型数据库， NOSql (**N**ot **O**nly **SQL**)
     + 产品
       Redis, MongoDB, Memcached, HBase, etc.
 

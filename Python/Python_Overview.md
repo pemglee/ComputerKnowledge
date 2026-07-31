@@ -245,7 +245,7 @@ markmap:
 
 + Soft keywords
 
-  + [官方文档 Python3.13](https://docs.python.org/3.13/reference/lexical_analysis.html#other-tokens)
+  + [python.org python3.13参考](https://docs.python.org/3.13/reference/lexical_analysis.html#other-tokens)
 
     + [quote]
 
@@ -269,6 +269,35 @@ markmap:
       > 软关键字（Soft Keywords）是编程语言中仅在特定上下文中被保留的标识符，属于计算机语言学科范畴。这类标识符在Python、Scala等语言中以保留语义的方式存在，但其保留性仅限特定语法环境而非全局生效。
       >
       > 在Python3.10.7版本中，match、case和_等软关键字仅在模式匹配语句上下文具备关键字语义。这种区分通过解析器层级实现，而非在形符化阶段处理，从而保持与使用这些标识符作为变量名的既有代码的兼容性
+
+### 内置常量
+
++ False / True
+
+  > 给 False / True 赋值是非法的并会引发 SyntaxError
+
+  **真正的常数**
+
++ None
+
+  > 常用于表示无值的对象，例如未向某个函数传入默认参数时。给 None 赋值是非法的并会引发 SyntaxError。  
+  > None 是 NoneType 类型的唯一实例。
+
+  **真正的常数**
+
++ NotImplemented
+
++ Ellipsis
+  
+  > 与 ... 相同，常用于表示某些东西被省略的对象。可以给 Ellipsis 赋值，但是给 ... 赋值会引发 SyntaxError。  
+  > Ellipsis 是 types.EllipsisType 类型的唯一实例。
+
++ \_\_debug\_\_
+
+  > 如果 Python 没有以 -O 选项启动，则此常量为真值。 另请参见 assert 语句。
+
+
+  **真正的常数**
 
 ### 基本类型 / 内置类型
 
@@ -336,6 +365,21 @@ markmap:
   + 布尔 and 和 or 运算符会返回 True 或 False的操作对象
 
 + 示例
+
+  + [operating]
+
+    ```python
+    ┌──(Test)(edgar㉿ThinkPadT14P-23)-[~/workspaces/PythonWrkspces/Exercises26/venvTest]
+    └─$ python
+    Python 3.13.12 (main, Feb  4 2026, 15:06:39) [GCC 15.2.0] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> 2 - False
+    2
+    >>> 2 + True
+    3
+    >>>    
+    ```
+
   + [operating]
 
     ```python
@@ -377,6 +421,8 @@ markmap:
     >>> comp_a = complex(1,2)
     >>> comp_a
     (1+2j)
+    >>> comp_a.conjugate()
+    (1-2j)
     >>>
     ```
 
@@ -533,12 +579,95 @@ markmap:
   
   + 类型特定方法
     + .find()
+      + 示例
+        + [operating]
+
+          ```python
+          >>> "I Love the job".find("ov")
+          3
+          >>>
+          ```
+
     + .replace()
+
+      + 示例
+        + [operating]
+
+          ```python
+          >>> "I Love the job".replace("Love", "love")
+          'I love the job'
+          >>>
+          ```
+
     + .split()
-    + .upper()
+
+      + 示例
+        + [operating]
+
+          ```python
+          >>> "I Love the job".split(" ")
+          ['I', 'Love', 'the', 'job']
+          >>>
+          ```
+
+    + .upper() & .lower()
+
+      + 示例
+
+        + [operating]
+
+          ```python
+          >>> "I Love the job".upper()
+          'I LOVE THE JOB'
+          >>> "I Love the job".lower()
+          'i love the job'
+          >>>
+          ```
+
     + .isalpha()
-    + .rstrip()
+
+      + 说明
+
+        > 如果字符串中的所有字符均为字母类并且至少有一个字符则返回 True，否则返回 False。  
+        > 字母类字符是指在 Unicode 字符数据库中被定义为 "Letter" 的字符，即通用类别属性为 "Lm", "Lt", "Lu", "Ll" 或 "Lo" 之一的字符。  
+        > 请注意这不同于 Unicode 标准 4.10 'Letters, Alphabetic, and Ideographic' 中定义的 Alphabetic 属性。
+      + 示例
+        + [operating]
+  
+          ```python
+          >>> "I Love the job".isalpha()
+          False
+          >>> "Hello".isalpha()
+          True
+          >>> 'µ'.isalpha()    # 非 ASCII 字符也可能为字母类
+          True
+          >>>
+          ```
+
+    + .strip() & .rstrip() & .strip()
+
+      + 示例
+        + [operating]
+
+          ```python
+          >>> "  I Love the job  ".rstrip()
+          '  I Love the job'
+          >>> "  I Love the job  ".lstrip()
+          'I Love the job  '
+          >>> "  I Love the job  ".strip()
+          'I Love the job'
+          >>>
+          ```
+
     + 格式化
+
+      + 说明
+
+        + [operating]
+
+          ```python
+          ```
+
     + 模式匹配
   
   + `print()` 函数
@@ -567,6 +696,100 @@ markmap:
     >>>
     ```
 
++ 列表操作
+
+  + 初始化
+
+    + [operating]
+
+      ```python
+      >>> lst_1 = []
+      >>> lst_1.append("hello")
+      >>> lst_1
+      ['hello']
+      >>> lst_2 = ["hello","the","world"]
+      >>> lst_2.append("!")
+      >>> lst_2
+      ['hello', 'the', 'world', '!']
+      >>>
+      ```
+
+  + 长度、正反索引、切片
+    + 示例
+      + [operating]
+  
+        ```python
+        >>> lst_2
+        ['hello', 'the', 'world', '!']
+        >>> len(lst_2)
+        4
+        >>> lst_2[1]
+        'the'
+        >>> lst_2[-2]
+        'world'
+        >>> lst_2[1:3]
+        ['the', 'world']
+        >>>
+        ```
+
+  + 特定操作
+
+    + .sort()
+
+    + .reverse()
+
+    + 示例
+      + [operating]
+
+        ```python
+        >>> lst_2
+        ['hello', 'the', 'world', '!']
+        >>> lst_2.sort()
+        >>> lst_2
+        ['!', 'hello', 'the', 'world']
+        >>> lst_2.reverse()
+        >>> lst_2
+        ['world', 'the', 'hello', '!']
+        >>>
+        ```
+
+  + 列表解析 list comprehension expression
+
+    + 提供处理像矩阵结构的工具
+    + 源自集合的概念
+    + 通过对序列中的每一项运行一个表达式来**创建**一个新列表的方法，每次一个，从左至右
+
+    + 示例
+
+      + 数据
+
+        $$
+        M = 
+          \begin{vmatrix}
+           1 & 2 & 3 \\
+           4 & 5 & 6 \\
+           7 & 8 & 9
+          \end{vmatrix}
+        $$
+
+      + [operating]
+
+        ```python
+        >>> M = [[1,2,3],[4,5,6],[7,8,9]]
+        >>> M
+        [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        >>> col2 = [ row[1] for row in M ]    # 获取第2列
+        >>> col2
+        [2, 5, 8]
+        >>> [ row[2] + 1 for row in M ]    # 第3列数值 + 1
+        [4, 7, 10]
+        >>> [ row[2] for row in M if row[2] % 2 == 0 ]    # 若第3列数值为偶数，则取出
+        [6]
+        >>> [ row[1] for row in M if row[1] % 2 == 0 ]    # 若第2列数值为偶数，则取出
+        [2, 8]
+        >>>
+        ```
+
 #### tuple
 
 + 说明
@@ -591,6 +814,24 @@ markmap:
 
 + 场景
 
++ 示例，键的循环
+
+  + [operating]
+
+    ```python
+    >>> D = {'a':1, 'b':2, 'c':3 }
+    >>> Ks = list(D.keys())
+    >>> Ks
+    ['a', 'b', 'c']
+    >>> Ks.sort()
+    >>> for key in Ks: print(key, "=>", D[key])
+    ...
+    a => 1
+    b => 2
+    c => 3
+    >>>
+    ```
+
 #### set
 
 + 说明
@@ -610,7 +851,24 @@ markmap:
 + 说明
   + 类型
   + None
-  + bool
+  + ~~bool~~
+    + bool类型属于int类型
+
+      + 示例
+
+        + [operating]
+
+          ```python
+          ┌──(Test)(edgar㉿ThinkPadT14P-23)-[~/workspaces/PythonWrkspces/Exercises26/venvTest]
+          └─$ python
+          Python 3.13.12 (main, Feb  4 2026, 15:06:39) [GCC 15.2.0] on linux
+          Type "help", "copyright", "credits" or "license" for more information.
+          >>> 2 - False
+          2
+          >>> 2 + True
+          3
+          >>>
+          ```
 
 #### 编程单元类型
 
@@ -914,7 +1172,7 @@ markmap:
 
 ### 内置函数列表
 
-[官方文档 Python3.13](https://docs.python.org/zh-cn/3.13/library/functions.html)
+[python.org python3.13参考](https://docs.python.org/zh-cn/3.13/library/functions.html)
 
 + `abs()`
 
@@ -1270,13 +1528,27 @@ markmap:
 
 + `pow()`
 
+  + 等价于 "**"
+
+  + 示例
+
+    + [operating]
+
+      ```python
+      >>> pow(2,8)
+      256
+      >>> 2**8
+      256
+      >>>
+      ```
+
 + `print()`
 
   + 语法 help(print)
 
     + [help-text]
 
-      ```sh
+      ```python
       >>> 
       Help on built-in function print in module builtins:
       
@@ -1516,11 +1788,238 @@ markmap:
 
 + pass  
 
+### 内置异常  
+
+#### 异常的层次结构
+
+```text
+BaseException
+ ├── BaseExceptionGroup
+ ├── GeneratorExit
+ ├── KeyboardInterrupt
+ ├── SystemExit
+ └── Exception
+      ├── ArithmeticError
+      │    ├── FloatingPointError
+      │    ├── OverflowError
+      │    └── ZeroDivisionError
+      ├── AssertionError
+      ├── AttributeError
+      ├── BufferError
+      ├── EOFError
+      ├── ExceptionGroup [BaseExceptionGroup]
+      ├── ImportError
+      │    └── ModuleNotFoundError
+      ├── LookupError
+      │    ├── IndexError
+      │    └── KeyError
+      ├── MemoryError
+      ├── NameError
+      │    └── UnboundLocalError
+      ├── OSError
+      │    ├── BlockingIOError
+      │    ├── ChildProcessError
+      │    ├── ConnectionError
+      │    │    ├── BrokenPipeError
+      │    │    ├── ConnectionAbortedError
+      │    │    ├── ConnectionRefusedError
+      │    │    └── ConnectionResetError
+      │    ├── FileExistsError
+      │    ├── FileNotFoundError
+      │    ├── InterruptedError
+      │    ├── IsADirectoryError
+      │    ├── NotADirectoryError
+      │    ├── PermissionError
+      │    ├── ProcessLookupError
+      │    └── TimeoutError
+      ├── ReferenceError
+      ├── RuntimeError
+      │    ├── NotImplementedError
+      │    ├── PythonFinalizationError
+      │    └── RecursionError
+      ├── StopAsyncIteration
+      ├── StopIteration
+      ├── SyntaxError
+      │    └── IndentationError
+      │         └── TabError
+      ├── SystemError
+      ├── TypeError
+      ├── ValueError
+      │    └── UnicodeError
+      │         ├── UnicodeDecodeError
+      │         ├── UnicodeEncodeError
+      │         └── UnicodeTranslateError
+      └── Warning
+           ├── BytesWarning
+           ├── DeprecationWarning
+           ├── EncodingWarning
+           ├── FutureWarning
+           ├── ImportWarning
+           ├── PendingDeprecationWarning
+           ├── ResourceWarning
+           ├── RuntimeWarning
+           ├── SyntaxWarning
+           ├── UnicodeWarning
+           └── UserWarning
+```
+
+#### 常见异常
+
++ exception **AssertionError**
+
++ exception **AttributeError**
+
++ exception **EOFError**
+
++ ~~exception **FloatingPointError**~~
+
++ exception **GeneratorExit**
+
++ exception **ImportError**
+
++ exception **ModuleNotFoundError**
+
++ exception **IndexError**
+
++ exception **KeyError**
+
++ exception **KeyboardInterrupt**
+
++ exception **MemoryError**
+
++ exception **NameError**
+
++ exception **NotImplementedError**
+
++ exception **OSError**
+
++ exception **OverflowError**
+
++ exception **PythonFinalizationError**
+
++ exception **RecursionError**
+
++ exception **ReferenceError**
+
++ exception **RuntimeError**
+
++ exception **StopIteration**
+
++ exception **StopAsyncIteration**
+
++ exception **SyntaxError**
+
++ exception **IndentationError**
+
++ exception **TabError**
+
++ exception **SystemError**
+
++ exception **SystemExit**
+
++ exception **TypeError**
+
++ exception **UnboundLocalError**
+
++ exception **UnicodeError**
+
++ exception **UnicodeEncodeError**
+
++ exception **UnicodeDecodeError**
+
++ exception **UnicodeTranslateError**
+
++ exception **ValueError**
+
++ exception **ZeroDivisionError**
+
+#### 异常上下文
+
+#### 内置异常衍生类异常
+
+#### 基类异常
+
+#### OS异常
+
++ OSError = EnvironmentError = IOError = WindowsError
+
++ exception **BlockingIOError**
+
++ exception **ChildProcessError**
+
++ exception **ConnectionError**
+
++ exception **BrokenPipeError**
+
++ exception **ConnectionAbortedError**
+
++ exception **ConnectionRefusedError**
+
++ exception **ConnectionResetError**
+
++ exception **FileExistsError**
+
++ exception **FileNotFoundError**
+
++ exception **InterruptedError**
+
++ exception **IsADirectoryError**
+
++ exception **NotADirectoryError**
+
++ exception **PermissionError**
+
++ exception **ProcessLookupError**
+
++ exception **TimeoutError**
+
+#### 警告
+
+#### 异常组
+
+### 迭代器、生成器 和 专门容器
+
+#### 迭代器
+
++ 迭代协议
+  在内存中物理存储的序列，或一个在迭代操作情况下每次产生一个元素的对象
+
+#### 生成器
+
+#### 专门容器
+
 ### Python标准库(内置库)
+
+#### math
+
++ [python.org python3.13参考](https://docs.python.org/zh-cn/3.13/library/math.html)
+
++ 常量
+  + math.pi
+  + math.e
+  + math.tau
+  + math.inf
+  + math.nan
+
++ 函数
+
+  + 数论函数
+  + 浮点算术
+  + 浮点操作函数
+  + 幂、指、对数
+  + 加总、乘积
+  + 角度、弧度
+  + 三角
+  + 双曲
+  + 特殊
 
 #### operator
 
 #### os
+
+#### random 伪随机
+
++ [python.org python3.13参考](https://docs.python.org/zh-cn/3.13/library/random.html)
 
 #### shutil
 
@@ -1535,3 +2034,5 @@ markmap:
 #### wxPython
 
 #### PyQT
+
+## Python OOP
